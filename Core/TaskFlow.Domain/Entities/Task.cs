@@ -8,5 +8,6 @@ namespace TaskFlow.Domain.Entities
         public string Description { get; set; }
         public int TaskStatusId { get; set; }
         public TaskStatus TaskStatus { get; set; }
+        public ICollection<TaskAnswer> TaskAnswer { get; set; }
     }
 }

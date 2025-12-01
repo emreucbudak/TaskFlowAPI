@@ -2,7 +2,7 @@
 {
     public class TaskStatus
     {
-        public int Guid { get; set; }
+        public Guid TaskStatusId { get; set; }
         public string StatusName { get; set; }
     }
 }

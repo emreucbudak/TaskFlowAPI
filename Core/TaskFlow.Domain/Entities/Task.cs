@@ -6,7 +6,7 @@ namespace TaskFlow.Domain.Entities
     {
         public string TaskName { get; set; }
         public string Description { get; set; }
-        public int TaskStatusId { get; set; }
+        public Guid TaskStatusId { get; set; }
         public TaskStatus TaskStatus { get; set; }
         public ICollection<TaskAnswer> TaskAnswer { get; set; }
     }

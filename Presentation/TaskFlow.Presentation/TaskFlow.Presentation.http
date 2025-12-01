@@ -1,0 +1,6 @@
+@TaskFlow.Presentation_HostAddress = http://localhost:5101
+
+GET {{TaskFlow.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

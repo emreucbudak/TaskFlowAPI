@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/TaskFlow.Application/TaskFlow.Application.csproj" />
+    <Project Path="Core/TaskFlow.Domain/TaskFlow.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/TaskFlow.Infrastructure/TaskFlow.Infrastructure.csproj" />
+    <Project Path="Infrastructure/TaskFlow.Persistence/TaskFlow.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="Presentation/TaskFlow.Presentation/TaskFlow.Presentation.csproj" />
+  </Folder>
+</Solution>

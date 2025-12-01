@@ -9,5 +9,8 @@ namespace TaskFlow.Domain.Entities
         public Guid TaskStatusId { get; set; }
         public TaskStatus TaskStatus { get; set; }
         public ICollection<TaskAnswer> TaskAnswer { get; set; }
+        public DateTime DeadlineTime { get; set; }
+        public Guid? TaskPriorityCategoryId { get; set; }
+        public TaskPriorityCategory? TaskPriority { get; set; }
     }
 }

@@ -1,0 +1,25 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TaskFlow.Domain.Entities;
+
+namespace TaskFlow.Persistence.ApplicationContext
+{
+    public class ApplicationDbContext : DbContext
+    {
+        public ApplicationDbContext(DbContextOptions options) : base(options)
+        {
+        }
+
+        protected ApplicationDbContext()
+        {
+        }
+        public DbSet<Company> companies { get; set; }
+        public DbSet<CompanyPlan> companiesPlan { get; set; }
+        public DbSet<Message> messages { get; set; }
+        public DbSet<PlanProperties> planProperties { get; set; }
+        public DbSet<Domain.Entities.Task> tasks { get; set; }
+        public DbSet<TaskAnswer> taskAnswers { get; set; }
+        public DbSet<TaskPriorityCategory> taskPriorityCategories { get; set; }
+        public DbSet<Domain.Entities.TaskStatus> taskStatuses { get; set; }
+
+    }
+}

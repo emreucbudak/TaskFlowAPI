@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TaskFlow.Domain.Entities;
+using TaskFlow.Infrastructure.TokenService;
 using TaskFlow.Persistence.ApplicationContext;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +45,9 @@ builder.Services.AddIdentity<User, Roles>(opt =>
     opt.Password.RequireLowercase = false;
     opt.Password.RequireUppercase = false;
 }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
-
+builder.Services.Configure<TokenSettings>(
+    builder.Configuration.GetSection("JwtSettings")
+    );
 var app = builder.Build();
 
 

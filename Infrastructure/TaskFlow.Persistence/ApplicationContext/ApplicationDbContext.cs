@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TaskFlow.Domain.Entities;
 
 namespace TaskFlow.Persistence.ApplicationContext
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User,Roles,Guid>
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -20,6 +21,10 @@ namespace TaskFlow.Persistence.ApplicationContext
         public DbSet<TaskAnswer> taskAnswers { get; set; }
         public DbSet<TaskPriorityCategory> taskPriorityCategories { get; set; }
         public DbSet<Domain.Entities.TaskStatus> taskStatuses { get; set; }
+        public DbSet<SubTask> subTasks { get; set; }
+        public DbSet<SubTaskAnswer> subTasksAnswer { get; set; }
+        public DbSet<SubTaskStatus> subTasksStatus { get; set; }
+
 
     }
 }

@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\TaskFlow.Infrastructure\TaskFlow.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Infrastructure\TaskFlow.Persistence\TaskFlow.Persistence.csproj" />
   </ItemGroup>
 

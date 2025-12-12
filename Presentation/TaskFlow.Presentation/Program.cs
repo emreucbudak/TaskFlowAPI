@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TaskFlow.Application.Repositories;
+using TaskFlow.Application.UnitOfWork;
 using TaskFlow.Domain.Entities;
 using TaskFlow.Infrastructure.TokenService;
 using TaskFlow.Persistence.ApplicationContext;
@@ -40,6 +41,7 @@ builder.Services.AddAuthentication(opt =>
 });
 builder.Services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
 builder.Services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));
+builder.Services.AddScoped<IUnitOfWork, TaskFlow.Persistence.UnitOfWork.UnitOfWork>();
 builder.Services.AddIdentity<User, Roles>(opt =>
 {
     opt.User.RequireUniqueEmail = true;

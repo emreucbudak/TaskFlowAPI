@@ -15,4 +15,8 @@
     <ProjectReference Include="..\TaskFlow.Domain\TaskFlow.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\CQRS\" />
+  </ItemGroup>
+
 </Project>

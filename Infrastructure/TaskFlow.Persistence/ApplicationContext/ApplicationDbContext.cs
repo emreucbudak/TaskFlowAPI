@@ -31,6 +31,11 @@ namespace TaskFlow.Persistence.ApplicationContext
         {
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            builder.Entity<TaskAnswer>()
+                .HasOne(ta => ta.Task)
+                .WithMany(t => t.TaskAnswer)
+                .HasForeignKey(ta => ta.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

@@ -6,11 +6,11 @@ namespace TaskFlow.Domain.Entities
     {
         public string TaskName { get; set; }
         public string Description { get; set; }
-        public Guid TaskStatusId { get; set; }
+        public int TaskStatusId { get; set; }
         public TaskStatus TaskStatus { get; set; }
-        public ICollection<TaskAnswer>? TaskAnswer { get; set; }
+        public ICollection<TaskAnswer> TaskAnswer { get; set; } = new List<TaskAnswer>();   
         public DateTime DeadlineTime { get; set; }
-        public Guid? TaskPriorityCategoryId { get; set; }
+        public int? TaskPriorityCategoryId { get; set; }
         public TaskPriorityCategory? TaskPriority { get; set; }
     }
 }

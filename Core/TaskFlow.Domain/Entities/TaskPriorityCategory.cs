@@ -6,7 +6,7 @@ namespace TaskFlow.Domain.Entities
 {
     public class TaskPriorityCategory
     {
-        public Guid TaskPriorityCategoryId { get; set; }
+        public int TaskPriorityCategoryId { get; set; }
         public string CategoryName { get; set; }
     }
 }

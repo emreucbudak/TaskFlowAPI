@@ -1,8 +1,8 @@
 ﻿namespace TaskFlow.Domain.Bases
 {
-    public class BaseEntity : IBaseEntity
+    public abstract class BaseEntity : IBaseEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
 
     }
 }

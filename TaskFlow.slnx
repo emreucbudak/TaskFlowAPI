@@ -7,7 +7,36 @@
     <Project Path="Infrastructure/TaskFlow.Infrastructure/TaskFlow.Infrastructure.csproj" />
     <Project Path="Infrastructure/TaskFlow.Persistence/TaskFlow.Persistence.csproj" />
   </Folder>
-  <Folder Name="/Presentation/">
-    <Project Path="Presentation/TaskFlow.Presentation/TaskFlow.Presentation.csproj" />
+  <Folder Name="/Presentation/" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Chat/">
+    <Project Path="src/Modules/Chat/Chat.Application/Chat.Application.csproj" Id="ccacf866-86d0-402d-bec0-2cd428e00af8" />
+    <Project Path="src/Modules/Chat/Chat.Domain/Chat.Domain.csproj" Id="efa9d582-167e-4482-b4fc-0b9f4626fd6e" />
+    <Project Path="src/Modules/Chat/Chat.Infrastructure/Chat.Infrastructure.csproj" Id="ba73c298-f795-4b6b-b6e0-00591fcaaa05" />
   </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" Id="fdafa603-3f3b-4267-9985-b155365c68b3" />
+    <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" Id="2928a877-515f-438c-8320-eaf1cf1a3b86" />
+    <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" Id="7602f7fa-2d5c-4e4b-95da-4b39e3353bd8" />
+  </Folder>
+  <Folder Name="/src/Modules/Notification/">
+    <Project Path="src/Modules/Notification/Notification.Application/Notification.Application.csproj" Id="70736c31-1d2b-4e72-88b3-e180838b9123" />
+    <Project Path="src/Modules/Notification/Notification.Domain/Notification.Domain.csproj" Id="fa2a66cc-a703-40cb-9cca-224ba16f2a70" />
+    <Project Path="src/Modules/Notification/Notification.Infrastructure/Notification.Infrastructure.csproj" Id="e47f55ab-a083-4694-a7fd-15e96d96d861" />
+  </Folder>
+  <Folder Name="/src/Modules/ProjectManagement/">
+    <Project Path="src/Modules/ProjectManagement/ProjectManagement.Application/ProjectManagement.Application.csproj" Id="0747d709-1531-4932-b1a9-a1f1f9a93917" />
+    <Project Path="src/Modules/ProjectManagement/ProjectManagement.Domain/ProjectManagement.Domain.csproj" Id="5ae94238-5436-4392-96e2-dd15135d88f0" />
+    <Project Path="src/Modules/ProjectManagement/ProjectManagement.Infrastructure/ProjectManagement.Infrastructure.csproj" Id="48a82398-5d31-405c-b78a-96a99e467430" />
+  </Folder>
+  <Folder Name="/src/Modules/Tenant/">
+    <Project Path="src/Modules/Tenant/Tenant.Application/Tenant.Application.csproj" Id="0eb12f4b-3438-43b8-b8f2-95c816bef03c" />
+    <Project Path="src/Modules/Tenant/Tenant.Domain/Tenant.Domain.csproj" Id="29bd084f-6832-4ea6-9281-1172b3a8b8bc" />
+    <Project Path="src/Modules/Tenant/Tenant.Infrastructure/Tenant.Infrastructure.csproj" Id="632b2847-79d3-4dba-a90e-f5509cbf0fdf" />
+  </Folder>
+  <Folder Name="/src/TaskFlow.API/">
+    <Project Path="src/Taskflow.API/Taskflow.Presentation/Taskflow.Presentation.csproj" Id="7032b4ac-f7e9-4633-aa8a-e658c0a3b7bd" />
+  </Folder>
+  <Folder Name="/src/TaskFlow.BuildingBlocks/" />
 </Solution>

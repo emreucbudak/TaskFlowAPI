@@ -30,8 +30,7 @@ namespace TaskFlow.Persistence.Migrations
                 name: "companiesPlan",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PlanName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -43,8 +42,7 @@ namespace TaskFlow.Persistence.Migrations
                 name: "messages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MessageText = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -70,7 +68,8 @@ namespace TaskFlow.Persistence.Migrations
                 name: "taskPriorityCategories",
                 columns: table => new
                 {
-                    TaskPriorityCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TaskPriorityCategoryId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CategoryName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -82,7 +81,8 @@ namespace TaskFlow.Persistence.Migrations
                 name: "taskStatuses",
                 columns: table => new
                 {
-                    TaskStatusId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TaskStatusId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StatusName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -115,18 +115,16 @@ namespace TaskFlow.Persistence.Migrations
                 name: "companies",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CompanyName = table.Column<string>(type: "text", nullable: false),
-                    CompanyPlanId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CompanyPlanId1 = table.Column<int>(type: "integer", nullable: false)
+                    CompanyPlanId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_companies", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_companies_companiesPlan_CompanyPlanId1",
-                        column: x => x.CompanyPlanId1,
+                        name: "FK_companies_companiesPlan_CompanyPlanId",
+                        column: x => x.CompanyPlanId,
                         principalTable: "companiesPlan",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -136,8 +134,7 @@ namespace TaskFlow.Persistence.Migrations
                 name: "planProperties",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PeopleAddedLimit = table.Column<int>(type: "integer", nullable: false),
                     IsIncludeGroupChat = table.Column<bool>(type: "boolean", nullable: false),
                     IsIncludeVideoCall = table.Column<bool>(type: "boolean", nullable: false),
@@ -146,15 +143,14 @@ namespace TaskFlow.Persistence.Migrations
                     IsIncludeTaskPriorityCategory = table.Column<bool>(type: "boolean", nullable: false),
                     IsDeadlineNotificationEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     IsIncludeAddTaskNotifications = table.Column<bool>(type: "boolean", nullable: false),
-                    CompanyPlanId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CompanyPlanId1 = table.Column<int>(type: "integer", nullable: false)
+                    CompanyPlanId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_planProperties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_planProperties_companiesPlan_CompanyPlanId1",
-                        column: x => x.CompanyPlanId1,
+                        name: "FK_planProperties_companiesPlan_CompanyPlanId",
+                        column: x => x.CompanyPlanId,
                         principalTable: "companiesPlan",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -164,13 +160,12 @@ namespace TaskFlow.Persistence.Migrations
                 name: "tasks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     TaskName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    TaskStatusId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TaskStatusId = table.Column<int>(type: "integer", nullable: false),
                     DeadlineTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TaskPriorityCategoryId = table.Column<Guid>(type: "uuid", nullable: true)
+                    TaskPriorityCategoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -195,7 +190,6 @@ namespace TaskFlow.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     CompanyId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CompanyId1 = table.Column<int>(type: "integer", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -215,8 +209,8 @@ namespace TaskFlow.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_companies_CompanyId1",
-                        column: x => x.CompanyId1,
+                        name: "FK_AspNetUsers_companies_CompanyId",
+                        column: x => x.CompanyId,
                         principalTable: "companies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -226,10 +220,9 @@ namespace TaskFlow.Persistence.Migrations
                 name: "taskAnswers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AnswerText = table.Column<string>(type: "text", nullable: false),
-                    TaskId = table.Column<int>(type: "integer", nullable: false)
+                    TaskId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -331,8 +324,7 @@ namespace TaskFlow.Persistence.Migrations
                 name: "subTasks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     SubTaskStatusId = table.Column<int>(type: "integer", nullable: false)
@@ -358,18 +350,16 @@ namespace TaskFlow.Persistence.Migrations
                 name: "subTasksAnswer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AnswerText = table.Column<string>(type: "text", nullable: false),
-                    SubTaskId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubTaskId1 = table.Column<int>(type: "integer", nullable: false)
+                    SubTaskId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_subTasksAnswer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_subTasksAnswer_subTasks_SubTaskId1",
-                        column: x => x.SubTaskId1,
+                        name: "FK_subTasksAnswer_subTasks_SubTaskId",
+                        column: x => x.SubTaskId,
                         principalTable: "subTasks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -407,9 +397,9 @@ namespace TaskFlow.Persistence.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_CompanyId1",
+                name: "IX_AspNetUsers_CompanyId",
                 table: "AspNetUsers",
-                column: "CompanyId1");
+                column: "CompanyId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -418,14 +408,14 @@ namespace TaskFlow.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_companies_CompanyPlanId1",
+                name: "IX_companies_CompanyPlanId",
                 table: "companies",
-                column: "CompanyPlanId1");
+                column: "CompanyPlanId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_planProperties_CompanyPlanId1",
+                name: "IX_planProperties_CompanyPlanId",
                 table: "planProperties",
-                column: "CompanyPlanId1");
+                column: "CompanyPlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_subTasks_SubTaskStatusId",
@@ -438,9 +428,9 @@ namespace TaskFlow.Persistence.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_subTasksAnswer_SubTaskId1",
+                name: "IX_subTasksAnswer_SubTaskId",
                 table: "subTasksAnswer",
-                column: "SubTaskId1");
+                column: "SubTaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_taskAnswers_TaskId",

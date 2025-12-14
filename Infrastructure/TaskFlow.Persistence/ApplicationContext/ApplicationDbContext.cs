@@ -25,7 +25,6 @@ namespace TaskFlow.Persistence.ApplicationContext
         public DbSet<Domain.Entities.TaskStatus> taskStatuses { get; set; }
         public DbSet<SubTask> subTasks { get; set; }
         public DbSet<SubTaskAnswer> subTasksAnswer { get; set; }
-        public DbSet<SubTaskStatus> subTasksStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -10,8 +10,8 @@ namespace TaskFlow.Domain.Entities
         public string Description { get; set; }
         public Guid UserId { get; set; }
         public User User { get; set; }
-        public int SubTaskStatusId { get; set; }
-        public SubTaskStatus SubTaskStatus { get; set; }
+        public int TaskStatusId { get; set; }
+        public TaskStatus TaskStatus { get; set; }
         public ICollection<SubTaskAnswer> Answers { get; set; }
     }
 }

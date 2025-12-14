@@ -12,7 +12,7 @@ using TaskFlow.Persistence.ApplicationContext;
 namespace TaskFlow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251203210819_InitialCreate")]
+    [Migration("20251213161318_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -130,11 +130,9 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Company", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
@@ -143,23 +141,18 @@ namespace TaskFlow.Persistence.Migrations
                     b.Property<Guid>("CompanyPlanId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("CompanyPlanId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyPlanId1");
+                    b.HasIndex("CompanyPlanId");
 
                     b.ToTable("companies");
                 });
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.CompanyPlan", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PlanName")
                         .IsRequired()
@@ -172,11 +165,9 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Message", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -192,17 +183,12 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.PlanProperties", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("CompanyPlanId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("CompanyPlanId1")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDailyPlannerEnabled")
                         .HasColumnType("boolean");
@@ -230,7 +216,7 @@ namespace TaskFlow.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyPlanId1");
+                    b.HasIndex("CompanyPlanId");
 
                     b.ToTable("planProperties");
                 });
@@ -264,11 +250,9 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.SubTask", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -291,11 +275,9 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.SubTaskAnswer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AnswerText")
                         .IsRequired()
@@ -304,12 +286,9 @@ namespace TaskFlow.Persistence.Migrations
                     b.Property<Guid>("SubTaskId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("SubTaskId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SubTaskId1");
+                    b.HasIndex("SubTaskId");
 
                     b.ToTable("subTasksAnswer");
                 });
@@ -333,11 +312,9 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.Task", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DeadlineTime")
                         .HasColumnType("timestamp with time zone");
@@ -350,11 +327,11 @@ namespace TaskFlow.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("TaskPriorityCategoryId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("TaskPriorityCategoryId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("TaskStatusId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("TaskStatusId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -367,18 +344,16 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.TaskAnswer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AnswerText")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TaskId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -389,9 +364,11 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.TaskPriorityCategory", b =>
                 {
-                    b.Property<Guid>("TaskPriorityCategoryId")
+                    b.Property<int>("TaskPriorityCategoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TaskPriorityCategoryId"));
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -404,9 +381,11 @@ namespace TaskFlow.Persistence.Migrations
 
             modelBuilder.Entity("TaskFlow.Domain.Entities.TaskStatus", b =>
                 {
-                    b.Property<Guid>("TaskStatusId")
+                    b.Property<int>("TaskStatusId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TaskStatusId"));
 
                     b.Property<string>("StatusName")
                         .IsRequired()
@@ -428,9 +407,6 @@ namespace TaskFlow.Persistence.Migrations
 
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("CompanyId1")
-                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -482,7 +458,7 @@ namespace TaskFlow.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId1");
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -549,7 +525,7 @@ namespace TaskFlow.Persistence.Migrations
                 {
                     b.HasOne("TaskFlow.Domain.Entities.CompanyPlan", "CompanyPlan")
                         .WithMany()
-                        .HasForeignKey("CompanyPlanId1")
+                        .HasForeignKey("CompanyPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -560,7 +536,7 @@ namespace TaskFlow.Persistence.Migrations
                 {
                     b.HasOne("TaskFlow.Domain.Entities.CompanyPlan", "CompanyPlan")
                         .WithMany("PlanProperties")
-                        .HasForeignKey("CompanyPlanId1")
+                        .HasForeignKey("CompanyPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -590,7 +566,7 @@ namespace TaskFlow.Persistence.Migrations
                 {
                     b.HasOne("TaskFlow.Domain.Entities.SubTask", "SubTask")
                         .WithMany("Answers")
-                        .HasForeignKey("SubTaskId1")
+                        .HasForeignKey("SubTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -629,7 +605,7 @@ namespace TaskFlow.Persistence.Migrations
                 {
                     b.HasOne("TaskFlow.Domain.Entities.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("CompanyId1")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

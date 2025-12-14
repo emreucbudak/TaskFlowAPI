@@ -1,6 +1,8 @@
-﻿namespace ProjectManagement.Domain.Entities
+﻿using TaskFlow.BuildingBlocks.Common;
+
+namespace ProjectManagement.Domain.Entities
 {
-    public class Subtask
+    public class Subtask : BaseEntity
     {
         public string Description { get; set; }
         public int TaskStatusId { get; set; }

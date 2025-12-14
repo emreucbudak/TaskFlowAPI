@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ProjectManagement.Domain.Entities
+﻿namespace ProjectManagement.Domain.Entities
 {
-    internal class TaskPriorityCategory
+    public class TaskPriorityCategory
     {
+        public int TaskPriorityCategoryId { get; set; }
+        public string CategoryName { get; set; }
     }
 }

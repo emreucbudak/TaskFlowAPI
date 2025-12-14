@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ProjectManagement.Domain.Entities
+﻿namespace ProjectManagement.Domain.Entities
 {
-    internal class TaskStatus
+    public class TaskStatus
     {
+        public int TaskStatusId { get; set; }
+        public string StatusName { get; set; }
     }
 }

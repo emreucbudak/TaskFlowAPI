@@ -12,7 +12,10 @@
 
   <ItemGroup>
     <Folder Include="Features\CQRS\" />
-    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Notification.Domain\Notification.Domain.csproj" />
   </ItemGroup>
 
 </Project>

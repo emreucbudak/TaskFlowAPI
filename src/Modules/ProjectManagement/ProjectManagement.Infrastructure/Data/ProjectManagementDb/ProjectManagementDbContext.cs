@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
 {
     public class ProjectManagementDbContext : DbContext
@@ -17,6 +16,10 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
         public DbSet<Domain.Entities.TaskStatus> TaskStatuses { get; set; }
         public DbSet<Domain.Entities.Subtask> Subtasks { get; set; }
         public DbSet<Domain.Entities.SubTaskAnswer> SubTaskAnswers { get; set; }
-       
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

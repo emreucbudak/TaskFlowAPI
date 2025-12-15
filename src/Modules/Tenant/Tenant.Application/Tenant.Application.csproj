@@ -8,11 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="FlashMediator" Version="1.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Features\CQRS\" />
-    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tenant.Domain\Tenant.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -12,7 +12,10 @@
 
   <ItemGroup>
     <Folder Include="Features\CQRS\" />
-    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectManagement.Domain\ProjectManagement.Domain.csproj" />
   </ItemGroup>
 
 </Project>

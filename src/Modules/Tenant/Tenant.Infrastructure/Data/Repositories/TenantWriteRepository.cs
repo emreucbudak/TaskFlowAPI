@@ -17,14 +17,14 @@ namespace Tenant.Infrastructure.Data.Repositories
         public async Task AddPlan(CompanyPlan plan)
         {
             await _context.companyPlans.AddAsync(plan);
-            await _context.SaveChangesAsync();
+
 
         }
 
         public async Task DeletePlan(CompanyPlan plan)
         {
             _context.companyPlans.Remove(plan);
-            await _context.SaveChangesAsync();
+ 
         }
 
         public Task<List<CompanyPlan>> GetAllPlans(bool trackChanges)
@@ -47,7 +47,7 @@ namespace Tenant.Infrastructure.Data.Repositories
         public async Task UpdatePlan(CompanyPlan plan)
         {
              _context.companyPlans.Update(plan);
-            await _context.SaveChangesAsync();
+
         }
     }
 }

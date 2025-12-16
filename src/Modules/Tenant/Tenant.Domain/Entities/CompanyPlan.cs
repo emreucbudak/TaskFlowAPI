@@ -2,7 +2,7 @@
 {
     public class CompanyPlan : TaskFlow.BuildingBlocks.Common.BaseEntity 
     {
-        public string PlanName { get; set; }
+        public string PlanName { get; private set; }
         public PlanProperties PlanProperties { get; private set; }
         protected CompanyPlan() { }
 

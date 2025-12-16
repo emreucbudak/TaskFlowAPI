@@ -7,7 +7,6 @@
     <Project Path="Infrastructure/TaskFlow.Infrastructure/TaskFlow.Infrastructure.csproj" />
     <Project Path="Infrastructure/TaskFlow.Persistence/TaskFlow.Persistence.csproj" />
   </Folder>
-  <Folder Name="/Presentation/" />
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/TaskFlow.BuildingBlocks/TaskFlow.BuildingBlocks.csproj" Id="57040aae-081e-427f-a79d-04c60bc58cf9" />

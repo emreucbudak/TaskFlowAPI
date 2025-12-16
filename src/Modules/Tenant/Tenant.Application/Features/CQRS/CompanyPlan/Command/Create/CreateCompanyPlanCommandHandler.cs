@@ -1,20 +1,26 @@
 ﻿using FlashMediator.src.FlashMediator.Contracts;
 using Tenant.Application.Repositories;
+using Tenant.Application.UnitOfWork;
 
 namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Create
 {
     public class CreateCompanyPlanCommandHandler : IRequestHandler<CreateCompanyPlanCommandRequest>
     {
         private readonly ITenantWriteRepository _tenantWriteRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CreateCompanyPlanCommandHandler(ITenantWriteRepository tenantWriteRepository)
+        public CreateCompanyPlanCommandHandler(ITenantWriteRepository tenantWriteRepository, IUnitOfWork unitOfWork)
         {
             _tenantWriteRepository = tenantWriteRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public Task Handle(CreateCompanyPlanCommandRequest request, CancellationToken cancellationToken)
+        public async Task Handle(CreateCompanyPlanCommandRequest request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var companyPlan = new Tenant.Domain.Entities.CompanyPlan(request.PlanName,request.PlanProperties);
+            await _tenantWriteRepository.AddPlan(companyPlan);
+            await _unitOfWork.SaveChangesAsync();
+
         }
     }
 }

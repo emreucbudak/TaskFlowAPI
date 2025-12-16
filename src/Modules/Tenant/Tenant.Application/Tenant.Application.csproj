@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\CQRS\" />
+    <Folder Include="Features\CQRS\CompanyPlan\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

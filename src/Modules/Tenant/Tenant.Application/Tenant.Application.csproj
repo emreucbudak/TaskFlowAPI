@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\CQRS\CompanyPlan\Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Tenant.Domain\Tenant.Domain.csproj" />
   </ItemGroup>
 

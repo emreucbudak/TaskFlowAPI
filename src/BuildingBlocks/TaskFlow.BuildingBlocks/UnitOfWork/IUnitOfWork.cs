@@ -1,4 +1,4 @@
-﻿namespace Tenant.Application.UnitOfWork
+﻿namespace TaskFlow.BuildingBlocks.UnitOfWork
 {
     public interface IUnitOfWork
     {

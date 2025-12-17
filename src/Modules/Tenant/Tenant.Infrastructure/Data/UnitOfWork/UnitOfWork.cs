@@ -1,4 +1,4 @@
-﻿using Tenant.Application.UnitOfWork;
+﻿using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Infrastructure.Data.TenantDb;
 
 namespace Tenant.Infrastructure.Data.UnitOfWork

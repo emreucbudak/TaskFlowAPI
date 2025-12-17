@@ -17,6 +17,7 @@ namespace Tenant.Infrastructure.Extensions
                     npgsqlOptions.MigrationsAssembly("Tenant.Infrastructure");
                 });
             });
+            
 
         }
     }

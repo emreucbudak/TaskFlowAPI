@@ -2,14 +2,14 @@
 {
     public class PlanProperties
     {
-        public PlanProperties(int peopleAddedLimit, bool isIncludeGroupChat, bool isIncludeVideoCall, int teamLimit, bool isDailyPlannerEnabled, bool isIncludeTaskPriorityCategory, bool isDeadlineNotificationEnabled, bool isIncludeAddTaskNotifications)
+        public PlanProperties(int peopleAddedLimit, bool isIncludeGroupChat, int teamLimit, bool isDailyPlannerEnabled, bool isIncludeTaskPriorityCategory, bool isDeadlineNotificationEnabled, bool isIncludeAddTaskNotifications)
         {
             if(peopleAddedLimit <0)  throw new ArgumentException("Çalışan ekleme limiti negatif olamaz");
             if(teamLimit <0)  throw new ArgumentException("Takım ekleme limiti negatif olamaz");
 
             PeopleAddedLimit = peopleAddedLimit;
             IsIncludeGroupChat = isIncludeGroupChat;
-            IsIncludeVideoCall = isIncludeVideoCall;
+
             TeamLimit = teamLimit;
             IsDailyPlannerEnabled = isDailyPlannerEnabled;
             IsIncludeTaskPriorityCategory = isIncludeTaskPriorityCategory;
@@ -20,7 +20,6 @@
 
         public int PeopleAddedLimit { get; private set; }
         public bool IsIncludeGroupChat { get; private set; }
-        public bool IsIncludeVideoCall { get; private set; }
         public int TeamLimit { get; private set; }
         public bool IsDailyPlannerEnabled { get; private set; }
         public bool IsIncludeTaskPriorityCategory { get; private set; }

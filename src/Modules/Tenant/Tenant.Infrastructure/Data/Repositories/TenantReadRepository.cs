@@ -14,12 +14,12 @@ namespace Tenant.Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public Task<List<CompanyPlan>> GetAllPlans(bool trackChanges)
+        public async Task<List<CompanyPlan>> GetAllPlans(bool trackChanges)
         {
             IQueryable<CompanyPlan> query = _context.companyPlans;
             if (!trackChanges)
                 query = query.AsNoTracking();
-            return query.ToListAsync();
+            return await query.ToListAsync();
         }
 
         public async Task<CompanyPlan> GetPlan(Guid id, bool trackChanges)

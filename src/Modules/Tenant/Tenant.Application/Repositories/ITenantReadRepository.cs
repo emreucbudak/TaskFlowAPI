@@ -5,7 +5,7 @@ namespace Tenant.Application.Repositories
 {
     public interface ITenantReadRepository
     {
-       DbSet<CompanyPlan> Companies {  get; }
-       DbSet<PlanProperties> PlanProperties { get; }
+        Task<CompanyPlan> GetPlan(Guid id, bool trackChanges);
+        Task<List<CompanyPlan>> GetAllPlans(bool trackChanges);
     }
 }

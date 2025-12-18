@@ -20,7 +20,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         public async Task Handle(CreateSubTasksCommandRequest request, CancellationToken cancellationToken)
         {
             var subTask = await _projectManagementReadRepository.GetTask(request.TaskId, true);
-            subTask.AddSubTask(request.Description);
+            subTask.AddSubTask(request.Description,request.AssignedUserId);
             await _unitOfWork.SaveChangesAsync();
 
 

@@ -94,6 +94,16 @@ namespace ProjectManagement.Domain.Entities
             if(deadlineTime.Value<DateTime.UtcNow)
             this.DeadlineTime = deadlineTime.Value; 
         }
+        public Subtask GetSubtask (Guid taskId)
+        {
+            var subTask = _subtask.Where(x=> x.Id == taskId).FirstOrDefault();
+            if (subTask is null)
+            {
+                throw new Exception("subtask bulunamadı!");
+            }
+            return subTask;
+
+        }
 
   
 

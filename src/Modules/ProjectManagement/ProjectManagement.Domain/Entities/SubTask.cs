@@ -27,6 +27,13 @@ namespace ProjectManagement.Domain.Entities
         {
             this.TaskStatusId = taskStatus;
         }
-
+        public void UpdateTaskTitle(string taskTitle)
+        {
+            this.TaskTitle = taskTitle; 
+        }
+        public void UpdateTaskDescription (string taskDescription)
+        {
+            this.Description = taskDescription;
+        }
     }
 }

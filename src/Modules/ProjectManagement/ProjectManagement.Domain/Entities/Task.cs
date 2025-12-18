@@ -1,4 +1,5 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+﻿using System.Xml.Linq;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Domain.Entities
 {
@@ -60,54 +61,44 @@ namespace ProjectManagement.Domain.Entities
         public void RemoveSubTask (Guid taskId)
         {
             var subtask = _subtask.Where(x=> x.Id == taskId).FirstOrDefault();
-            if (subtask is null)
-            {
-                throw new InvalidOperationException("Subtask bulunamadı!");
-            }
+            ArgumentNullException.ThrowIfNull(subtask);
             _subtask.Remove(subtask); 
         }
         public void UpdateTaskName (string? name)
         {
-            if (name is null)
-            {
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(name))
+                throw new Exception("Task adı boş olamaz");
             this.TaskName = name;
         }
         public void UpdateTaskDescription(string? description)
         {
-            if (description is null)
-            {
-                return; 
-            }
+            if (string.IsNullOrWhiteSpace(description))
+                throw new Exception("Task açıklaması boş olamaz");
             this.Description = description;
         }
         public void UpdateDeadlineTime (DateTime? deadlineTime)
         {
-            if(deadlineTime.HasValue)
+            if(!deadlineTime.HasValue)
             {
                 return;
             }
             if(deadlineTime.Value<DateTime.UtcNow)
+            {
+                throw new Exception("deadline zamanı şimdiki zamandan geride olamaz");
+            }
             this.DeadlineTime = deadlineTime.Value; 
         }
         public Subtask GetSubtask (Guid taskId)
         {
             var subTask = _subtask.Where(x=> x.Id == taskId).FirstOrDefault();
-            if (subTask is null)
-            {
-                throw new Exception("subtask bulunamadı!");
-            }
+            ArgumentNullException.ThrowIfNull(subTask);
             return subTask;
 
         }
         public List<SubTaskAnswer> GetAllSubTaskAnswer(Guid taskId)
         {
             var subTask = _subtask.Where(x => x.Id == taskId).FirstOrDefault();
-            if (subTask is null)
-            {
-                throw new Exception("subtask bulunamadı!");
-            }
+            ArgumentNullException.ThrowIfNull(subTask);
             var subTaskAnswer = subTask.subTaskAnswers;
             return subTaskAnswer.ToList();
 
@@ -115,10 +106,7 @@ namespace ProjectManagement.Domain.Entities
         public void RemoveTaskAnswer (Guid AnswerId)
         {
             var taskAnswer = _answers.Where(x=> x.Id == AnswerId).FirstOrDefault();
-            if (taskAnswer is null)
-            {
-                throw new Exception("task answer bulunamadı!");
-            }
+            ArgumentNullException.ThrowIfNull(taskAnswer);
             _answers.Remove(taskAnswer);
 
         }

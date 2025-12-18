@@ -1,6 +1,6 @@
 ﻿namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
 {
-    internal class GetAllSubTasksQueriesHandler
+    internal class GetAllSubTasksQueriesRequest
     {
     }
 }

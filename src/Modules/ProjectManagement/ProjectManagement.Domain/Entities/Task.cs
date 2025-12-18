@@ -14,6 +14,10 @@ namespace ProjectManagement.Domain.Entities
             {
                 throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
             }
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                throw new ArgumentException("Açıklama boş olamaz");
+            }
             TaskName = taskName;
             Description = description;
             TaskStatusId = 1;
@@ -56,7 +60,8 @@ namespace ProjectManagement.Domain.Entities
             var subtask = new Subtask(description);
             _subtask.Add(subtask);
         }
+  
 
-        
+
     }
 }

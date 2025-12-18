@@ -4,8 +4,8 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
 {
     public record CreateTasksCommandRequest : IRequest
     {
-        public string TaskName { get; set; }
-        public string Description { get; set; }
-        public DateTime DeadlineTime { get; set; }
+        public string TaskName { get; init; }
+        public string Description { get; init; }
+        public DateTime DeadlineTime { get; init; }
     }
 }

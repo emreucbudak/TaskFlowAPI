@@ -2,11 +2,11 @@
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.UpdateTask
 {
-    public class UpdateTaskCommandRequest : IRequest
+    public record UpdateTaskCommandRequest : IRequest
     {
-        public string TaskName { get; set; }
-        public string Description { get; set; } 
-        public DateTime DeadlineTime { get; set; }
-        public Guid TaskId { get; set; }
+        public string TaskName { get; init; }
+        public string Description { get; init; } 
+        public DateTime DeadlineTime { get; init; }
+        public Guid TaskId { get; init; }
     }
 }

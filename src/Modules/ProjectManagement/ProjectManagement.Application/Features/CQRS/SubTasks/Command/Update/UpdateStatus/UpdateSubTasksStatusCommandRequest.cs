@@ -2,8 +2,8 @@
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.UpdateStatus
 {
-    public class UpdateSubTasksStatusCommandRequest : IRequest
+    public record UpdateSubTasksStatusCommandRequest : IRequest
     {
-        public int TaskStatusId { get; set; }
+        public int TaskStatusId { get; init; }
     }
 }

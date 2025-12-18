@@ -14,7 +14,6 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
   - Kullanıcı ve takım limiti  
 
 - **Standard Plan**
-  - Video konferans  
   - Görev önceliklendirme / kategori  
   - Deadline hatırlatma
   - Bireysel / Grup Sohbet

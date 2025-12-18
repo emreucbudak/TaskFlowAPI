@@ -15,9 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\CQRS\SubTaskAnswer\Queries\" />
-    <Folder Include="Features\CQRS\SubTasks\Queries\" />
-    <Folder Include="Features\CQRS\TaskAnswer\Queries\" />
+    <Folder Include="Features\CQRS\Tasks\Queries\" />
   </ItemGroup>
 
 </Project>

@@ -54,5 +54,6 @@ namespace ProjectManagement.Domain.Entities
             subTask.UpdateAnswerText(taskAnswer);
 
         }
+
     }
 }

@@ -119,6 +119,10 @@ namespace ProjectManagement.Domain.Entities
             }
            taskAnswer.UpdateAnswerText(answerText);
         }
+        public List<Subtask> GetAllSubTasks()
+        {
+            return subtask.ToList();
+        }
   
 
 

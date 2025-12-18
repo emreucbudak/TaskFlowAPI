@@ -1,6 +1,9 @@
-﻿namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
+﻿using FlashMediator.src.FlashMediator.Contracts;
+
+namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
 {
-    internal class GetAllSubTasksQueriesRequest
+    public class GetAllSubTasksQueriesRequest :IRequest<List<GetAllSubTasksQueriesResponse>>
     {
+        public Guid TaskId { get; set; }
     }
 }

@@ -1,11 +1,12 @@
 ﻿using FlashMediator.src.FlashMediator.Contracts;
 
-namespace ProjectManagement.Application.Features.CQRS.TaskAnswer.Command.Create
+namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Create
 {
-    public record CreateTaskAnswerCommandRequest : IRequest
+    public record CreateSubTaskAnswerCommandRequest : IRequest
     {
         public string AnswerText { get; init; }
         public Guid SenderId { get; init; }
+        public Guid SubTaskId { get; init; }
         public Guid TaskId { get; init; }
     }
 }

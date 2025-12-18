@@ -14,4 +14,8 @@
     <ProjectReference Include="..\ProjectManagement.Domain\ProjectManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\CQRS\SubTasks\Command\Update\UpdateSubTask\" />
+  </ItemGroup>
+
 </Project>

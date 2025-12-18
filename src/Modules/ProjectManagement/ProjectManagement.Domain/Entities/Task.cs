@@ -51,15 +51,50 @@ namespace ProjectManagement.Domain.Entities
         {
             this.TaskStatusId = taskStatusId;
         }
-        public void AddSubTask (string description)
+        public void AddSubTask (string description,Guid AssignedUserId)
         {
             if (TaskStatusId == 2)
             {
                 throw new InvalidOperationException("TAMAMLANMIŞ GÖREVE SUBTASK EKLENEMEZ");
             }
-            var subtask = new Subtask(description);
+            var subtask = new Subtask(description,AssignedUserId,1);
             _subtask.Add(subtask);
         }
+        public void RemoveSubTask (Guid taskId)
+        {
+            var subtask = _subtask.Where(x=> x.Id == taskId).FirstOrDefault();
+            if (subtask is null)
+            {
+                throw new InvalidOperationException("Subtask bulunamadı!");
+            }
+            _subtask.Remove(subtask); 
+        }
+        public void UpdateTaskName (string? name)
+        {
+            if (name is null)
+            {
+                return;
+            }
+            this.TaskName = name;
+        }
+        public void UpdateTaskDescription(string? description)
+        {
+            if (description is null)
+            {
+                return; 
+            }
+            this.Description = description;
+        }
+        public void UpdateDeadlineTime (DateTime? deadlineTime)
+        {
+            if(deadlineTime.HasValue)
+            {
+                return;
+            }
+            if(deadlineTime.Value<DateTime.UtcNow)
+            this.DeadlineTime = deadlineTime.Value; 
+        }
+
   
 
 

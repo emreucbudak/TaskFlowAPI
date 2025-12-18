@@ -15,9 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\CQRS\SubTaskAnswer\Command\Delete\" />
-    <Folder Include="Features\CQRS\SubTaskAnswer\Command\Update\" />
     <Folder Include="Features\CQRS\SubTaskAnswer\Queries\" />
+    <Folder Include="Features\CQRS\SubTasks\Queries\" />
     <Folder Include="Features\CQRS\TaskAnswer\Queries\" />
   </ItemGroup>
 

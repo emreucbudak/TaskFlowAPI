@@ -15,5 +15,9 @@ namespace ProjectManagement.Domain.Entities
 
         public string AnswerText { get; private set; }
         public Guid SenderId { get; private set; }
+        public void UpdateAnswerText(string answerText)
+        {
+            AnswerText = answerText;
+        }
     }
 }

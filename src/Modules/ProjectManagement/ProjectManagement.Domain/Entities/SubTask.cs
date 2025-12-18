@@ -35,5 +35,24 @@ namespace ProjectManagement.Domain.Entities
         {
             this.Description = taskDescription;
         }
+        public void RemoveSubTaskAnswer (Guid AnswerId)
+        {
+            var answer = subTaskAnswers.Where(x=> x.Id == AnswerId).FirstOrDefault();
+            if (answer is null)
+            {
+                throw new Exception("Subtaskın Answeri bulunamadı!");
+            }
+            Answers.Remove(answer);
+        }
+        public void UpdateSubTaskAnswer (string taskAnswer,Guid subTaskAnswerId)
+        {
+            var subTask = Answers.Where(x => x.Id == subTaskAnswerId).FirstOrDefault();
+            if (subTask is null)
+            {
+                throw new Exception("subtakanswer bulunamadı!");
+            }
+            subTask.UpdateAnswerText(taskAnswer);
+
+        }
     }
 }

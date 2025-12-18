@@ -51,13 +51,13 @@ namespace ProjectManagement.Domain.Entities
         {
             this.TaskStatusId = taskStatusId;
         }
-        public void AddSubTask (string description,Guid AssignedUserId)
+        public void AddSubTask (string description,Guid AssignedUserId,string Title)
         {
             if (TaskStatusId == 2)
             {
                 throw new InvalidOperationException("TAMAMLANMIŞ GÖREVE SUBTASK EKLENEMEZ");
             }
-            var subtask = new Subtask(description,AssignedUserId,1);
+            var subtask = new Subtask(description,AssignedUserId,1,Title);
             _subtask.Add(subtask);
         }
         public void RemoveSubTask (Guid taskId)

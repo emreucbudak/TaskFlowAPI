@@ -35,12 +35,9 @@ namespace ProjectManagement.Domain.Entities
         public DateTime DeadlineTime { get; private set; }
         public int? TaskPriorityCategoryId { get; private set; }
         public TaskPriorityCategory? TaskPriority { get; private set; }
-        public void AddAnswer(string AnswerText)
+        public void AddAnswer(string AnswerText,Guid sender)
         {
-            var answer = new TaskAnswer()
-            {
-                AnswerText = AnswerText
-            };
+            var answer = new TaskAnswer(answerText:AnswerText,senderId:sender);
             _answers.Add(answer);
         }
         public void UpdateTaskPriority (int taskPriority)

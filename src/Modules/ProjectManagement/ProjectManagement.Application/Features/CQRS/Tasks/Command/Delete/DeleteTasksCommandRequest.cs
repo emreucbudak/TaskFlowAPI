@@ -2,8 +2,8 @@
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
 {
-    public class DeleteTasksCommandRequest : IRequest
+    public record DeleteTasksCommandRequest : IRequest
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
     }
 }

@@ -1,6 +1,10 @@
-﻿namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.UpdateTaskStatus
+﻿using FlashMediator.src.FlashMediator.Contracts;
+
+namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.UpdateTaskStatus
 {
-    internal class UpdateTaskStatusCommandRequest
+    public record UpdateTaskStatusCommandRequest : IRequest
     {
+        public int TaskStatusId { get; init; }
+        public Guid TaskId { get; init; }
     }
 }

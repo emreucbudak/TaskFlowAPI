@@ -101,7 +101,25 @@ namespace ProjectManagement.Domain.Entities
             return subTask;
 
         }
+        public void RemoveTaskAnswer (Guid AnswerId)
+        {
+            var taskAnswer = _answers.Where(x=> x.Id == AnswerId).FirstOrDefault();
+            if (taskAnswer is null)
+            {
+                throw new Exception("task answer bulunamadı!");
+            }
+            _answers.Remove(taskAnswer);
 
+        }
+        public void UpdateTaskAnswer (Guid TaskId,string answerText)
+        {
+            var taskAnswer = _answers.Where(x => x.Id == TaskId).FirstOrDefault();
+            if (taskAnswer is null)
+            {
+                throw new Exception("TASKANSWER BULUNAMADI!");
+            }
+           taskAnswer.UpdateAnswerText(answerText);
+        }
   
 
 

@@ -16,6 +16,10 @@ namespace ProjectManagement.Domain.Entities
         protected TaskAnswer(){}
         public string AnswerText { get; private set; }
         public Guid SenderId { get; private set; }
+        public void UpdateAnswerText(string answerText)
+        {
+            this.AnswerText = answerText;
+        }
 
 
     }

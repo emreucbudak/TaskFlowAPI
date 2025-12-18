@@ -101,6 +101,17 @@ namespace ProjectManagement.Domain.Entities
             return subTask;
 
         }
+        public List<SubTaskAnswer> GetAllSubTaskAnswer(Guid taskId)
+        {
+            var subTask = _subtask.Where(x => x.Id == taskId).FirstOrDefault();
+            if (subTask is null)
+            {
+                throw new Exception("subtask bulunamadı!");
+            }
+            var subTaskAnswer = subTask.subTaskAnswers;
+            return subTaskAnswer.ToList();
+
+        }
         public void RemoveTaskAnswer (Guid AnswerId)
         {
             var taskAnswer = _answers.Where(x=> x.Id == AnswerId).FirstOrDefault();

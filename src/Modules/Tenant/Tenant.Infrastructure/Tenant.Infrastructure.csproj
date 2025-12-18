@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\TaskFlow.BuildingBlocks\TaskFlow.BuildingBlocks.csproj" />
     <ProjectReference Include="..\Tenant.Application\Tenant.Application.csproj" />
     <ProjectReference Include="..\Tenant.Domain\Tenant.Domain.csproj" />
   </ItemGroup>

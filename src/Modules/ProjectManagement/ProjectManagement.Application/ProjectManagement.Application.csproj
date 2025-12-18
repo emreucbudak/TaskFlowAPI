@@ -14,4 +14,10 @@
     <ProjectReference Include="..\ProjectManagement.Domain\ProjectManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\CQRS\SubTaskAnswer\Command\" />
+    <Folder Include="Features\CQRS\SubTaskAnswer\Queries\" />
+    <Folder Include="Features\CQRS\TaskAnswer\Queries\" />
+  </ItemGroup>
+
 </Project>

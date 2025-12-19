@@ -123,6 +123,10 @@ namespace ProjectManagement.Domain.Entities
         {
             return subtask.ToList();
         }
+        public List<TaskAnswer> GetAllTaskAnwers ()
+        {
+            return taskAnswers.ToList();
+        }
   
 
 

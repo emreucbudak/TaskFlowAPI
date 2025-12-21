@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Identity.Domain.Entities
+﻿namespace Identity.Domain.Entities
 {
     public class Company : TaskFlow.BuildingBlocks.Common.BaseEntity
     {

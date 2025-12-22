@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using TaskFlow.BuildingBlocks.Common;
+﻿using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Domain.Entities
 {

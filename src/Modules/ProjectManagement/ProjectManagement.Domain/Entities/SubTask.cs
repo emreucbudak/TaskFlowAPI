@@ -4,14 +4,22 @@ namespace ProjectManagement.Domain.Entities
 {
     public class Subtask : BaseEntity
     {
-        public string TaskTitle { get; set; }
-        public string Description { get; set; }
-        public Guid AssignedUserId {  get; set; }
-        public int TaskStatusId { get; set; }
-        public TaskStatus TaskStatus { get; set; }
+        public string TaskTitle { get; private set; }
+        public string Description { get; private set; }
+        public Guid AssignedUserId {  get; private set; }
+        public int TaskStatusId { get; private set; }
+        public TaskStatus TaskStatus { get; private set; }
 
         public Subtask(string description, Guid assignedUserId, int taskStatusId, string taskTitle)
         {
+            if (string.IsNullOrWhiteSpace(taskTitle))
+            {
+                throw new Exception("Task title'ı boş veya null olamaz");
+            }
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                throw new Exception("Description boş veya null olamaz");
+            }
             Description = description;
             AssignedUserId = assignedUserId;
             TaskStatusId = taskStatusId;

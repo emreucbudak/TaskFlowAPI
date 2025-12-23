@@ -62,6 +62,10 @@ namespace ProjectManagement.Domain.Entities
             subTask.UpdateAnswerText(taskAnswer);
 
         }
+        public string GetTaskStatus()
+        {
+            return TaskStatus.StatusName;
+        }
 
     }
 }

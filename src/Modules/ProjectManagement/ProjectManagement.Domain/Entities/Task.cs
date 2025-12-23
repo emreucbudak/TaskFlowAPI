@@ -126,6 +126,14 @@ namespace ProjectManagement.Domain.Entities
         {
             return taskAnswers.ToList();
         }
+        public string GetTaskStatus()
+        {
+            return TaskStatus.StatusName;
+        }
+        public string GetTaskPriorityCategory()
+        {
+            return TaskPriority.CategoryName;
+        }
   
 
 

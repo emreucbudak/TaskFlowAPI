@@ -18,6 +18,7 @@
     <Project Path="src/Modules/Notification/Notification.Application/Notification.Application.csproj" Id="70736c31-1d2b-4e72-88b3-e180838b9123" />
     <Project Path="src/Modules/Notification/Notification.Domain/Notification.Domain.csproj" Id="fa2a66cc-a703-40cb-9cca-224ba16f2a70" />
     <Project Path="src/Modules/Notification/Notification.Infrastructure/Notification.Infrastructure.csproj" Id="e47f55ab-a083-4694-a7fd-15e96d96d861" />
+    <Project Path="src/Modules/Notification/Notification.Persistence/Notification.Persistence.csproj" Id="f5e47791-bfdf-4288-b84c-4c17c8c57301" />
   </Folder>
   <Folder Name="/src/Modules/ProjectManagement/">
     <Project Path="src/Modules/ProjectManagement/ProjectManagement.Application/ProjectManagement.Application.csproj" Id="0747d709-1531-4932-b1a9-a1f1f9a93917" />

@@ -1,6 +1,6 @@
-﻿namespace Notification.Domain.Entities
+﻿namespace Notification.Domain.Models
 {
-    public class NotificationMessage : TaskFlow.BuildingBlocks.Common.BaseEntity
+    public class NotificationMessage
     {
         public string Title { get; set; }
         public string Description { get; set; }

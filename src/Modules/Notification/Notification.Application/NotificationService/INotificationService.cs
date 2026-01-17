@@ -1,6 +1,10 @@
-﻿namespace Notification.Application.NotificationService
+﻿
+using Notification.Domain.Models;
+
+namespace Notification.Application
 {
-    internal interface INotificationService
+    public interface INotificationService
     {
+        Task SendNotificationToUserAsync (string userId, NotificationMessage nm);
     }
 }

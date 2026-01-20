@@ -4,8 +4,10 @@ namespace Notification.Infrastructure.Hubs
 {
     public class NotificationHub : Hub
     {
-        public override Task OnConnectedAsync()
+        public override  Task OnConnectedAsync()
         {
+            var userId = Context.UserIdentifier;
+
             return base.OnConnectedAsync();
         }
 
@@ -13,5 +15,6 @@ namespace Notification.Infrastructure.Hubs
         {
             return base.OnDisconnectedAsync(exception);
         }
+
     }
 }

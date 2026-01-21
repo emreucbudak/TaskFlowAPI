@@ -11,7 +11,8 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
 - **Free Plan**
   - Temel görev yönetimi  
   - Bireysel Sohbet
-  - Kullanıcı ve takım limiti  
+  - Kullanıcı ve takım limiti
+  - Bireysel / Grup Sohbet  
 
 - **Standard Plan**
   - Görev önceliklendirme / kategori  
@@ -23,7 +24,8 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
   - Tüm Standard özellikler  
   - Görev eklendiğinde bildirim  
   - Gelişmiş takım ve kullanıcı limiti
-  - Günlük Görev Planlayıcı  
+  - Günlük Görev Planlayıcı
+  - Bireysel / Grup Sohbet  
 
 ---
 

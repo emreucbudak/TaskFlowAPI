@@ -2,7 +2,7 @@
 {
     public interface INotificationWriteRepository
     {
-        Task SendNotification (Notification.Domain.Entities.NotificationMessage notification);
+        Task SendNotification (Notification.Domain.Models.NotificationMessage notification);
 
     }
 }

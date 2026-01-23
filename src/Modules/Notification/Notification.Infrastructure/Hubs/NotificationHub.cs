@@ -14,13 +14,13 @@ namespace Notification.Infrastructure.Hubs
             this.mediator = mediator;
         }
 
-        public async Task SendNotificationToUser(Guid userId,string gorevBasligi,string message)
+        public async Task SendNotificationToUser(Guid userId,string title,string message)
         {
-            await Clients.User(userId.ToString()).SendAsync("NewMessage", message);
+            await Clients.User(userId.ToString()).SendAsync("NewMessage", title,message);
         }
-        public async Task SendNotificationToGroup(string groupName, string message)
+        public async Task SendNotificationToGroup(string groupName,string title, string message)
         {
-            await Clients.Group(groupName).SendAsync("NewMessage", message);
+            await Clients.Group(groupName).SendAsync("NewMessage", title,message);
         }
         public async override  Task OnConnectedAsync()
         {

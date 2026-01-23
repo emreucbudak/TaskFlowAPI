@@ -5,6 +5,6 @@ namespace Notification.Application
 {
     public interface INotificationService
     {
-        Task SendNotificationToUserAsync (string userId, NotificationMessage nm);
+        Task SendNotificationToUserAsync (string userId, NotificationMessage nm,string? groupName);
     }
 }

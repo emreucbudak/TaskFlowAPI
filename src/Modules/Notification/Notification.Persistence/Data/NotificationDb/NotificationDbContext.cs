@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Notification.Domain.Entities;
+using Notification.Domain.Models;
 
 namespace Notification.Infrastructure.Data.NotificationDb
 {

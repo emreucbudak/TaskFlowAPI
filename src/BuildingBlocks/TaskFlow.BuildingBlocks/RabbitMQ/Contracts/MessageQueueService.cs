@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 
@@ -31,9 +33,26 @@ namespace TaskFlow.BuildingBlocks.RabbitMQ.Contracts
         }
 
 
-        public Task PublishMessageAsync<T>(string queueName, T message) where T : class
+        public async Task PublishMessageAsync<T>(string queueName, T message) where T : class
         {
-            
+            if (_channel == null || !_channel.IsOpen)
+            {
+                logger.LogError("RabbitMQ kanalı kullanıma hazır değil (Başlatılmadı veya Koptu). Mesaj gönderilemedi: {QueueName}", queueName);
+                throw new InvalidOperationException("RabbitMQ kanalı kullanıma hazır değil. Lütfen servisin başlatıldığından emin olun.");
+            }
+            var json = JsonSerializer.Serialize(message);
+            var body = Encoding.UTF8.GetBytes(json);
+            await _channel.QueueDeclareAsync(queue: queueName,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null);
+
+            await _channel.BasicPublishAsync(exchange: "",
+                                   routingKey: queueName,
+                                   basicProperties: new BasicProperties() { Persistent = true },
+                                   body: body,
+                                   mandatory: true);
         }
 
         public async ValueTask DisposeAsync()

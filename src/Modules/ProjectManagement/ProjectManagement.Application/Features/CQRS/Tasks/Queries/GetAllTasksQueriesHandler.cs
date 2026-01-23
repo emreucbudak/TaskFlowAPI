@@ -1,4 +1,5 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿
+using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.Tasks.Queries.DTOS;
 using ProjectManagement.Application.Repositories;
 

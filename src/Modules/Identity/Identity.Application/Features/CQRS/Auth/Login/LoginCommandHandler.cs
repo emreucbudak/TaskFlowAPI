@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using Identity.Application.TokenService;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;

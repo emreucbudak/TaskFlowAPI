@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 
 namespace Identity.Application.Features.CQRS.Auth.Register
 {

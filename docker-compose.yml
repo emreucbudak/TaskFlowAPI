@@ -1,0 +1,6 @@
+services:
+  taskflow.presentation:
+    image: ${DOCKER_REGISTRY-}taskflowpresentation
+    build:
+      context: .
+      dockerfile: src/Taskflow.API/Taskflow.Presentation/Dockerfile

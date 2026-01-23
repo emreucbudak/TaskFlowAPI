@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using Tenant.Domain.Entities;
 
 namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Create

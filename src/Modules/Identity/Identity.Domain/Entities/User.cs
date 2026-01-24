@@ -9,5 +9,7 @@ namespace Identity.Domain.Entities
         public Company Company { get; set; }
         private readonly List<GroupsMember> _groupsMembers = new();
         public IReadOnlyCollection<GroupsMember> GroupsMembers => _groupsMembers;
+        public Guid DepartmentId { get; set; }
+        public Department Department { get; set; }
     }
 }

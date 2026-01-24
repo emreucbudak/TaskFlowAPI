@@ -10,8 +10,7 @@ namespace Identity.Infrastructure.Data.SeedData
         {
             builder.HasData(
                 new GroupRoles { GroupRolesId = 1, RoleName = "Leader" },
-                new GroupRoles { GroupRolesId = 2, RoleName = "User" },
-                new GroupRoles { GroupRolesId = 3, RoleName = "Manager" }
+                new GroupRoles { GroupRolesId = 2, RoleName = "User" }
             );
         }
     }

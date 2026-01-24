@@ -15,7 +15,11 @@ namespace Identity.Application.Features.CQRS.UserGroups.Queries
         }
         public async Task<List<string>> Handle(GetUserAllGroupsNameQueriesRequest request, CancellationToken cancellationToken)
         {
-            return await _readRepository
+            var groups = await _readRepository.GetAllAsync();
+            var userGroupsNames = groups.Where(g => g.Users.Any(ug => ug.UserId == request.userId))
+                                        .Select(g => g.Name)
+                                        .ToList();
+            return userGroupsNames;
         }
     }
 }

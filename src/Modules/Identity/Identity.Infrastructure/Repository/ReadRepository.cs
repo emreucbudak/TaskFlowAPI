@@ -1,6 +1,7 @@
 ﻿using Identity.Application.Repositories;
 using Identity.Infrastructure.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Identity.Infrastructure.Repository
 {
@@ -19,6 +20,10 @@ namespace Identity.Infrastructure.Repository
             var getAll = await db.ToListAsync();
             return getAll;
         }
+
+
+
+
 
         public async Task<T> GetByIdAsync(int id)
         {

@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Application.Repositories;
 
@@ -23,7 +23,6 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Update
             var companyPlan = await tenantReadRepository.GetPlan(request.CompanyPlanId, true);
             var newProperties = new Domain.Entities.PlanProperties(
                 request.PeopleAddedLimit,
-                request.IsIncludeGroupChat,
                 request.TeamLimit,
                 request.IsDailyPlannerEnabled,
                 request.IsIncludeTaskPriorityCategory,
@@ -31,7 +30,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Update
                 request.IsIncludeAddTaskNotifications
             );
             companyPlan.UpdateProperties(newProperties);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

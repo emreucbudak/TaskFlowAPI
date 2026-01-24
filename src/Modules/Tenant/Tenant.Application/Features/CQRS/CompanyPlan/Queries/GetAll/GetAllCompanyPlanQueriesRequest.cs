@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 
 namespace Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll
 {

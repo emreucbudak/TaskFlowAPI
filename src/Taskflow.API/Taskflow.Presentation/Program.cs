@@ -1,4 +1,5 @@
 using FlashMediator;
+using FluentValidation;
 using Serilog;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("/logs/logs.txt",rollingInterval:RollingInterval.Day).CreateLogger();
 builder.Host.UseSerilog(logger);
 builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

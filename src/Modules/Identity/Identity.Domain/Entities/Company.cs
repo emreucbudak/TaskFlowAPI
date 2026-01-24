@@ -13,14 +13,17 @@
 
 
         public string CompanyName { get; private set; }
-        public ICollection<Groups> Groups { get; private set; } = new List<Groups>();
+        private readonly List<Groups> _groups = new();
+        private readonly List<Department> _departments = new();
+        public IReadOnlyCollection<Groups> Groups => _groups;
+        public IReadOnlyCollection<Department> Departments => _departments;
         public void AddGroup(Groups groups)
         {
-            Groups.Add(groups);
+            _groups.Add(groups);
         }
         public void removeGroup(Groups groups)
         {
-            Groups.Remove(groups);
+            _groups.Remove(groups);
         }
         public void UpdateCompanyName(string companyName)
         {

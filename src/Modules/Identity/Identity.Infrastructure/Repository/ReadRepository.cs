@@ -14,7 +14,7 @@ namespace Identity.Infrastructure.Repository
         }
         private DbSet<T> db => _context.Set<T>();
 
-        public async Task<List<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
             var getAll = await db.ToListAsync();
             return getAll;
@@ -25,5 +25,7 @@ namespace Identity.Infrastructure.Repository
             var getById = await db.FindAsync(id);
             return getById;
         }
+
+
     }
 }

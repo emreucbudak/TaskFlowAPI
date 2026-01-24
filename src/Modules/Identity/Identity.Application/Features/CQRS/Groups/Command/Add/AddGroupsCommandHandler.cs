@@ -17,7 +17,7 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Add
 
         public async Task Handle(AddGroupsCommandRequest request, CancellationToken cancellationToken)
         {
-            var group = new Domain.Entities.Groups(request.Name);
+            var group = new Domain.Entities.Groups(request.Name, request.companyId);
            await _writeRepository.AddAsync(group);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

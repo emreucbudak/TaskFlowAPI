@@ -20,7 +20,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Create
         {
             var companyPlan = new Tenant.Domain.Entities.CompanyPlan(request.PlanName,request.PlanProperties);
             await _tenantWriteRepository.AddPlan(companyPlan);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }

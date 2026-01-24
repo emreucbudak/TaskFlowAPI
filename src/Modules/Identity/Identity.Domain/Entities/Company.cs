@@ -29,5 +29,13 @@
         {
             CompanyName = companyName;
         }
+        public void AddDepartment(Department department)
+        {
+            _departments.Add(department);
+        }
+        public void RemoveDepartment(Department department)
+        {
+            _departments.Remove(department);
+        }
     }
 }

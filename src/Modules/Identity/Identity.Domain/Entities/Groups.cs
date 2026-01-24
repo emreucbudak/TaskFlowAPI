@@ -1,14 +1,20 @@
-﻿namespace Identity.Domain.Entities
+﻿using TaskFlow.BuildingBlocks.Common;
+
+namespace Identity.Domain.Entities
 {
-    public class Groups 
+    public class Groups : BaseEntity
     {
-        public int Id { get; private set; }
+
         public string Name { get; private set; }
         private List<GroupsMember> _users = new();
         public IReadOnlyCollection<GroupsMember> Users => _users;
-        public Groups(string name)
+        public Guid CompanyId { get; private set; }
+        public Company Company { get; private set; }
+        public Groups(string name, Guid companyId)
         {
             Name = name;
+            CompanyId = companyId;
+
         }
         public void AddUser(Guid userid,int rolesId)
         {

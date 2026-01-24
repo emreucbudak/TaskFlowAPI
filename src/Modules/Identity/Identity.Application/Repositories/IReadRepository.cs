@@ -1,4 +1,7 @@
-﻿namespace Identity.Application.Repositories
+﻿using Microsoft.EntityFrameworkCore.Query;
+using TaskFlow.BuildingBlocks.Common;
+
+namespace Identity.Application.Repositories
 {
     public interface IReadRepository<T> where T : class
     {

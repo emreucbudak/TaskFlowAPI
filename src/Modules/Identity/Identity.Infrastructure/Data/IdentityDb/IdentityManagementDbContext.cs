@@ -19,6 +19,7 @@ namespace Identity.Infrastructure.Data.IdentityDb
         public DbSet<Domain.Entities.Groups> Groups { get; set; }
         public DbSet<Domain.Entities.GroupsMember> GroupsMembers { get; set; }
         public DbSet<Domain.Entities.GroupRoles> GroupRoles { get; set; }
+        public DbSet<Domain.Entities.Department> Departments { get; set; }
 
     }
 }

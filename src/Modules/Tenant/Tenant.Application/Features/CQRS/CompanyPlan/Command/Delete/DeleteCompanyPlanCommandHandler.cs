@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Application.Repositories;
 
@@ -21,7 +21,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Delete
         {
             var companyPlan = await tenantReadRepository.GetPlan(request.CompanyPlanId,false);
             await tenantWriteRepository.DeletePlan(companyPlan);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }

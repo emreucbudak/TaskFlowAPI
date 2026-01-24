@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Application.Repositories;
 

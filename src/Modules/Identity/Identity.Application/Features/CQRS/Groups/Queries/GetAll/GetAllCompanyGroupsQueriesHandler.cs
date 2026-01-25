@@ -1,22 +1,21 @@
 ﻿using FlashMediator;
 using Identity.Application.Repositories;
-using Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
 {
     public class GetAllCompanyGroupsQueriesHandler : IRequestHandler<GetAllCompanyGroupsQueriesRequest, List<GetAllCompanyGroupsQueriesResponse>>
     {
-        private readonly IBaseReadRepository<Domain.Entities.Groups> _readRepository;
+        private readonly IReadRepository<Domain.Entities.Groups,Guid> _readRepository;
 
-        public GetAllCompanyGroupsQueriesHandler(IBaseReadRepository<Domain.Entities.Groups> readRepository)
+        public GetAllCompanyGroupsQueriesHandler(IReadRepository<Domain.Entities.Groups, Guid> readRepository)
         {
             _readRepository = readRepository;
         }
 
         public async Task<List<GetAllCompanyGroupsQueriesResponse>> Handle(GetAllCompanyGroupsQueriesRequest request, CancellationToken cancellationToken)
         {
-            var company = await _readRepository.GetByGuidAsync(request.CompanyId,x=> x.Include(y=> y.Users).ThenInclude(x=> x.User).ThenInclude(x=> x.Department));
+            var company = await _readRepository.GetByIdAsync(false,request.CompanyId, x => x.Include(y => y.Users).ThenInclude(x => x.User).ThenInclude(x => x.Department));
             return company.Users.Select(group => new GetAllCompanyGroupsQueriesResponse
             {
                 GroupName = company.Name,

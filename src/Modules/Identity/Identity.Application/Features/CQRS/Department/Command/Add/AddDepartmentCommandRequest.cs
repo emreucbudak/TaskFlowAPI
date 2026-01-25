@@ -1,13 +1,12 @@
 ﻿using FlashMediator;
 
-namespace Identity.Application.Features.CQRS.Groups.Command.Add
+namespace Identity.Application.Features.CQRS.Department.Command.Add
 {
-    public record AddGroupsCommandRequest : IRequest
+    public record AddDepartmentCommandRequest : IRequest
     {
         public string Name { get; init; }
         public Guid companyId { get; init; }
-
-        public AddGroupsCommandRequest(string name, Guid companyId)
+        public AddDepartmentCommandRequest(string name, Guid companyId)
         {
             Name = name;
             this.companyId = companyId;

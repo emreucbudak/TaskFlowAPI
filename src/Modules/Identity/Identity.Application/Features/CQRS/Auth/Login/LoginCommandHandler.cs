@@ -1,8 +1,10 @@
 ﻿using FlashMediator;
+using Identity.Application.Features.CQRS.Auth.Exceptions;
 using Identity.Application.TokenService;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
+using TaskFlow.BuildingBlocks.Exceptions;
 
 namespace Identity.Application.Features.CQRS.Auth.Login
 {
@@ -22,7 +24,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user is null)
             {
-                throw new Exception("Kullanıcı Bulunamadı!");
+                throw new UserNotFoundExceptions(request.Email);
             }
             bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
             if (checkPassword)

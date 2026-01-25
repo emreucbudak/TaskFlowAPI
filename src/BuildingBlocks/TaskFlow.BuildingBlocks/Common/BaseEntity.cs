@@ -1,11 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TaskFlow.BuildingBlocks.Common
+﻿namespace TaskFlow.BuildingBlocks.Common
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity<TKey>
     {
-        public Guid Id { get; set; } = Guid.CreateVersion7();
+        public TKey Id { get; set; }
+
+      
+    }
+
+    public abstract class BaseEntity : BaseEntity<Guid>
+    {
+        public BaseEntity()
+        {
+            Id = Guid.CreateVersion7();
+        }
     }
 }

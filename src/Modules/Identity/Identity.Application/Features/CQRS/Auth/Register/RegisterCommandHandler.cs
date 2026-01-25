@@ -4,6 +4,7 @@ using Identity.Application.Features.CQRS.Company.Exceptions;
 using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using System.IO;
 
 namespace Identity.Application.Features.CQRS.Auth.Register
 {
@@ -11,10 +12,12 @@ namespace Identity.Application.Features.CQRS.Auth.Register
     {
         private readonly UserManager<User> _userManager;
         private readonly IReadRepository<Domain.Entities.Company,Guid> _companyReadRepository;
-        public RegisterCommandHandler(UserManager<User> userManager, IReadRepository<Domain.Entities.Company, Guid> companyReadRepository)
+        private readonly RoleManager<Roles> role;
+        public RegisterCommandHandler(UserManager<User> userManager, IReadRepository<Domain.Entities.Company, Guid> companyReadRepository, RoleManager<Roles> role)
         {
             _userManager = userManager;
             _companyReadRepository = companyReadRepository;
+            this.role = role;
         }
         public async Task Handle(RegisterCommandRequest request, CancellationToken cancellationToken)
         {
@@ -32,6 +35,11 @@ namespace Identity.Application.Features.CQRS.Auth.Register
             if (!allowedRoles.Contains(request.Role))
             {
                 throw new InvalidRoleException();
+            }
+            var roleExists = await role.RoleExistsAsync(request.Role);
+            if (!roleExists)
+            {
+                throw new RoleNotFoundExceptions();
             }
             User newUser = User.Create(request.Name, request.Email, request.CompanyId);
             IdentityResult result = await _userManager.CreateAsync(newUser, request.Password);

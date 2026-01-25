@@ -28,13 +28,19 @@ namespace Identity.Application.Features.CQRS.Auth.Register
             {
                 throw new CompanyNotFoundExceptions();
             }
+            var allowedRoles = new[] { "Company", "Worker" };
+            if (!allowedRoles.Contains(request.Role))
+            {
+                throw new InvalidRoleException();
+            }
             User newUser = User.Create(request.Name, request.Email, request.CompanyId);
             IdentityResult result = await _userManager.CreateAsync(newUser, request.Password);
             if(!result.Succeeded)
             {
                 throw new RegisterNotSuccessfullyExceptions();
             }
-            
+            await _userManager.AddToRoleAsync(newUser, request.Role);
+
 
 
 

@@ -19,6 +19,7 @@ namespace Identity.Application.Features.CQRS.UserGroups.Queries
             var userGroupsNames = groups.Where(g => g.Users.Any(ug => ug.UserId == request.userId))
                                         .Select(g => g.Name)
                                         .ToList();
+            
             return userGroupsNames;
         }
     }

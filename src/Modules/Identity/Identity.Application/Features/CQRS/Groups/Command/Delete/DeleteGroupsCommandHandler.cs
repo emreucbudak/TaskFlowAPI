@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using Identity.Application.Features.CQRS.Groups.Exceptions;
 using Identity.Application.Repositories;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.BuildingBlocks.UnitOfWork;
@@ -24,7 +25,7 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
             var groups = await _readRepository.GetByIdAsync(false,request.GroupId);
             if (groups is null)
             {
-                throw new KeyNotFoundException("Group not found.");
+                throw new GroupsNotFoundExceptions();
             }
             await _writeRepository.DeleteAsync(groups);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.Repositories;
 
 namespace Identity.Application.Features.CQRS.Department.Command.Update
@@ -17,6 +18,10 @@ namespace Identity.Application.Features.CQRS.Department.Command.Update
         public async Task Handle(UpdateDepartmentCommandRequest request, CancellationToken cancellationToken)
         {
             var department = await _readRepository.GetByIdAsync(false,request.Id);
+            if (department is null)
+            {
+                throw new DepartmentNotFoundExceptions();
+            }
             department.UpdateName(request.Name);
 
 

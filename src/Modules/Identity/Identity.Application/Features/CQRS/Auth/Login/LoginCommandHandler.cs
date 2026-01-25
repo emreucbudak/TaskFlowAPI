@@ -29,7 +29,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
             bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
             if (checkPassword)
             {
-                throw new Exception("Şifre Yanlış");
+                throw new WrongPasswordExceptions();
             }
             IList<string> roles = await userManager.GetRolesAsync(user);
             JwtSecurityToken accessToken =  tokenService.CreateToken(user, roles);

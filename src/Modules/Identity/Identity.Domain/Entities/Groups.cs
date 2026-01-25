@@ -16,6 +16,14 @@ namespace Identity.Domain.Entities
             CompanyId = companyId;
 
         }
+        public void UpdateName(string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                throw new ArgumentException("Group name cannot be empty.");
+            }
+            Name = newName;
+        }
         public void AddUser(Guid userid,int rolesId)
         {
             var groupMember = new GroupsMember(userid, this.Id,rolesId);

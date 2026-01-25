@@ -2,10 +2,11 @@
 using Identity.Infrastructure.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace Identity.Infrastructure.Repository
 {
-    public class ReadRepository<T> : IReadRepository<T> where T : class
+    public class ReadRepository<T, TKey> : IReadRepository<T, TKey> where T : BaseEntity<TKey>
     {
         private readonly IdentityManagementDbContext _context;
 
@@ -15,22 +16,34 @@ namespace Identity.Infrastructure.Repository
         }
         private DbSet<T> db => _context.Set<T>();
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(bool trackChanges, Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
-            var getAll = await db.ToListAsync();
-            return getAll;
+            IQueryable<T> query = db.AsQueryable();
+
+            if (!trackChanges)
+                query = query.AsNoTracking();
+            if (inc is not null)
+            {
+                query = inc(query);
+            }
+
+        
+            return await query.ToListAsync();
         }
 
-
-
-
-
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(bool trackChanges, TKey id, Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
-            var getById = await db.FindAsync(id);
-            return getById;
+            IQueryable<T> query = db.AsQueryable();
+
+            if (!trackChanges)
+                query = query.AsNoTracking();
+            if (inc is not null)
+            {
+                query = inc(query);
+            }
+
+
+                return await query.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
-
-
     }
 }

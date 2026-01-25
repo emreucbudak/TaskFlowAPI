@@ -7,11 +7,11 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
 {
     public class DeleteGroupsCommandHandler : IRequestHandler<DeleteGroupsCommandRequest>
     {
-        private readonly IReadRepository<Domain.Entities.Groups> _readRepository;
+        private readonly IReadRepository<Domain.Entities.Groups,Guid> _readRepository;
         private readonly IWriteRepository<Domain.Entities.Groups> _writeRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteGroupsCommandHandler(IReadRepository<Domain.Entities.Groups> readRepository, IWriteRepository<Domain.Entities.Groups> writeRepository, IUnitOfWork unitOfWork)
+        public DeleteGroupsCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> readRepository, IWriteRepository<Domain.Entities.Groups> writeRepository, IUnitOfWork unitOfWork)
         {
             _readRepository = readRepository;
             _writeRepository = writeRepository;
@@ -21,7 +21,7 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
 
         public async Task Handle(DeleteGroupsCommandRequest request, CancellationToken cancellationToken)
         {
-            var groups = await _readRepository.GetByIdAsync(request.GroupId);
+            var groups = await _readRepository.GetByIdAsync(false,request.GroupId);
             if (groups is null)
             {
                 throw new KeyNotFoundException("Group not found.");

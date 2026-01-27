@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.UpdateSubTask
 {

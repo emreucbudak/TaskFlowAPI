@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -19,7 +19,7 @@ namespace ProjectManagement.Application.Features.CQRS.TaskAnswer.Command.Update
         {
             var task = await _repository.GetTask(request.TaskId, true);
             task.UpdateTaskAnswer(request.TaskAnswerId, request.TaskAnswer);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }

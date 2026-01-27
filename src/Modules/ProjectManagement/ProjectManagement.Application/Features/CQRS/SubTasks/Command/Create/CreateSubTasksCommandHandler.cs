@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -20,8 +20,8 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         public async Task Handle(CreateSubTasksCommandRequest request, CancellationToken cancellationToken)
         {
             var subTask = await _projectManagementReadRepository.GetTask(request.TaskId, true);
-            subTask.AddSubTask(request.Description,request.AssignedUserId);
-            await _unitOfWork.SaveChangesAsync();
+            subTask.AddSubTask(description:request.Description,AssignedUserId:request.AssignedUserId,Title:request.TaskTitle);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 
         }

@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -20,7 +20,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
         {
             var task = await projectManagementReadRepository.GetTask(request.TaskId, false);
              task.RemoveSubTask(request.TaskId);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             
         }

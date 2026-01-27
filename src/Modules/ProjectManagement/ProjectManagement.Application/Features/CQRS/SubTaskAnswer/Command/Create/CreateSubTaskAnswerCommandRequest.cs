@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Create
 {

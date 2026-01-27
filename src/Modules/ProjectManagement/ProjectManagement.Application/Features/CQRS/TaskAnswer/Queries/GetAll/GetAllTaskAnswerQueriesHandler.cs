@@ -1,5 +1,4 @@
-﻿
-using FlashMediator;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 
 namespace ProjectManagement.Application.Features.CQRS.TaskAnswer.Queries.GetAll

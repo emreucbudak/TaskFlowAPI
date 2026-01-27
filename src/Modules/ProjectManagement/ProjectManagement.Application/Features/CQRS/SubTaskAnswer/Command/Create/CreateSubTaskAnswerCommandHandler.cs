@@ -1,7 +1,6 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Domain.Entities;
-using System.Security.Cryptography.X509Certificates;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Create
@@ -24,7 +23,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Crea
             var subTask = Task.GetSubtask(request.SubTaskId);
             var answer = new Domain.Entities.SubTaskAnswer(request.AnswerText, request.SenderId);
             subTask.AddAnswer(answer);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }

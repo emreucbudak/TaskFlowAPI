@@ -20,16 +20,29 @@ namespace Identity.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(newName))
             {
-                throw new ArgumentException("Group name cannot be empty.");
+                throw new ArgumentException("Grup adı boş olamaz");
             }
             Name = newName;
         }
         public void AddUser(Guid userid,int rolesId)
         {
+            if(userid == Guid.Empty)
+            {
+                throw new ArgumentException("Çalışan idsi boş olamaz");
+            }
+            if(_users.Any(u => u.UserId == userid))
+            {
+                throw new InvalidOperationException("Çalışan zaten gruba üye");
+            }
             var groupMember = new GroupsMember(userid, this.Id,rolesId);
             _users.Add(groupMember);
         }
-        public void RemoveUser(Guid userid) {
+        public void RemoveUser(Guid userid)
+        {
+            if (_users.Any(u => u.UserId == userid) is false)
+            {
+                throw new InvalidOperationException("Çalışan bu grubun üyesi değil");
+            }
             var userToRemove = Users.FirstOrDefault(u => u.UserId == userid);
             if (userToRemove is not null)
             {

@@ -4,7 +4,7 @@ using Identity.Application.Features.CQRS.Company.Exceptions;
 using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.IO;
+
 
 namespace Identity.Application.Features.CQRS.Auth.Register
 {

@@ -18,7 +18,7 @@ namespace Identity.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(newName))
             {
-                throw new ArgumentException("Department name cannot be empty.");
+                throw new ArgumentException("Departman ismi boş veya null olamaz.");
             }
             Name = newName;
         }
@@ -26,7 +26,11 @@ namespace Identity.Domain.Entities
         {
             if (user is null)
             {
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+                throw new ArgumentNullException(nameof(user), "Çalışan null olamaz.");
+            }
+            if(_users.Any(u => u.Id == user.Id))
+            {
+                throw new InvalidOperationException("Çalışan zaten gruba üye.");
             }
             _users.Add(user);
         }

@@ -16,19 +16,17 @@ namespace Identity.Infrastructure.Repository
         }
         private DbSet<T> db => _context.Set<T>();
 
-        public async Task<IEnumerable<T>> GetAllAsync(bool trackChanges, Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
+        public IQueryable<T> GetAllAsync(bool trackChanges, Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
             IQueryable<T> query = db.AsQueryable();
 
             if (!trackChanges)
                 query = query.AsNoTracking();
-            if (inc is not null)
-            {
-                query = inc(query);
-            }
 
-        
-            return await query.ToListAsync();
+            if (inc is not null)
+                query = inc(query);
+
+            return query;
         }
 
         public async Task<T> GetByIdAsync(bool trackChanges, TKey id, Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)

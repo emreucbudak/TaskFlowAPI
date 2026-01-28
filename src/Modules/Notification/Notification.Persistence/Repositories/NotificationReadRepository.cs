@@ -25,7 +25,7 @@ namespace Notification.Persistence.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<NotificationMessage>> GetByUserIdAsync(Guid userId, bool trackChanges = false)
+        public async Task<List<NotificationMessage>> GetByUserIdAsync(Guid userId, int take, bool trackChanges = false)
         {
             IQueryable<NotificationMessage> query = context.notificationMessages
                 .Where(x => x.ReceiverUserId == userId)
@@ -33,6 +33,13 @@ namespace Notification.Persistence.Repositories
 
             if (!trackChanges)
                 query = query.AsNoTracking();
+
+            if(take > 200)
+                take = 200;
+            if (take <1)
+                take = 1;
+            query = query.Take(take);
+
 
             return await query.ToListAsync();
         }

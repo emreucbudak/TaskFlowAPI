@@ -24,9 +24,7 @@ namespace Tenant.Infrastructure.Data.Repositories
         private const int SlowQueryThresholdMs = 1000;
         private const string CacheKeyPrefix = "tenant_plan_";
 
-        /// <summary>
-        /// Constructor with null validation for all dependencies
-        /// </summary>
+
         public TenantReadRepository(
             TenantDbContext context,
             ILogger<TenantReadRepository> logger,
@@ -190,12 +188,12 @@ namespace Tenant.Infrastructure.Data.Repositories
             try
             {
                 IQueryable<CompanyPlan> query = _context.companyPlans;
-                // .Where(p => p.IsActive); // If IsActive field exists
+   
 
                 if (!trackChanges)
                     query = query.AsNoTracking();
 
-                query = query.OrderBy(p => p.Price);
+                query = query.OrderBy(p => p);
 
                 var plans = await query
                     .Skip((page - 1) * pageSize)
@@ -222,9 +220,8 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Searches plans by name with SQL injection protection
-        /// </summary>
+
+
         public async Task<List<CompanyPlan>> SearchPlansByName(
             string searchTerm,
             int page = 1,
@@ -234,7 +231,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             ValidateSearchTerm(searchTerm);
             ValidatePagination(ref page, ref pageSize);
 
-            // CRITICAL: Escape LIKE wildcards to prevent wildcard injection
+          
             var escapedTerm = EscapeLikePattern(searchTerm);
 
             _logger.LogInformation(
@@ -246,12 +243,12 @@ namespace Tenant.Infrastructure.Data.Repositories
             try
             {
                 IQueryable<CompanyPlan> query = _context.companyPlans
-                    .Where(p => EF.Functions.Like(p.Name, $"%{escapedTerm}%"));
+                    .Where(p => EF.Functions.Like(p.PlanName, $"%{escapedTerm}%"));
 
                 if (!trackChanges)
                     query = query.AsNoTracking();
 
-                query = query.OrderBy(p => p.Name);
+                query = query.OrderBy(p => p.PlanName);
 
                 var plans = await query
                     .Skip((page - 1) * pageSize)
@@ -278,9 +275,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Retrieves plans by price range
-        /// </summary>
+
         public async Task<List<CompanyPlan>> GetPlansByPriceRange(
             decimal minPrice,
             decimal maxPrice,
@@ -300,12 +295,12 @@ namespace Tenant.Infrastructure.Data.Repositories
             try
             {
                 IQueryable<CompanyPlan> query = _context.companyPlans
-                    .Where(p => p.Price >= minPrice && p.Price <= maxPrice);
+                    .Where(p => p.PlanPrice >= minPrice && p.PlanPrice <= maxPrice);
 
                 if (!trackChanges)
                     query = query.AsNoTracking();
 
-                query = query.OrderBy(p => p.Price);
+                query = query.OrderBy(p => p.PlanPrice);
 
                 var plans = await query
                     .Skip((page - 1) * pageSize)
@@ -332,9 +327,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Gets total plan count
-        /// </summary>
+
         public async Task<int> GetTotalPlanCount()
         {
             _logger.LogDebug("Getting total company plan count");
@@ -356,9 +349,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Checks if a plan exists
-        /// </summary>
+
         public async Task<bool> PlanExists(Guid id)
         {
             ValidateId(id);
@@ -384,9 +375,6 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// Checks if plan name is unique
-        /// </summary>
         public async Task<bool> IsPlanNameUnique(string planName, Guid? excludePlanId = null)
         {
             if (string.IsNullOrWhiteSpace(planName))
@@ -403,7 +391,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             {
                 var query = _context.companyPlans
                     .AsNoTracking()
-                    .Where(p => p.Name == planName);
+                    .Where(p => p.PlanName == planName);
 
                 if (excludePlanId.HasValue)
                 {
@@ -412,7 +400,7 @@ namespace Tenant.Infrastructure.Data.Repositories
 
                 var exists = await query.AnyAsync();
 
-                return !exists; // Unique if not exists
+                return !exists; 
             }
             catch (Exception ex)
             {

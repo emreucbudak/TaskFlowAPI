@@ -8,10 +8,11 @@ namespace Chat.Domain.Entities
         public bool IsRead { get; private set; }
         public DateTime SendTime { get; private set; }
         public Guid SenderId { get; private set; }
-        public Guid ReceiverId { get; private set; }
+        public Guid? ReceiverId { get; private set; }
+        public Guid? GroupId { get; private set; }
         public bool isDeleted { get; private set; }
 
-        public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId, bool isDeleted)
+        public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId, bool isDeleted, Guid? groupId)
         {
             Content = content;
             IsRead = ısRead;
@@ -19,6 +20,7 @@ namespace Chat.Domain.Entities
             SenderId = senderId;
             ReceiverId = receiverId;
             this.isDeleted = isDeleted;
+            GroupId = groupId;
         }
 
         public Message()
@@ -28,5 +30,15 @@ namespace Chat.Domain.Entities
         {
             Content = newContent;
         }
+        public void MarkAsRead()
+        {
+            IsRead = true;
+        }
+        public void MarkAsDeleted()
+        {
+            isDeleted = true;
+        }
+
+
     }
 }

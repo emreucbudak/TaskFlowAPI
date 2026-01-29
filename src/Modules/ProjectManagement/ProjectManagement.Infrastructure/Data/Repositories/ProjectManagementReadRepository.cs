@@ -53,10 +53,7 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
             return tasks;
         }
 
-        /// <summary>
-        /// BACKWARD COMPATIBILITY: Eski parametreli versiyon (Deprecated)
-        /// Yeni kodda kullanılmamalı, pagination'lı versiyonu kullan
-        /// </summary>
+
         [Obsolete("Use GetAllTasks(trackChanges, page, pageSize) instead. This method will be removed in future versions.")]
         public async Task<List<Domain.Entities.Task>> GetAllTasks(bool trackChanges)
         {
@@ -67,12 +64,10 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
             return await GetAllTasks(trackChanges, 1, MaxPageSize);
         }
 
-        /// <summary>
-        /// Belirli bir task'ı ID'ye göre getirir (Validation + Logging)
-        /// </summary>
+
         public async Task<Domain.Entities.Task?> GetTask(Guid id, bool trackChanges)
         {
-            // Input validation
+       
             ValidateId(id);
 
             logger.LogInformation(
@@ -81,8 +76,6 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
 
             IQueryable<Domain.Entities.Task> query = context.Tasks;
 
-            // Soft delete filtresi
-            // query = query.Where(t => !t.IsDeleted);
 
             if (!trackChanges)
             {
@@ -101,15 +94,13 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
             {
                 logger.LogDebug(
                     "Task found - Id: {TaskId}, Title: {Title}",
-                    id, task.Title ?? "N/A");
+                    id, task.TaskName ?? "N/A");
             }
 
             return task;
         }
 
-        /// <summary>
-        /// Kullanıcıya atanmış task'ları getirir (Authorization destekli)
-        /// </summary>
+        
         public async Task<List<Domain.Entities.Task>> GetTasksByUserId(
             Guid userId,
             int page = 1,
@@ -125,7 +116,7 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 userId, page, pageSize);
 
             IQueryable<Domain.Entities.Task> query = context.Tasks
-                .Where(t => t.AssignedUserId == userId);
+                .Where(t => t. == userId);
 
             // Soft delete filtresi
             // query = query.Where(t => !t.IsDeleted);
@@ -177,7 +168,7 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 query = query.AsNoTracking();
             }
 
-            query = query.OrderBy(t => t.Priority)
+            query = query.OrderBy(t => t.TaskPriority)
                          .ThenByDescending(t => t.CreatedDate);
 
             var tasks = await query
@@ -210,7 +201,7 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 status, page, pageSize);
 
             IQueryable<Domain.Entities.Task> query = context.Tasks
-                .Where(t => t.Status == status);
+                .Where(t => t.TaskStatusId == status);
 
             // Soft delete filtresi
             // query = query.Where(t => !t.IsDeleted);

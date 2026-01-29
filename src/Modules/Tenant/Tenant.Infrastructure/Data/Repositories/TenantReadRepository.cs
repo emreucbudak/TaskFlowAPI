@@ -35,9 +35,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        /// <summary>
-        /// Retrieves all plans with pagination (SECURE VERSION)
-        /// </summary>
+
         public async Task<List<CompanyPlan>> GetAllPlans(
             bool trackChanges,
             int page = 1,
@@ -55,15 +53,14 @@ namespace Tenant.Infrastructure.Data.Repositories
             {
                 IQueryable<CompanyPlan> query = _context.companyPlans;
 
-                // Soft delete filter (if CompanyPlan has IsDeleted)
-                // query = query.Where(p => !p.IsDeleted);
+
 
                 if (!trackChanges)
                     query = query.AsNoTracking();
 
-                // Ordering
-                query = query.OrderBy(p => p.Price)
-                             .ThenBy(p => p.Name);
+     
+                query = query.OrderBy(p => p.PlanPrice)
+                             .ThenBy(p => p.PlanName);
 
                 var plans = await query
                     .Skip((page - 1) * pageSize)
@@ -90,9 +87,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
         }
 
-        /// <summary>
-        /// BACKWARD COMPATIBILITY: Deprecated version (Obsolete)
-        /// </summary>
+
         [Obsolete("Use GetAllPlans(trackChanges, page, pageSize) instead. This method will be removed in future versions.")]
         public async Task<List<CompanyPlan>> GetAllPlans(bool trackChanges)
         {
@@ -102,9 +97,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             return await GetAllPlans(trackChanges, 1, MaxPageSize);
         }
 
-        /// <summary>
-        /// Retrieves a specific plan by ID with caching support
-        /// </summary>
+
         public async Task<CompanyPlan?> GetPlan(Guid id, bool trackChanges)
         {
             ValidateId(id);
@@ -112,7 +105,7 @@ namespace Tenant.Infrastructure.Data.Repositories
             // Cache key
             var cacheKey = $"{CacheKeyPrefix}{id}";
 
-            // Try cache first (only for non-tracked queries)
+     
             if (!trackChanges && _cache.TryGetValue(cacheKey, out CompanyPlan? cachedPlan))
             {
                 _logger.LogDebug("Plan retrieved from cache - Id: {PlanId}", id);

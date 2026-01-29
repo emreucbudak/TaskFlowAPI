@@ -13,5 +13,17 @@ namespace Notification.Infrastructure.Data.NotificationDb
         {
         }
         public DbSet<NotificationMessage> notificationMessages { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            var notification = modelBuilder.Entity<NotificationMessage>();
+
+            notification.HasIndex(n => new { n.ReceiverUserId, n.SendTime })
+                .IsDescending(false, true);
+
+
+        }
     }
 }

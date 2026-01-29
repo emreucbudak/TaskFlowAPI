@@ -9,14 +9,16 @@ namespace Chat.Domain.Entities
         public DateTime SendTime { get; private set; }
         public Guid SenderId { get; private set; }
         public Guid ReceiverId { get; private set; }
+        public bool isDeleted { get; private set; }
 
-        public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId)
+        public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId, bool isDeleted)
         {
             Content = content;
             IsRead = ısRead;
             SendTime = sendTime;
             SenderId = senderId;
             ReceiverId = receiverId;
+            this.isDeleted = isDeleted;
         }
 
         public Message()

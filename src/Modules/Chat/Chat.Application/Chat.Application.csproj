@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FlashMediator" Version="1.0.0" />
+    <PackageReference Include="FlashMediator" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Features\CQRS\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chat.Domain\Chat.Domain.csproj" />
   </ItemGroup>
 
 </Project>

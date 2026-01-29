@@ -4,13 +4,13 @@ namespace ProjectManagement.Domain.Entities
 {
     public class Task : BaseEntity
     {
-        public Task(string taskName, string description, DateTime deadlineTime)
+        public Task(string taskName, string description, DateTime deadlineTime, DateTime createdDate)
         {
             if (string.IsNullOrWhiteSpace(taskName))
             {
                 throw new ArgumentException("Task Adı boş olamaz");
             }
-            if (deadlineTime< DateTime.Now)
+            if (deadlineTime < DateTime.Now)
             {
                 throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
             }
@@ -22,6 +22,7 @@ namespace ProjectManagement.Domain.Entities
             Description = description;
             TaskStatusId = 1;
             DeadlineTime = deadlineTime;
+            CreatedDate = createdDate;
         }
 
         public string TaskName { get; private set; }
@@ -35,6 +36,7 @@ namespace ProjectManagement.Domain.Entities
         public DateTime DeadlineTime { get; private set; }
         public int? TaskPriorityCategoryId { get; private set; }
         public TaskPriorityCategory? TaskPriority { get; private set; }
+        public DateTime CreatedDate { get; private set; } = DateTime.UtcNow;
         public void AddAnswer(string AnswerText,Guid sender)
         {
             var answer = new TaskAnswer(answerText:AnswerText,senderId:sender);

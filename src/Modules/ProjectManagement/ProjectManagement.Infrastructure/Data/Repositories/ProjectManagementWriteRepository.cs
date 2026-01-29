@@ -59,11 +59,11 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 throw new ArgumentException("Task title cannot be empty", nameof(task));
             }
 
-            if (task.Title.Length > MaxTaskTitleLength)
+            if (task.TaskName.Length > MaxTaskTitleLength)
             {
                 logger.LogWarning(
                     "Task title too long: {Length} characters",
-                    task.Title.Length);
+                    task.TaskName.Length);
                 throw new ArgumentException(
                     $"Task title cannot exceed {MaxTaskTitleLength} characters",
                     nameof(task));

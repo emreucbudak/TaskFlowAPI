@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Chat/">
+    <Project Path="../Chat.Persistence/Chat.Persistence.csproj" Id="9f440e6f-1e09-4438-8b3a-5ea19b999186" />
     <Project Path="src/Modules/Chat/Chat.Application/Chat.Application.csproj" Id="ccacf866-86d0-402d-bec0-2cd428e00af8" />
     <Project Path="src/Modules/Chat/Chat.Domain/Chat.Domain.csproj" Id="efa9d582-167e-4482-b4fc-0b9f4626fd6e" />
     <Project Path="src/Modules/Chat/Chat.Infrastructure/Chat.Infrastructure.csproj" Id="ba73c298-f795-4b6b-b6e0-00591fcaaa05" />

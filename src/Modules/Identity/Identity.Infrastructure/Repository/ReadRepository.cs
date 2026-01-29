@@ -7,7 +7,6 @@ using TaskFlow.BuildingBlocks.Common;
 
 namespace Identity.Infrastructure.Repository
 {
-    // Pagination için result model
     public class PagedResult<T>
     {
         public IEnumerable<T> Items { get; set; } = new List<T>();
@@ -19,20 +18,17 @@ namespace Identity.Infrastructure.Repository
         public bool HasNextPage => Page < TotalPages;
     }
 
-    // Soft delete için interface
     public interface ISoftDelete
     {
         bool IsDeleted { get; set; }
         DateTime? DeletedAt { get; set; }
     }
 
-    // User ownership için interface
     public interface IUserOwnedEntity
     {
         Guid UserId { get; set; }
     }
 
-    // Multi-tenant için interface
     public interface IMultiTenant
     {
         Guid TenantId { get; set; }
@@ -46,103 +42,110 @@ namespace Identity.Infrastructure.Repository
         private const int MaxPageSize = 100;
         private const int DefaultPageSize = 20;
         private const int MaxIncludeDepth = 3;
+        private const int MaxTotalRecords = 10000;
 
         private DbSet<T> db => context.Set<T>();
 
-        /// <summary>
-        /// Tüm kayıtları sayfalı olarak getirir (GÜVENLİ)
-        /// </summary>
         public async Task<PagedResult<T>> GetAllAsync(
             int page = 1,
             int pageSize = DefaultPageSize,
             bool trackChanges = false,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
-            // Pagination validation
             ValidatePagination(ref page, ref pageSize);
 
             logger.LogInformation(
-                "GetAllAsync called - Type: {Type}, Page: {Page}, PageSize: {PageSize}",
+                "Tüm kayıtlar getiriliyor - Tür: {Type}, Sayfa: {Page}, Sayfa Boyutu: {PageSize}",
                 typeof(T).Name, page, pageSize);
 
-            IQueryable<T> query = db.AsQueryable();
-
-            // Soft delete filtresi
-            query = ApplySoftDeleteFilter(query);
-
-            if (!trackChanges)
-                query = query.AsNoTracking();
-
-            if (inc is not null)
-                query = SafeInclude(query, inc);
-
-            var totalCount = await query.CountAsync();
-
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            logger.LogInformation(
-                "GetAllAsync completed - Type: {Type}, Retrieved: {Count}/{Total}",
-                typeof(T).Name, items.Count, totalCount);
-
-            return new PagedResult<T>
+            try
             {
-                Items = items,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+                IQueryable<T> query = db.AsQueryable();
+
+                query = ApplySoftDeleteFilter(query);
+
+                if (!trackChanges)
+                    query = query.AsNoTracking();
+
+                if (inc is not null)
+                    query = SafeInclude(query, inc);
+
+                var totalCount = await query.CountAsync();
+
+                if (totalCount > MaxTotalRecords)
+                {
+                    logger.LogWarning(
+                        "Toplam kayıt sayısı limiti aşıyor - Tür: {Type}, Toplam: {Total}, Limit: {Limit}",
+                        typeof(T).Name, totalCount, MaxTotalRecords);
+                }
+
+                var items = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                logger.LogInformation(
+                    "Kayıtlar başarıyla getirildi - Tür: {Type}, Getirilen: {Count}/{Total}",
+                    typeof(T).Name, items.Count, totalCount);
+
+                return new PagedResult<T>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kayıtlar getirilirken hata oluştu - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
         }
 
-        /// <summary>
-        /// ID'ye göre tek kayıt getirir (GÜVENLİ)
-        /// </summary>
         public async Task<T?> GetByIdAsync(
             bool trackChanges,
             TKey id,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
-            // Input validation
             ValidateId(id);
 
             logger.LogInformation(
-                "GetByIdAsync called - Type: {Type}, ID: {Id}, TrackChanges: {TrackChanges}",
-                typeof(T).Name, id, trackChanges);
+                "ID ile kayıt getiriliyor - Tür: {Type}, Değişiklik Takibi: {TrackChanges}",
+                typeof(T).Name, trackChanges);
 
-            IQueryable<T> query = db.AsQueryable();
-
-            // Soft delete filtresi
-            query = ApplySoftDeleteFilter(query);
-
-            if (!trackChanges)
-                query = query.AsNoTracking();
-
-            if (inc is not null)
-                query = SafeInclude(query, inc);
-
-            var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
-
-            if (result == null)
+            try
             {
-                logger.LogWarning(
-                    "Entity not found - Type: {Type}, ID: {Id}",
-                    typeof(T).Name, id);
-            }
-            else
-            {
-                logger.LogDebug(
-                    "Entity found - Type: {Type}, ID: {Id}",
-                    typeof(T).Name, id);
-            }
+                IQueryable<T> query = db.AsQueryable();
 
-            return result;
+                query = ApplySoftDeleteFilter(query);
+
+                if (!trackChanges)
+                    query = query.AsNoTracking();
+
+                if (inc is not null)
+                    query = SafeInclude(query, inc);
+
+                var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
+
+                if (result == null)
+                {
+                    logger.LogWarning("Kayıt bulunamadı - Tür: {Type}", typeof(T).Name);
+                }
+                else
+                {
+                    logger.LogDebug("Kayıt bulundu - Tür: {Type}", typeof(T).Name);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kayıt getirilirken hata oluştu - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Authorization kontrollü GetById (Kullanıcı bazlı)
-        /// </summary>
         public async Task<T?> GetByIdWithAuthorizationAsync(
             TKey id,
             Guid currentUserId,
@@ -151,55 +154,68 @@ namespace Identity.Infrastructure.Repository
         {
             ValidateId(id);
 
-            logger.LogInformation(
-                "GetByIdWithAuthorization - Type: {Type}, ID: {Id}, User: {UserId}",
-                typeof(T).Name, id, currentUserId);
-
-            IQueryable<T> query = db.AsQueryable();
-
-
-            query = ApplySoftDeleteFilter(query);
-
-
-            query = ApplyAuthorizationFilter(query, currentUserId);
-
-            if (!trackChanges)
-                query = query.AsNoTracking();
-
-            if (inc is not null)
-                query = SafeInclude(query, inc);
-
-            var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
-
-            if (result == null)
+            if (currentUserId == Guid.Empty)
             {
-                logger.LogWarning(
-                    "Unauthorized or not found - Type: {Type}, ID: {Id}, User: {UserId}",
-                    typeof(T).Name, id, currentUserId);
+                logger.LogError("Geçersiz kullanıcı ID'si sağlandı");
+                throw new ArgumentException("Kullanıcı ID'si geçersiz", nameof(currentUserId));
             }
 
-            return result;
-        }
+            logger.LogInformation(
+                "Yetkilendirme ile kayıt getiriliyor - Tür: {Type}",
+                typeof(T).Name);
 
+            try
+            {
+                IQueryable<T> query = db.AsQueryable();
+
+                query = ApplySoftDeleteFilter(query);
+                query = ApplyAuthorizationFilter(query, currentUserId);
+
+                if (!trackChanges)
+                    query = query.AsNoTracking();
+
+                if (inc is not null)
+                    query = SafeInclude(query, inc);
+
+                var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
+
+                if (result is null)
+                {
+                    logger.LogWarning(
+                        "Yetkisiz erişim veya kayıt bulunamadı - Tür: {Type}",
+                        typeof(T).Name);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Yetkilendirmeli kayıt getirme işleminde hata - Tür: {Type}",
+                    typeof(T).Name);
+                throw;
+            }
+        }
 
         private void ValidatePagination(ref int page, ref int pageSize)
         {
             if (page < 1)
             {
-                logger.LogWarning("Invalid page number: {Page}, resetting to 1", page);
+                logger.LogWarning("Geçersiz sayfa numarası: {Page}, 1'e ayarlanıyor", page);
                 page = 1;
             }
 
             if (pageSize < 1)
             {
-                logger.LogWarning("Invalid page size: {PageSize}, resetting to default", pageSize);
+                logger.LogWarning("Geçersiz sayfa boyutu: {PageSize}, varsayılana ayarlanıyor", pageSize);
                 pageSize = DefaultPageSize;
             }
 
             if (pageSize > MaxPageSize)
             {
                 logger.LogWarning(
-                    "Page size {PageSize} exceeds maximum {MaxPageSize}, limiting",
+                    "Sayfa boyutu {PageSize} maksimum değeri {MaxPageSize} aşıyor, sınırlanıyor",
                     pageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
@@ -209,14 +225,14 @@ namespace Identity.Infrastructure.Repository
         {
             if (id == null)
             {
-                logger.LogError("Null ID provided to GetByIdAsync");
-                throw new ArgumentNullException(nameof(id), "ID cannot be null");
+                logger.LogError("Null ID değeri sağlandı");
+                throw new ArgumentNullException(nameof(id), "ID null olamaz");
             }
 
             if (id.Equals(default(TKey)))
             {
-                logger.LogError("Default/Invalid ID provided: {Id}", id);
-                throw new ArgumentException("Invalid ID value", nameof(id));
+                logger.LogError("Geçersiz ID değeri sağlandı");
+                throw new ArgumentException("Geçersiz ID değeri", nameof(id));
             }
         }
 
@@ -224,9 +240,7 @@ namespace Identity.Infrastructure.Repository
         {
             if (typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
             {
-                logger.LogDebug("Applying soft delete filter to {Type}", typeof(T).Name);
-
-           
+                logger.LogDebug("Soft delete filtresi uygulanıyor - Tür: {Type}", typeof(T).Name);
                 query = query.Where(x => !((ISoftDelete)(object)x).IsDeleted);
             }
             return query;
@@ -237,10 +251,8 @@ namespace Identity.Infrastructure.Repository
             if (typeof(IUserOwnedEntity).IsAssignableFrom(typeof(T)))
             {
                 logger.LogDebug(
-                    "Applying user authorization filter - Type: {Type}, User: {UserId}",
-                    typeof(T).Name, userId);
-
- 
+                    "Kullanıcı yetkilendirme filtresi uygulanıyor - Tür: {Type}",
+                    typeof(T).Name);
                 query = query.Where(x => ((IUserOwnedEntity)(object)x).UserId == userId);
             }
             return query;
@@ -253,24 +265,20 @@ namespace Identity.Infrastructure.Repository
             try
             {
                 var includedQuery = inc(query);
-
-      
-                logger.LogDebug("Include applied to query for type {Type}", typeof(T).Name);
-
+                logger.LogDebug("Include işlemi uygulandı - Tür: {Type}", typeof(T).Name);
                 return includedQuery;
             }
             catch (Exception ex)
             {
                 logger.LogError(
                     ex,
-                    "Error applying include to query for type {Type}",
+                    "Include işlemi uygulanırken hata oluştu - Tür: {Type}",
                     typeof(T).Name);
 
                 throw new InvalidOperationException(
-                    "Invalid include operation. Please check your navigation properties.",
+                    "Geçersiz include işlemi. Lütfen navigation property'lerinizi kontrol edin.",
                     ex);
             }
         }
-
     }
 }

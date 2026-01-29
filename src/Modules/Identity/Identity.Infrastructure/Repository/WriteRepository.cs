@@ -6,7 +6,6 @@ using TaskFlow.BuildingBlocks.Common;
 
 namespace Identity.Infrastructure.Repository
 {
-    // Soft delete için interface
     public interface ISoftDelete
     {
         bool IsDeleted { get; set; }
@@ -14,253 +13,21 @@ namespace Identity.Infrastructure.Repository
         Guid? DeletedBy { get; set; }
     }
 
-    // User ownership için interface
     public interface IUserOwnedEntity
     {
         Guid UserId { get; set; }
     }
 
-    // Concurrency için interface
     public interface IHasConcurrencyToken
     {
         byte[] RowVersion { get; set; }
     }
 
-    // Current user service (dependency olarak eklenmeli)
     public interface ICurrentUserService
     {
         Guid UserId { get; }
         bool IsAuthenticated { get; }
     }
-
-    /// <summary>
-    /// Güvenli Write Repository - Authorization, Validation, Logging ile
-    /// </summary>
-    public class WriteRepository<T>(
-        IdentityManagementDbContext context,
-        ILogger<WriteRepository<T>> logger,
-        ICurrentUserService currentUserService) : IWriteRepository<T>
-        where T : class
-    {
-        private DbSet<T> db => context.Set<T>();
-
-        /// <summary>
-        /// Yeni entity ekler (Validation + Authorization + Logging)
-        /// NOT: async kaldırıldı çünkü EF Core Add() sync
-        /// </summary>
-        public void Add(T entity)
-        {
-            // Input validation
-            ValidateEntity(entity, nameof(Add));
-
-            // Authorization check
-            ValidateAddPermission(entity);
-
-            // Creatable entity ise created bilgilerini set et
-            if (entity is ICreatableEntity creatable)
-            {
-                creatable.CreatedAt = DateTime.UtcNow;
-                creatable.CreatedBy = currentUserService.UserId;
-            }
-
-            logger.LogInformation(
-                "Adding entity - Type: {Type}, User: {UserId}",
-                typeof(T).Name,
-                currentUserService.UserId);
-
-            db.Add(entity);
-
-            logger.LogDebug(
-                "Entity added to context - Type: {Type}",
-                typeof(T).Name);
-        }
-
-        /// <summary>
-        /// Entity'yi günceller (Validation + Authorization + Concurrency + Logging)
-        /// </summary>
-        public void Update(T entity)
-        {
-            // Input validation
-            ValidateEntity(entity, nameof(Update));
-
-            // Authorization check
-            ValidateUpdatePermission(entity);
-
-            // Updatable entity ise updated bilgilerini set et
-            if (entity is IUpdatableEntity updatable)
-            {
-                updatable.UpdatedAt = DateTime.UtcNow;
-                updatable.UpdatedBy = currentUserService.UserId;
-            }
-
-            // Concurrency check
-            if (entity is IHasConcurrencyToken concurrency)
-            {
-                var entry = context.Entry(entity);
-                entry.Property(nameof(IHasConcurrencyToken.RowVersion))
-                    .OriginalValue = concurrency.RowVersion;
-
-                logger.LogDebug(
-                    "Concurrency token set for entity - Type: {Type}",
-                    typeof(T).Name);
-            }
-
-            logger.LogInformation(
-                "Updating entity - Type: {Type}, User: {UserId}",
-                typeof(T).Name,
-                currentUserService.UserId);
-
-            db.Update(entity);
-        }
-
-        /// <summary>
-        /// Entity'yi siler (Soft Delete Destekli + Authorization + Logging)
-        /// </summary>
-        public void Delete(T entity)
-        {
-            // Input validation
-            ValidateEntity(entity, nameof(Delete));
-
-            // Authorization check
-            ValidateDeletePermission(entity);
-
-            // Soft delete kontrolü
-            if (entity is ISoftDelete softDelete)
-            {
-                // Soft delete
-                softDelete.IsDeleted = true;
-                softDelete.DeletedAt = DateTime.UtcNow;
-                softDelete.DeletedBy = currentUserService.UserId;
-
-                db.Update(entity);
-
-                logger.LogInformation(
-                    "Soft deleted entity - Type: {Type}, User: {UserId}",
-                    typeof(T).Name,
-                    currentUserService.UserId);
-            }
-            else
-            {
-                // Hard delete (dikkatli!)
-                db.Remove(entity);
-
-                logger.LogWarning(
-                    "Hard deleted entity - Type: {Type}, User: {UserId}",
-                    typeof(T).Name,
-                    currentUserService.UserId);
-            }
-        }
-
-        /// <summary>
-        /// Hard delete (Soft delete olsa bile kalıcı silme)
-        /// Dikkatli kullanılmalı! Sadece admin veya system operations için
-        /// </summary>
-        public void PermanentDelete(T entity)
-        {
-            ValidateEntity(entity, nameof(PermanentDelete));
-            ValidateDeletePermission(entity);
-
-            logger.LogCritical(
-                "PERMANENT DELETE - Type: {Type}, User: {UserId}",
-                typeof(T).Name,
-                currentUserService.UserId);
-
-            db.Remove(entity);
-        }
-
-        #region Validation Methods
-
-        private void ValidateEntity(T entity, string operation)
-        {
-            if (entity == null)
-            {
-                logger.LogError(
-                    "Null entity provided to {Operation}",
-                    operation);
-                throw new ArgumentNullException(
-                    nameof(entity),
-                    $"Entity cannot be null for {operation} operation");
-            }
-
-            // Entity base type ise ID kontrolü
-            if (entity is BaseEntity<Guid> baseEntity)
-            {
-                if (baseEntity.Id == Guid.Empty && operation != nameof(Add))
-                {
-                    logger.LogError(
-                        "Empty ID for {Operation} operation - Type: {Type}",
-                        operation, typeof(T).Name);
-                    throw new ArgumentException(
-                        "Entity ID cannot be empty for Update/Delete",
-                        nameof(entity));
-                }
-            }
-        }
-
-        private void ValidateAddPermission(T entity)
-        {
-            // User owned entity ise, userId kontrolü yap
-            if (entity is IUserOwnedEntity userOwned)
-            {
-                // Eğer userId set edilmemişse, current user'ı set et
-                if (userOwned.UserId == Guid.Empty)
-                {
-                    userOwned.UserId = currentUserService.UserId;
-                    logger.LogDebug(
-                        "UserId set to current user - Type: {Type}, UserId: {UserId}",
-                        typeof(T).Name, currentUserService.UserId);
-                }
-                // Eğer farklı bir userId set edilmişse, authorization check
-                else if (userOwned.UserId != currentUserService.UserId)
-                {
-                    logger.LogWarning(
-                        "Unauthorized add attempt - Type: {Type}, RequestedUserId: {RequestedId}, CurrentUserId: {CurrentId}",
-                        typeof(T).Name, userOwned.UserId, currentUserService.UserId);
-
-                    throw new UnauthorizedAccessException(
-                        "You cannot add entities for other users");
-                }
-            }
-        }
-
-        private void ValidateUpdatePermission(T entity)
-        {
-            // User owned entity ise, sadece kendi entity'sini güncelleyebilir
-            if (entity is IUserOwnedEntity userOwned)
-            {
-                if (userOwned.UserId != currentUserService.UserId)
-                {
-                    logger.LogWarning(
-                        "Unauthorized update attempt - Type: {Type}, EntityUserId: {EntityUserId}, CurrentUserId: {CurrentUserId}",
-                        typeof(T).Name, userOwned.UserId, currentUserService.UserId);
-
-                    throw new UnauthorizedAccessException(
-                        "You cannot update entities that don't belong to you");
-                }
-            }
-        }
-
-        private void ValidateDeletePermission(T entity)
-        {
-            // User owned entity ise, sadece kendi entity'sini silebilir
-            if (entity is IUserOwnedEntity userOwned)
-            {
-                if (userOwned.UserId != currentUserService.UserId)
-                {
-                    logger.LogWarning(
-                        "Unauthorized delete attempt - Type: {Type}, EntityUserId: {EntityUserId}, CurrentUserId: {CurrentUserId}",
-                        typeof(T).Name, userOwned.UserId, currentUserService.UserId);
-
-                    throw new UnauthorizedAccessException(
-                        "You cannot delete entities that don't belong to you");
-                }
-            }
-        }
-
-        #endregion
-    }
-
-    #region Helper Interfaces (BaseEntity'den extend edilebilir)
 
     public interface ICreatableEntity
     {
@@ -274,5 +41,233 @@ namespace Identity.Infrastructure.Repository
         Guid? UpdatedBy { get; set; }
     }
 
-    #endregion
+    public class WriteRepository<T>(
+        IdentityManagementDbContext context,
+        ILogger<WriteRepository<T>> logger,
+        ICurrentUserService currentUserService) : IWriteRepository<T>
+        where T : class
+    {
+        private DbSet<T> db => context.Set<T>();
+
+        public void Add(T entity)
+        {
+            ValidateEntity(entity, "Ekleme");
+            ValidateUserAuthentication();
+            ValidateAddPermission(entity);
+
+            if (entity is ICreatableEntity creatable)
+            {
+                creatable.CreatedAt = DateTime.UtcNow;
+                creatable.CreatedBy = currentUserService.UserId;
+            }
+
+            try
+            {
+                logger.LogInformation(
+                    "Yeni kayıt ekleniyor - Tür: {Type}",
+                    typeof(T).Name);
+
+                db.Add(entity);
+
+                logger.LogDebug(
+                    "Kayıt context'e eklendi - Tür: {Type}",
+                    typeof(T).Name);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kayıt eklenirken hata oluştu - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        public void Update(T entity)
+        {
+            ValidateEntity(entity, "Güncelleme");
+            ValidateUserAuthentication();
+            ValidateUpdatePermission(entity);
+
+            if (entity is IUpdatableEntity updatable)
+            {
+                updatable.UpdatedAt = DateTime.UtcNow;
+                updatable.UpdatedBy = currentUserService.UserId;
+            }
+
+            if (entity is IHasConcurrencyToken concurrency)
+            {
+                var entry = context.Entry(entity);
+                if (concurrency.RowVersion == null || concurrency.RowVersion.Length == 0)
+                {
+                    logger.LogError("Geçersiz concurrency token - Tür: {Type}", typeof(T).Name);
+                    throw new InvalidOperationException("Concurrency token geçersiz veya eksik");
+                }
+
+                entry.Property(nameof(IHasConcurrencyToken.RowVersion))
+                    .OriginalValue = concurrency.RowVersion;
+
+                logger.LogDebug("Concurrency token ayarlandı - Tür: {Type}", typeof(T).Name);
+            }
+
+            try
+            {
+                logger.LogInformation("Kayıt güncelleniyor - Tür: {Type}", typeof(T).Name);
+                db.Update(entity);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                logger.LogWarning(ex, "Eşzamanlılık hatası - Tür: {Type}", typeof(T).Name);
+                throw new InvalidOperationException("Kayıt başka bir kullanıcı tarafından değiştirilmiş", ex);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kayıt güncellenirken hata oluştu - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        public void Delete(T entity)
+        {
+            ValidateEntity(entity, "Silme");
+            ValidateUserAuthentication();
+            ValidateDeletePermission(entity);
+
+            try
+            {
+                if (entity is ISoftDelete softDelete)
+                {
+                    softDelete.IsDeleted = true;
+                    softDelete.DeletedAt = DateTime.UtcNow;
+                    softDelete.DeletedBy = currentUserService.UserId;
+
+                    db.Update(entity);
+
+                    logger.LogInformation("Kayıt geçici olarak silindi - Tür: {Type}", typeof(T).Name);
+                }
+                else
+                {
+                    db.Remove(entity);
+
+                    logger.LogWarning("Kayıt kalıcı olarak silindi - Tür: {Type}", typeof(T).Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kayıt silinirken hata oluştu - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        public void PermanentDelete(T entity)
+        {
+            ValidateEntity(entity, "Kalıcı Silme");
+            ValidateUserAuthentication();
+            ValidateDeletePermission(entity);
+
+            try
+            {
+                logger.LogCritical("KALICI SİLME İŞLEMİ - Tür: {Type}", typeof(T).Name);
+
+                db.Remove(entity);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kalıcı silme işleminde hata - Tür: {Type}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        private void ValidateEntity(T entity, string operation)
+        {
+            if (entity == null)
+            {
+                logger.LogError("{Operation} işlemi için null entity sağlandı", operation);
+                throw new ArgumentNullException(nameof(entity), $"{operation} işlemi için entity null olamaz");
+            }
+
+            if (entity is BaseEntity<Guid> baseEntity)
+            {
+                if (baseEntity.Id == Guid.Empty && operation != "Ekleme")
+                {
+                    logger.LogError("{Operation} işlemi için geçersiz ID - Tür: {Type}", operation, typeof(T).Name);
+                    throw new ArgumentException($"{operation} işlemi için entity ID boş olamaz", nameof(entity));
+                }
+            }
+        }
+
+        private void ValidateUserAuthentication()
+        {
+            if (!currentUserService.IsAuthenticated)
+            {
+                logger.LogError("Kimlik doğrulaması yapılmamış kullanıcı erişim denemesi");
+                throw new UnauthorizedAccessException("Kullanıcı kimlik doğrulaması gerekli");
+            }
+
+            if (currentUserService.UserId == Guid.Empty)
+            {
+                logger.LogError("Geçersiz kullanıcı ID'si");
+                throw new UnauthorizedAccessException("Geçersiz kullanıcı kimliği");
+            }
+        }
+
+        private void ValidateAddPermission(T entity)
+        {
+            if (entity is IUserOwnedEntity userOwned)
+            {
+                if (userOwned.UserId == Guid.Empty)
+                {
+                    userOwned.UserId = currentUserService.UserId;
+                    logger.LogDebug("Kullanıcı ID'si mevcut kullanıcıya atandı - Tür: {Type}", typeof(T).Name);
+                }
+                else if (userOwned.UserId != currentUserService.UserId)
+                {
+                    logger.LogWarning(
+                        "Yetkisiz ekleme denemesi - Tür: {Type}",
+                        typeof(T).Name);
+
+                    throw new UnauthorizedAccessException("Başka kullanıcılar için kayıt ekleyemezsiniz");
+                }
+            }
+        }
+
+        private void ValidateUpdatePermission(T entity)
+        {
+            if (entity is IUserOwnedEntity userOwned)
+            {
+                if (userOwned.UserId == Guid.Empty)
+                {
+                    logger.LogError("Güncelleme işlemi için geçersiz kullanıcı ID'si - Tür: {Type}", typeof(T).Name);
+                    throw new InvalidOperationException("Entity'nin kullanıcı ID'si geçersiz");
+                }
+
+                if (userOwned.UserId != currentUserService.UserId)
+                {
+                    logger.LogWarning(
+                        "Yetkisiz güncelleme denemesi - Tür: {Type}",
+                        typeof(T).Name);
+
+                    throw new UnauthorizedAccessException("Size ait olmayan kayıtları güncelleyemezsiniz");
+                }
+            }
+        }
+
+        private void ValidateDeletePermission(T entity)
+        {
+            if (entity is IUserOwnedEntity userOwned)
+            {
+                if (userOwned.UserId == Guid.Empty)
+                {
+                    logger.LogError("Silme işlemi için geçersiz kullanıcı ID'si - Tür: {Type}", typeof(T).Name);
+                    throw new InvalidOperationException("Entity'nin kullanıcı ID'si geçersiz");
+                }
+
+                if (userOwned.UserId != currentUserService.UserId)
+                {
+                    logger.LogWarning(
+                        "Yetkisiz silme denemesi - Tür: {Type}",
+                        typeof(T).Name);
+
+                    throw new UnauthorizedAccessException("Size ait olmayan kayıtları silemezsiniz");
+                }
+            }
+        }
+    }
 }

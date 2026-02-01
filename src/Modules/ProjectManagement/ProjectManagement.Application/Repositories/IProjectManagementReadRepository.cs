@@ -1,8 +1,10 @@
-﻿namespace ProjectManagement.Application.Repositories
+﻿using TaskFlow.BuildingBlocks.Common;
+
+namespace ProjectManagement.Application.Repositories
 {
-    public interface IProjectManagementReadRepository
+    public interface IProjectManagementReadRepository <T> where T : BaseEntity
     {
-        Task<ProjectManagement.Domain.Entities.Task> GetTask(Guid id,bool trackChanges);
-        Task<List<ProjectManagement.Domain.Entities.Task>> GetAllTasks(bool trackChanges);
+        Task<T> GetTask(Guid id,bool trackChanges);
+        Task<List<T>> GetAllTasks(bool trackChanges,int pageSize);
     }
 }

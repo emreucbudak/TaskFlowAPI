@@ -5,8 +5,8 @@ namespace ProjectManagement.Application.Repositories
     public interface IProjectManagementWriteRepository <T> where T : BaseEntity
     {
         Task AddTask (T entity);
-        void DeleteTask (T task);
-        void UpdateTask (T task);
+        Task DeleteTask (T task);
+        Task UpdateTask (T task);
 
     }
 }

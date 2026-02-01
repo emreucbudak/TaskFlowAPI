@@ -2,238 +2,194 @@
 using Microsoft.Extensions.Logging;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Infrastructure.Data.ProjectManagementDb;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Infrastructure.Data.Repositories
 {
-    public interface ISoftDelete
-    {
-        bool IsDeleted { get; set; }
-        DateTime? DeletedAt { get; set; }
-        Guid? DeletedBy { get; set; }
-    }
-
-    public interface ICreatableEntity
-    {
-        DateTime CreatedDate { get; set; }
-        Guid CreatedBy { get; set; }
-    }
-
-    public interface IUpdatableEntity
-    {
-        DateTime? UpdatedDate { get; set; }
-        Guid? UpdatedBy { get; set; }
-    }
-
-    public interface ICurrentUserService
-    {
-        Guid UserId { get; }
-        bool IsAuthenticated { get; }
-    }
-
-    public sealed class ProjectManagementWriteRepository(
+    public class ProjectManagementWriteRepository<T>(
         ProjectManagementDbContext context,
-        ILogger<ProjectManagementWriteRepository> logger,
-        ICurrentUserService currentUserService) : IProjectManagementWriteRepository
+        ILogger<ProjectManagementWriteRepository<T>> logger
+        ) : IProjectManagementWriteRepository<T> where T : BaseEntity
     {
         private const int MaxTaskTitleLength = 200;
         private const int MaxTaskDescriptionLength = 5000;
         private const int MinPriority = 1;
         private const int MaxPriority = 5;
 
-        private static readonly string[] ValidStatuses =
-            { "Todo", "InProgress", "Done", "Blocked", "OnHold" };
-
-        public void AddTask(Domain.Entities.Task task)
+        public async Task AddTask(T entity)
         {
-            ArgumentNullException.ThrowIfNull(task);
-
-            ValidateTaskTitle(task.TaskName);
-            ValidateTaskDescription(task.Description);
-            ValidateProjectId(task.ProjectId);
-            ValidateAssignedUserId(task.AssignedUserId);
-            ValidateTaskStatus(task.TaskStatusId);
-            ValidateTaskPriority(task.TaskPriority);
-
-            if (task is ICreatableEntity creatable)
+            if (entity == null)
             {
-                creatable.CreatedDate = DateTime.UtcNow;
-                creatable.CreatedBy = currentUserService.UserId;
-            }
-            else if (task.CreatedDate == default)
-            {
-                task.CreatedDate = DateTime.UtcNow;
+                logger.LogError("Eklenmeye çalışılan task ile ilgili entity null");
+                throw new ArgumentNullException(nameof(entity), "Entity null olamaz");
             }
 
-            logger.LogInformation(
-                "Task ekleniyor - Başlık: '{Title}', ProjeId: {ProjectId}, Atanan: {UserId}, Oluşturan: {CreatedBy}",
-                task.TaskName,
-                task.ProjectId,
-                task.AssignedUserId,
-                currentUserService.UserId);
-
-            context.Tasks.Add(task);
-
-            logger.LogDebug("Task context'e eklendi - Id: {TaskId}", task.Id);
-        }
-
-        public void UpdateTask(Domain.Entities.Task task)
-        {
-            ArgumentNullException.ThrowIfNull(task);
-            ValidateId(task.Id);
-
-            ValidateTaskTitle(task.TaskName);
-            ValidateTaskDescription(task.Description);
-            ValidateProjectId(task.ProjectId);
-            ValidateTaskStatus(task.TaskStatusId);
-            ValidateTaskPriority(task.TaskPriority);
-
-            if (task is IUpdatableEntity updatable)
+            try
             {
-                updatable.UpdatedDate = DateTime.UtcNow;
-                updatable.UpdatedBy = currentUserService.UserId;
+                ValidateEntity(entity);
+
+                await context.Set<T>().AddAsync(entity);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Entity başarıyla eklendi. Id: {EntityId}, Tip: {EntityType}",
+                    entity.Id, typeof(T).Name);
             }
-
-            logger.LogInformation(
-                "Task güncelleniyor - Id: {TaskId}, Başlık: '{Title}', Güncelleyen: {UserId}",
-                task.Id,
-                task.TaskName,
-                currentUserService.UserId);
-
-            var entry = context.Entry(task);
-
-            if (entry.State == EntityState.Detached)
+            catch (DbUpdateException ex)
             {
-                context.Tasks.Attach(task);
-                entry.State = EntityState.Modified;
+                logger.LogError(ex, "Veritabanına kayıt eklenirken hata oluştu. Entity Id: {EntityId}",
+                    entity.Id);
+                throw new InvalidOperationException("Veritabanına kayıt eklenirken bir hata oluştu", ex);
             }
-            else
+            catch (Exception ex)
             {
-                context.Tasks.Update(task);
-            }
-
-            logger.LogDebug("Task güncellendi - Id: {TaskId}", task.Id);
-        }
-
-        public void DeleteTask(Domain.Entities.Task task)
-        {
-            ArgumentNullException.ThrowIfNull(task);
-            ValidateId(task.Id);
-
-            if (task is ISoftDelete softDelete)
-            {
-                softDelete.IsDeleted = true;
-                softDelete.DeletedAt = DateTime.UtcNow;
-                softDelete.DeletedBy = currentUserService.UserId;
-
-                logger.LogInformation(
-                    "Task soft delete ediliyor - Id: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
-                    task.Id,
-                    task.TaskName,
-                    currentUserService.UserId);
-
-                context.Tasks.Update(task);
-            }
-            else
-            {
-                logger.LogWarning(
-                    "Task KALICI olarak siliniyor - Id: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
-                    task.Id,
-                    task.TaskName,
-                    currentUserService.UserId);
-
-                context.Tasks.Remove(task);
-            }
-
-            logger.LogDebug("Task silindi - Id: {TaskId}", task.Id);
-        }
-
-        public void PermanentDeleteTask(Domain.Entities.Task task)
-        {
-            ArgumentNullException.ThrowIfNull(task);
-            ValidateId(task.Id);
-
-            logger.LogCritical(
-                "KALICI SİLME - TaskId: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
-                task.Id,
-                task.TaskName,
-                currentUserService.UserId);
-
-            context.Tasks.Remove(task);
-        }
-
-        private static void ValidateId(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                throw new ArgumentException("Task ID'si boş olamaz", nameof(id));
+                logger.LogError(ex, "Entity eklenirken beklenmeyen hata. Entity Id: {EntityId}",
+                    entity.Id);
+                throw;
             }
         }
 
-        private static void ValidateTaskTitle(string title)
+        public async Task DeleteTask(T task)
         {
-            if (string.IsNullOrWhiteSpace(title))
+            if (task == null)
             {
-                throw new ArgumentException("Task başlığı boş olamaz", nameof(title));
+                logger.LogError("Silinmeye çalışılan task null");
+                throw new ArgumentNullException(nameof(task), "Task null olamaz");
             }
 
-            if (title.Length > MaxTaskTitleLength)
+            try
             {
-                throw new ArgumentException(
-                    $"Task başlığı {MaxTaskTitleLength} karakteri geçemez",
-                    nameof(title));
+                var existingEntity = await context.Set<T>()
+                    .FirstOrDefaultAsync(e => e.Id == task.Id);
+
+                if (existingEntity == null)
+                {
+                    logger.LogWarning("Silinmek istenen task bulunamadı. Id: {TaskId}", task.Id);
+                    throw new InvalidOperationException($"Id'si {task.Id} olan kayıt bulunamadı");
+                }
+
+                context.Set<T>().Remove(existingEntity);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Task başarıyla silindi. Id: {TaskId}, Tip: {EntityType}",
+                    task.Id, typeof(T).Name);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                logger.LogError(ex, "Task silinirken eşzamanlılık hatası. Id: {TaskId}", task.Id);
+                throw new InvalidOperationException("Kayıt başka bir işlem tarafından değiştirilmiş", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, "Task silinirken veritabanı hatası. Id: {TaskId}", task.Id);
+                throw new InvalidOperationException("Kayıt silinirken veritabanı hatası oluştu", ex);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Task silinirken beklenmeyen hata. Id: {TaskId}", task.Id);
+                throw;
             }
         }
 
-        private static void ValidateTaskDescription(string? description)
+        public async Task UpdateTask(T task)
         {
-            if (!string.IsNullOrEmpty(description) && description.Length > MaxTaskDescriptionLength)
+            if (task == null)
             {
-                throw new ArgumentException(
-                    $"Task açıklaması {MaxTaskDescriptionLength} karakteri geçemez",
-                    nameof(description));
+                logger.LogError("Güncellenmeye çalışılan task null");
+                throw new ArgumentNullException(nameof(task), "Task null olamaz");
+            }
+
+            try
+            {
+                ValidateEntity(task);
+
+                var existingEntity = await context.Set<T>()
+                    .FirstOrDefaultAsync(e => e.Id == task.Id);
+
+                if (existingEntity == null)
+                {
+                    logger.LogWarning("Güncellenmek istenen task bulunamadı. Id: {TaskId}", task.Id);
+                    throw new InvalidOperationException($"Id'si {task.Id} olan kayıt bulunamadı");
+                }
+
+                context.Entry(existingEntity).CurrentValues.SetValues(task);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Task başarıyla güncellendi. Id: {TaskId}, Tip: {EntityType}",
+                    task.Id, typeof(T).Name);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                logger.LogError(ex, "Task güncellenirken eşzamanlılık hatası. Id: {TaskId}", task.Id);
+                throw new InvalidOperationException("Kayıt başka bir işlem tarafından değiştirilmiş", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, "Task güncellenirken veritabanı hatası. Id: {TaskId}", task.Id);
+                throw new InvalidOperationException("Kayıt güncellenirken veritabanı hatası oluştu", ex);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Task güncellenirken beklenmeyen hata. Id: {TaskId}", task.Id);
+                throw;
             }
         }
 
-        private static void ValidateProjectId(Guid projectId)
+        private void ValidateEntity(T entity)
         {
-            if (projectId == Guid.Empty)
+            if (entity.Id == Guid.Empty)
             {
-                throw new ArgumentException("Task bir projeye ait olmalıdır", nameof(projectId));
-            }
-        }
-
-        private static void ValidateAssignedUserId(Guid? assignedUserId)
-        {
-            if (assignedUserId.HasValue && assignedUserId.Value == Guid.Empty)
-            {
-                throw new ArgumentException(
-                    "Atanan kullanıcı ID'si boş GUID olamaz",
-                    nameof(assignedUserId));
-            }
-        }
-
-        private static void ValidateTaskStatus(string status)
-        {
-            if (string.IsNullOrWhiteSpace(status))
-            {
-                throw new ArgumentException("Task durumu boş olamaz", nameof(status));
+                logger.LogError("Entity Id boş olamaz");
+                throw new ArgumentException("Entity Id boş olamaz", nameof(entity));
             }
 
-            if (!ValidStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException(
-                    $"Geçersiz durum '{status}'. Geçerli değerler: {string.Join(", ", ValidStatuses)}",
-                    nameof(status));
-            }
-        }
+            var properties = typeof(T).GetProperties();
 
-        private static void ValidateTaskPriority(int priority)
-        {
-            if (priority < MinPriority || priority > MaxPriority)
+            var titleProperty = properties.FirstOrDefault(p =>
+                p.Name.Equals("Title", StringComparison.OrdinalIgnoreCase));
+
+            if (titleProperty != null && titleProperty.PropertyType == typeof(string))
             {
-                throw new ArgumentException(
-                    $"Geçersiz öncelik {priority}. Geçerli aralık: {MinPriority} (En Yüksek) - {MaxPriority} (En Düşük)",
-                    nameof(priority));
+                var title = titleProperty.GetValue(entity) as string;
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    logger.LogError("Task başlığı boş olamaz. Entity Id: {EntityId}", entity.Id);
+                    throw new ArgumentException("Task başlığı boş olamaz", nameof(entity));
+                }
+
+                if (title.Length > MaxTaskTitleLength)
+                {
+                    logger.LogError("Task başlığı maksimum {MaxLength} karakter olabilir. Mevcut: {CurrentLength}. Entity Id: {EntityId}",
+                        MaxTaskTitleLength, title.Length, entity.Id);
+                    throw new ArgumentException($"Task başlığı maksimum {MaxTaskTitleLength} karakter olabilir", nameof(entity));
+                }
+            }
+
+            var descriptionProperty = properties.FirstOrDefault(p =>
+                p.Name.Equals("Description", StringComparison.OrdinalIgnoreCase));
+
+            if (descriptionProperty != null && descriptionProperty.PropertyType == typeof(string))
+            {
+                var description = descriptionProperty.GetValue(entity) as string;
+                if (!string.IsNullOrWhiteSpace(description) && description.Length > MaxTaskDescriptionLength)
+                {
+                    logger.LogError("Task açıklaması maksimum {MaxLength} karakter olabilir. Mevcut: {CurrentLength}. Entity Id: {EntityId}",
+                        MaxTaskDescriptionLength, description.Length, entity.Id);
+                    throw new ArgumentException($"Task açıklaması maksimum {MaxTaskDescriptionLength} karakter olabilir", nameof(entity));
+                }
+            }
+
+            var priorityProperty = properties.FirstOrDefault(p =>
+                p.Name.Equals("Priority", StringComparison.OrdinalIgnoreCase));
+
+            if (priorityProperty != null && priorityProperty.PropertyType == typeof(int))
+            {
+                var priority = (int)priorityProperty.GetValue(entity);
+                if (priority < MinPriority || priority > MaxPriority)
+                {
+                    logger.LogError("Priority değeri {MinPriority} ile {MaxPriority} arasında olmalıdır. Mevcut: {CurrentPriority}. Entity Id: {EntityId}",
+                        MinPriority, MaxPriority, priority, entity.Id);
+                    throw new ArgumentException($"Priority değeri {MinPriority} ile {MaxPriority} arasında olmalıdır", nameof(entity));
+                }
             }
         }
     }

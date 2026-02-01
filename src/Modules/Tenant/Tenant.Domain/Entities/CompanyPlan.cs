@@ -1,10 +1,11 @@
 ﻿namespace Tenant.Domain.Entities
 {
-    public class CompanyPlan : TaskFlow.BuildingBlocks.Common.BaseEntity 
+    public class CompanyPlan : TaskFlow.BuildingBlocks.Common.BaseEntity
     {
         public string PlanName { get; private set; }
         public PlanProperties PlanProperties { get; private set; }
         public int PlanPrice { get; private set; }
+        public bool isActive { get; private set; }
         protected CompanyPlan() { }
 
         public CompanyPlan(string planName, PlanProperties planProperties, int planPrice)
@@ -12,6 +13,7 @@
             PlanName = planName;
             PlanProperties = planProperties;
             PlanPrice = planPrice;
+            isActive = true;
         }
         public void UpdateProperties(PlanProperties newProperties)
         {
@@ -32,6 +34,9 @@
             if (newPrice < 0) throw new ArgumentException("Plan fiyatı negatif olamaz.");
             PlanPrice = newPrice;
         }
-
+        public void DeactivatePlan()
+        {
+            isActive = false;
+        }
     }
 }

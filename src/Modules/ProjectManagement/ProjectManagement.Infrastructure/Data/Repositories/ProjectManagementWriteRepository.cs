@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Infrastructure.Data.ProjectManagementDb;
 
 namespace ProjectManagement.Infrastructure.Data.Repositories
 {
-    // Soft delete için interface
     public interface ISoftDelete
     {
         bool IsDeleted { get; set; }
@@ -12,7 +12,6 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
         Guid? DeletedBy { get; set; }
     }
 
-    // Audit için interfaces
     public interface ICreatableEntity
     {
         DateTime CreatedDate { get; set; }
@@ -25,175 +24,69 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
         Guid? UpdatedBy { get; set; }
     }
 
-    // Current user service (dependency injection ile eklenmeli)
     public interface ICurrentUserService
     {
         Guid UserId { get; }
         bool IsAuthenticated { get; }
     }
 
-    /// <summary>
-    /// Güvenli Project Management Write Repository
-    /// Validation + Logging + Soft Delete + Authorization
-    /// </summary>
-    public class ProjectManagementWriteRepository(
+    public sealed class ProjectManagementWriteRepository(
         ProjectManagementDbContext context,
         ILogger<ProjectManagementWriteRepository> logger,
         ICurrentUserService currentUserService) : IProjectManagementWriteRepository
     {
         private const int MaxTaskTitleLength = 200;
         private const int MaxTaskDescriptionLength = 5000;
+        private const int MinPriority = 1;
+        private const int MaxPriority = 5;
 
-        /// <summary>
-        /// Yeni task ekler (Validation + Authorization + Logging + Auto-fields)
-        /// </summary>
+        private static readonly string[] ValidStatuses =
+            { "Todo", "InProgress", "Done", "Blocked", "OnHold" };
+
         public void AddTask(Domain.Entities.Task task)
         {
-            // Input validation
-            ValidateTask(task, nameof(AddTask));
+            ArgumentNullException.ThrowIfNull(task);
 
-            // Title validation
-            if (string.IsNullOrWhiteSpace(task.Title))
-            {
-                logger.LogError("Empty task title");
-                throw new ArgumentException("Task title cannot be empty", nameof(task));
-            }
+            ValidateTaskTitle(task.TaskName);
+            ValidateTaskDescription(task.Description);
+            ValidateProjectId(task.ProjectId);
+            ValidateAssignedUserId(task.AssignedUserId);
+            ValidateTaskStatus(task.TaskStatusId);
+            ValidateTaskPriority(task.TaskPriority);
 
-            if (task.TaskName.Length > MaxTaskTitleLength)
-            {
-                logger.LogWarning(
-                    "Task title too long: {Length} characters",
-                    task.TaskName.Length);
-                throw new ArgumentException(
-                    $"Task title cannot exceed {MaxTaskTitleLength} characters",
-                    nameof(task));
-            }
-
-            // Description validation (eğer varsa)
-            if (!string.IsNullOrEmpty(task.Description) &&
-                task.Description.Length > MaxTaskDescriptionLength)
-            {
-                logger.LogWarning(
-                    "Task description too long: {Length} characters",
-                    task.Description.Length);
-                throw new ArgumentException(
-                    $"Task description cannot exceed {MaxTaskDescriptionLength} characters",
-                    nameof(task));
-            }
-
-            // ProjectId validation
-            if (task.ProjectId == Guid.Empty)
-            {
-                logger.LogError("Empty ProjectId in task");
-                throw new ArgumentException(
-                    "Task must be associated with a project",
-                    nameof(task));
-            }
-
-            // AssignedUserId validation (eğer task atanmışsa)
-            if (task.AssignedUserId.HasValue && task.AssignedUserId.Value == Guid.Empty)
-            {
-                logger.LogError("Invalid AssignedUserId (Guid.Empty)");
-                throw new ArgumentException(
-                    "AssignedUserId cannot be empty GUID",
-                    nameof(task));
-            }
-
-            // Status validation
-            ValidateTaskStatus(task.Status);
-
-            // Priority validation
-            ValidateTaskPriority(task.Priority);
-
-            // Auto-set created fields (eğer ICreatableEntity implement ediyorsa)
             if (task is ICreatableEntity creatable)
             {
                 creatable.CreatedDate = DateTime.UtcNow;
                 creatable.CreatedBy = currentUserService.UserId;
             }
-            else
+            else if (task.CreatedDate == default)
             {
-                // CreatedDate manuel set
-                if (task.CreatedDate == default)
-                {
-                    task.CreatedDate = DateTime.UtcNow;
-                }
+                task.CreatedDate = DateTime.UtcNow;
             }
 
             logger.LogInformation(
-                "Adding task - Title: '{Title}', ProjectId: {ProjectId}, AssignedTo: {UserId}, CreatedBy: {CreatedBy}",
-                task.Title,
+                "Task ekleniyor - Başlık: '{Title}', ProjeId: {ProjectId}, Atanan: {UserId}, Oluşturan: {CreatedBy}",
+                task.TaskName,
                 task.ProjectId,
                 task.AssignedUserId,
                 currentUserService.UserId);
 
             context.Tasks.Add(task);
 
-            logger.LogDebug(
-                "Task added to context - Id: {TaskId}",
-                task.Id);
+            logger.LogDebug("Task context'e eklendi - Id: {TaskId}", task.Id);
         }
 
-        /// <summary>
-        /// Task'ı günceller (Validation + Authorization + Logging + Auto-fields)
-        /// </summary>
         public void UpdateTask(Domain.Entities.Task task)
         {
-            // Input validation
-            ValidateTask(task, nameof(UpdateTask));
+            ArgumentNullException.ThrowIfNull(task);
+            ValidateId(task.Id);
 
-            // ID validation
-            if (task.Id == Guid.Empty)
-            {
-                logger.LogError("Cannot update task with empty Id");
-                throw new ArgumentException(
-                    "Task Id cannot be empty for update",
-                    nameof(task));
-            }
+            ValidateTaskTitle(task.TaskName);
+            ValidateTaskDescription(task.Description);
+            ValidateProjectId(task.ProjectId);
+            ValidateTaskStatus(task.TaskStatusId);
+            ValidateTaskPriority(task.TaskPriority);
 
-            // Title validation
-            if (string.IsNullOrWhiteSpace(task.Title))
-            {
-                logger.LogError("Empty task title on update");
-                throw new ArgumentException("Task title cannot be empty", nameof(task));
-            }
-
-            if (task.Title.Length > MaxTaskTitleLength)
-            {
-                logger.LogWarning(
-                    "Task title too long on update: {Length} characters",
-                    task.Title.Length);
-                throw new ArgumentException(
-                    $"Task title cannot exceed {MaxTaskTitleLength} characters",
-                    nameof(task));
-            }
-
-            // Description validation
-            if (!string.IsNullOrEmpty(task.Description) &&
-                task.Description.Length > MaxTaskDescriptionLength)
-            {
-                logger.LogWarning(
-                    "Task description too long on update: {Length} characters",
-                    task.Description.Length);
-                throw new ArgumentException(
-                    $"Task description cannot exceed {MaxTaskDescriptionLength} characters",
-                    nameof(task));
-            }
-
-            // ProjectId validation
-            if (task.ProjectId == Guid.Empty)
-            {
-                logger.LogError("Empty ProjectId on task update");
-                throw new ArgumentException(
-                    "Task must be associated with a project",
-                    nameof(task));
-            }
-
-            // Status ve Priority validation
-            ValidateTaskStatus(task.Status);
-            ValidateTaskPriority(task.Priority);
-
-            // Auto-set updated fields (eğer IUpdatableEntity implement ediyorsa)
             if (task is IUpdatableEntity updatable)
             {
                 updatable.UpdatedDate = DateTime.UtcNow;
@@ -201,160 +94,147 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
             }
 
             logger.LogInformation(
-                "Updating task - Id: {TaskId}, Title: '{Title}', UpdatedBy: {UserId}",
+                "Task güncelleniyor - Id: {TaskId}, Başlık: '{Title}', Güncelleyen: {UserId}",
                 task.Id,
-                task.Title,
+                task.TaskName,
                 currentUserService.UserId);
 
-            context.Tasks.Update(task);
+            var entry = context.Entry(task);
 
-            logger.LogDebug(
-                "Task updated in context - Id: {TaskId}",
-                task.Id);
-        }
-
-        /// <summary>
-        /// Task'ı siler (Soft Delete Destekli + Validation + Logging)
-        /// </summary>
-        public void DeleteTask(Domain.Entities.Task task)
-        {
-            // Input validation
-            ValidateTask(task, nameof(DeleteTask));
-
-            // ID validation
-            if (task.Id == Guid.Empty)
+            if (entry.State == EntityState.Detached)
             {
-                logger.LogError("Cannot delete task with empty Id");
-                throw new ArgumentException(
-                    "Task Id cannot be empty for delete",
-                    nameof(task));
+                context.Tasks.Attach(task);
+                entry.State = EntityState.Modified;
+            }
+            else
+            {
+                context.Tasks.Update(task);
             }
 
-            // Soft delete kontrolü
+            logger.LogDebug("Task güncellendi - Id: {TaskId}", task.Id);
+        }
+
+        public void DeleteTask(Domain.Entities.Task task)
+        {
+            ArgumentNullException.ThrowIfNull(task);
+            ValidateId(task.Id);
+
             if (task is ISoftDelete softDelete)
             {
-                // Soft delete
                 softDelete.IsDeleted = true;
                 softDelete.DeletedAt = DateTime.UtcNow;
                 softDelete.DeletedBy = currentUserService.UserId;
 
                 logger.LogInformation(
-                    "Soft deleting task - Id: {TaskId}, Title: '{Title}', DeletedBy: {UserId}",
+                    "Task soft delete ediliyor - Id: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
                     task.Id,
-                    task.Title,
+                    task.TaskName,
                     currentUserService.UserId);
 
                 context.Tasks.Update(task);
-
-                logger.LogDebug(
-                    "Task soft deleted - Id: {TaskId}",
-                    task.Id);
             }
             else
             {
-                // Hard delete (dikkatli!)
                 logger.LogWarning(
-                    "HARD DELETING task - Id: {TaskId}, Title: '{Title}', DeletedBy: {UserId}",
+                    "Task KALICI olarak siliniyor - Id: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
                     task.Id,
-                    task.Title,
+                    task.TaskName,
                     currentUserService.UserId);
 
                 context.Tasks.Remove(task);
-
-                logger.LogDebug(
-                    "Task hard deleted - Id: {TaskId}",
-                    task.Id);
             }
+
+            logger.LogDebug("Task silindi - Id: {TaskId}", task.Id);
         }
 
-        /// <summary>
-        /// Permanent delete (Soft delete olsa bile kalıcı silme)
-        /// UYARI: Dikkatli kullanılmalı! Sadece admin veya sistem işlemleri için
-        /// </summary>
         public void PermanentDeleteTask(Domain.Entities.Task task)
         {
-            ValidateTask(task, nameof(PermanentDeleteTask));
-
-            if (task.Id == Guid.Empty)
-            {
-                logger.LogError("Cannot permanently delete task with empty Id");
-                throw new ArgumentException(
-                    "Task Id cannot be empty",
-                    nameof(task));
-            }
+            ArgumentNullException.ThrowIfNull(task);
+            ValidateId(task.Id);
 
             logger.LogCritical(
-                "PERMANENT DELETE - TaskId: {TaskId}, Title: '{Title}', DeletedBy: {UserId}",
+                "KALICI SİLME - TaskId: {TaskId}, Başlık: '{Title}', Silen: {UserId}",
                 task.Id,
-                task.Title,
+                task.TaskName,
                 currentUserService.UserId);
 
             context.Tasks.Remove(task);
         }
 
-        #region Private Validation Methods
-
-        /// <summary>
-        /// Task entity'sinin null olmadığını kontrol eder
-        /// </summary>
-        private void ValidateTask(Domain.Entities.Task task, string operation)
+        private static void ValidateId(Guid id)
         {
-            if (task == null)
+            if (id == Guid.Empty)
             {
-                logger.LogError(
-                    "Null task provided to {Operation}",
-                    operation);
-                throw new ArgumentNullException(
-                    nameof(task),
-                    $"Task cannot be null for {operation} operation");
+                throw new ArgumentException("Task ID'si boş olamaz", nameof(id));
             }
         }
 
-        /// <summary>
-        /// Task status'ünü validate eder
-        /// </summary>
-        private void ValidateTaskStatus(string status)
+        private static void ValidateTaskTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Task başlığı boş olamaz", nameof(title));
+            }
+
+            if (title.Length > MaxTaskTitleLength)
+            {
+                throw new ArgumentException(
+                    $"Task başlığı {MaxTaskTitleLength} karakteri geçemez",
+                    nameof(title));
+            }
+        }
+
+        private static void ValidateTaskDescription(string? description)
+        {
+            if (!string.IsNullOrEmpty(description) && description.Length > MaxTaskDescriptionLength)
+            {
+                throw new ArgumentException(
+                    $"Task açıklaması {MaxTaskDescriptionLength} karakteri geçemez",
+                    nameof(description));
+            }
+        }
+
+        private static void ValidateProjectId(Guid projectId)
+        {
+            if (projectId == Guid.Empty)
+            {
+                throw new ArgumentException("Task bir projeye ait olmalıdır", nameof(projectId));
+            }
+        }
+
+        private static void ValidateAssignedUserId(Guid? assignedUserId)
+        {
+            if (assignedUserId.HasValue && assignedUserId.Value == Guid.Empty)
+            {
+                throw new ArgumentException(
+                    "Atanan kullanıcı ID'si boş GUID olamaz",
+                    nameof(assignedUserId));
+            }
+        }
+
+        private static void ValidateTaskStatus(string status)
         {
             if (string.IsNullOrWhiteSpace(status))
             {
-                logger.LogError("Empty task status");
-                throw new ArgumentException("Task status cannot be empty", nameof(status));
+                throw new ArgumentException("Task durumu boş olamaz", nameof(status));
             }
 
-            // İzin verilen status değerleri
-            var validStatuses = new[] { "Todo", "InProgress", "Done", "Blocked", "OnHold" };
-
-            if (!validStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
+            if (!ValidStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
             {
-                logger.LogWarning(
-                    "Invalid task status: {Status}. Valid values: {ValidStatuses}",
-                    status,
-                    string.Join(", ", validStatuses));
-
                 throw new ArgumentException(
-                    $"Invalid status '{status}'. Valid values: {string.Join(", ", validStatuses)}",
+                    $"Geçersiz durum '{status}'. Geçerli değerler: {string.Join(", ", ValidStatuses)}",
                     nameof(status));
             }
         }
 
-        /// <summary>
-        /// Task priority'sini validate eder
-        /// </summary>
-        private void ValidateTaskPriority(int priority)
+        private static void ValidateTaskPriority(int priority)
         {
-            // Priority range: 1 (Highest) - 5 (Lowest)
-            if (priority < 1 || priority > 5)
+            if (priority < MinPriority || priority > MaxPriority)
             {
-                logger.LogWarning(
-                    "Invalid task priority: {Priority}. Valid range: 1-5",
-                    priority);
-
                 throw new ArgumentException(
-                    $"Invalid priority {priority}. Valid range: 1 (Highest) - 5 (Lowest)",
+                    $"Geçersiz öncelik {priority}. Geçerli aralık: {MinPriority} (En Yüksek) - {MaxPriority} (En Düşük)",
                     nameof(priority));
             }
         }
-
-        #endregion
     }
 }

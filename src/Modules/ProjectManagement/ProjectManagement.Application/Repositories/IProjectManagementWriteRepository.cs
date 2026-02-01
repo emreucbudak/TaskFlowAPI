@@ -1,10 +1,12 @@
-﻿namespace ProjectManagement.Application.Repositories
+﻿using TaskFlow.BuildingBlocks.Common;
+
+namespace ProjectManagement.Application.Repositories
 {
-    public interface IProjectManagementWriteRepository
+    public interface IProjectManagementWriteRepository <T> where T : BaseEntity
     {
-        Task AddTask (ProjectManagement.Domain.Entities.Task task);
-        void DeleteTask (ProjectManagement.Domain.Entities.Task task);
-        void UpdateTask (ProjectManagement.Domain.Entities.Task task);
+        Task AddTask (T entity);
+        void DeleteTask (T task);
+        void UpdateTask (T task);
 
     }
 }

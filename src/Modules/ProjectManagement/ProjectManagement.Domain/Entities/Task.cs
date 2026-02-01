@@ -23,6 +23,7 @@ namespace ProjectManagement.Domain.Entities
             TaskStatusId = 1;
             DeadlineTime = deadlineTime;
             CreatedDate = createdDate;
+
         }
 
         public string TaskName { get; private set; }
@@ -37,6 +38,7 @@ namespace ProjectManagement.Domain.Entities
         public int? TaskPriorityCategoryId { get; private set; }
         public TaskPriorityCategory? TaskPriority { get; private set; }
         public DateTime CreatedDate { get; private set; } = DateTime.UtcNow;
+
         public void AddAnswer(string AnswerText,Guid sender)
         {
             var answer = new TaskAnswer(answerText:AnswerText,senderId:sender);

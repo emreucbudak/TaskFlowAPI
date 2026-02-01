@@ -34,6 +34,7 @@ namespace Identity.Infrastructure.Repository
         Guid TenantId { get; set; }
     }
 
+
     public class ReadRepository<T, TKey>(
         IdentityManagementDbContext context,
         ILogger<ReadRepository<T, TKey>> logger) : IReadRepository<T, TKey>
@@ -46,6 +47,7 @@ namespace Identity.Infrastructure.Repository
 
         private DbSet<T> db => context.Set<T>();
 
+
         public async Task<PagedResult<T>> GetAllAsync(
             int page = 1,
             int pageSize = DefaultPageSize,
@@ -55,27 +57,19 @@ namespace Identity.Infrastructure.Repository
             ValidatePagination(ref page, ref pageSize);
 
             logger.LogInformation(
-                "Tüm kayıtlar getiriliyor - Tür: {Type}, Sayfa: {Page}, Sayfa Boyutu: {PageSize}",
-                typeof(T).Name, page, pageSize);
+                "Kayıtlar getiriliyor - Varlık: {EntityType}, Sayfa: {Page}/{TotalPages}, Boyut: {PageSize}",
+                typeof(T).Name, page, "?", pageSize);
 
             try
             {
-                IQueryable<T> query = db.AsQueryable();
-
-                query = ApplySoftDeleteFilter(query);
-
-                if (!trackChanges)
-                    query = query.AsNoTracking();
-
-                if (inc is not null)
-                    query = SafeInclude(query, inc);
-
+                var query = BuildQuery(trackChanges, inc);
                 var totalCount = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
                 if (totalCount > MaxTotalRecords)
                 {
                     logger.LogWarning(
-                        "Toplam kayıt sayısı limiti aşıyor - Tür: {Type}, Toplam: {Total}, Limit: {Limit}",
+                        "Kayıt sayısı limiti aşıyor - Varlık: {EntityType}, Toplam: {TotalCount}, Limit: {MaxLimit}, Öneri: Filtreleme kullanın",
                         typeof(T).Name, totalCount, MaxTotalRecords);
                 }
 
@@ -85,8 +79,8 @@ namespace Identity.Infrastructure.Repository
                     .ToListAsync();
 
                 logger.LogInformation(
-                    "Kayıtlar başarıyla getirildi - Tür: {Type}, Getirilen: {Count}/{Total}",
-                    typeof(T).Name, items.Count, totalCount);
+                    "Kayıtlar başarıyla getirildi - Varlık: {EntityType}, Getirilen: {ItemCount}/{TotalCount}, Sayfa: {Page}/{TotalPages}",
+                    typeof(T).Name, items.Count, totalCount, page, totalPages);
 
                 return new PagedResult<T>
                 {
@@ -96,10 +90,25 @@ namespace Identity.Infrastructure.Repository
                     PageSize = pageSize
                 };
             }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogError(ex,
+                    "Geçersiz sorgu işlemi - Varlık: {EntityType}, Sayfa: {Page}, Hata: {Message}",
+                    typeof(T).Name, page, ex.Message);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kayıtları getirilirken geçersiz sorgu hatası oluştu. " +
+                    "Lütfen include parametrelerini ve filtreleri kontrol edin.",
+                    ex);
+            }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Kayıtlar getirilirken hata oluştu - Tür: {Type}", typeof(T).Name);
-                throw;
+                logger.LogError(ex,
+                    "Beklenmeyen hata - Varlık: {EntityType}, Sayfa: {Page}, Boyut: {PageSize}",
+                    typeof(T).Name, page, pageSize);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kayıtları getirilirken beklenmeyen bir hata oluştu. " +
+                    "Lütfen daha sonra tekrar deneyin.",
+                    ex);
             }
         }
 
@@ -111,41 +120,50 @@ namespace Identity.Infrastructure.Repository
             ValidateId(id);
 
             logger.LogInformation(
-                "ID ile kayıt getiriliyor - Tür: {Type}, Değişiklik Takibi: {TrackChanges}",
-                typeof(T).Name, trackChanges);
+                "ID ile kayıt getiriliyor - Varlık: {EntityType}, ID: {Id}, Takip: {TrackChanges}",
+                typeof(T).Name, id, trackChanges);
 
             try
             {
-                IQueryable<T> query = db.AsQueryable();
-
-                query = ApplySoftDeleteFilter(query);
-
-                if (!trackChanges)
-                    query = query.AsNoTracking();
-
-                if (inc is not null)
-                    query = SafeInclude(query, inc);
-
+                var query = BuildQuery(trackChanges, inc);
                 var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
 
                 if (result == null)
                 {
-                    logger.LogWarning("Kayıt bulunamadı - Tür: {Type}", typeof(T).Name);
-                }
-                else
-                {
-                    logger.LogDebug("Kayıt bulundu - Tür: {Type}", typeof(T).Name);
+                    logger.LogWarning(
+                        "Kayıt bulunamadı - Varlık: {EntityType}, ID: {Id}",
+                        typeof(T).Name, id);
+                    return null;
                 }
 
+                logger.LogDebug(
+                    "Kayıt başarıyla bulundu - Varlık: {EntityType}, ID: {Id}",
+                    typeof(T).Name, id);
                 return result;
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogError(ex,
+                    "Geçersiz sorgu işlemi - Varlık: {EntityType}, ID: {Id}, Hata: {Message}",
+                    typeof(T).Name, id, ex.Message);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kaydı (ID: {id}) getirilirken geçersiz sorgu hatası oluştu. " +
+                    "Lütfen include parametrelerini kontrol edin.",
+                    ex);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Kayıt getirilirken hata oluştu - Tür: {Type}", typeof(T).Name);
-                throw;
+                logger.LogError(ex,
+                    "Beklenmeyen hata - Varlık: {EntityType}, ID: {Id}",
+                    typeof(T).Name, id);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kaydı (ID: {id}) getirilirken beklenmeyen bir hata oluştu. " +
+                    "Lütfen daha sonra tekrar deneyin.",
+                    ex);
             }
         }
 
+        
         public async Task<T?> GetByIdWithAuthorizationAsync(
             TKey id,
             Guid currentUserId,
@@ -156,91 +174,143 @@ namespace Identity.Infrastructure.Repository
 
             if (currentUserId == Guid.Empty)
             {
-                logger.LogError("Geçersiz kullanıcı ID'si sağlandı");
-                throw new ArgumentException("Kullanıcı ID'si geçersiz", nameof(currentUserId));
+                logger.LogError(
+                    "Geçersiz kullanıcı ID'si - Varlık: {EntityType}, ID: {Id}",
+                    typeof(T).Name, id);
+                throw new ArgumentException(
+                    "Kullanıcı ID'si geçersiz. Boş GUID kullanılamaz.",
+                    nameof(currentUserId));
             }
 
             logger.LogInformation(
-                "Yetkilendirme ile kayıt getiriliyor - Tür: {Type}",
-                typeof(T).Name);
+                "Yetkilendirme ile kayıt getiriliyor - Varlık: {EntityType}, ID: {Id}, Kullanıcı: {UserId}",
+                typeof(T).Name, id, currentUserId);
 
             try
             {
-                IQueryable<T> query = db.AsQueryable();
-
-                query = ApplySoftDeleteFilter(query);
+                var query = BuildQuery(trackChanges, inc);
                 query = ApplyAuthorizationFilter(query, currentUserId);
-
-                if (!trackChanges)
-                    query = query.AsNoTracking();
-
-                if (inc is not null)
-                    query = SafeInclude(query, inc);
 
                 var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
 
-                if (result is null)
+                if (result == null)
                 {
                     logger.LogWarning(
-                        "Yetkisiz erişim veya kayıt bulunamadı - Tür: {Type}",
-                        typeof(T).Name);
+                        "Yetkisiz erişim veya kayıt yok - Varlık: {EntityType}, ID: {Id}, Kullanıcı: {UserId}",
+                        typeof(T).Name, id, currentUserId);
+                    return null;
                 }
 
+                logger.LogDebug(
+                    "Yetkilendirilmiş kayıt bulundu - Varlık: {EntityType}, ID: {Id}, Kullanıcı: {UserId}",
+                    typeof(T).Name, id, currentUserId);
                 return result;
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogError(ex,
+                    "Geçersiz sorgu işlemi - Varlık: {EntityType}, ID: {Id}, Kullanıcı: {UserId}, Hata: {Message}",
+                    typeof(T).Name, id, currentUserId, ex.Message);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kaydı (ID: {id}) yetkilendirme ile getirilirken geçersiz sorgu hatası oluştu. " +
+                    "Lütfen include parametrelerini kontrol edin.",
+                    ex);
             }
             catch (Exception ex)
             {
-                logger.LogError(
-                    ex,
-                    "Yetkilendirmeli kayıt getirme işleminde hata - Tür: {Type}",
-                    typeof(T).Name);
-                throw;
+                logger.LogError(ex,
+                    "Beklenmeyen hata - Varlık: {EntityType}, ID: {Id}, Kullanıcı: {UserId}",
+                    typeof(T).Name, id, currentUserId);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} kaydı (ID: {id}) yetkilendirme ile getirilirken beklenmeyen bir hata oluştu. " +
+                    "Lütfen daha sonra tekrar deneyin.",
+                    ex);
             }
         }
 
+      
+
+        private IQueryable<T> BuildQuery(
+            bool trackChanges,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc)
+        {
+            IQueryable<T> query = db.AsQueryable();
+
+            query = ApplySoftDeleteFilter(query);
+
+            if (!trackChanges)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (inc is not null)
+            {
+                query = SafeInclude(query, inc);
+            }
+
+            return query;
+        }
+
+       
         private void ValidatePagination(ref int page, ref int pageSize)
         {
             if (page < 1)
             {
-                logger.LogWarning("Geçersiz sayfa numarası: {Page}, 1'e ayarlanıyor", page);
+                logger.LogWarning(
+                    "Geçersiz sayfa numarası düzeltildi - İstenen: {RequestedPage}, Kullanılan: 1",
+                    page);
                 page = 1;
             }
 
             if (pageSize < 1)
             {
-                logger.LogWarning("Geçersiz sayfa boyutu: {PageSize}, varsayılana ayarlanıyor", pageSize);
+                logger.LogWarning(
+                    "Geçersiz sayfa boyutu düzeltildi - İstenen: {RequestedSize}, Kullanılan: {DefaultSize}",
+                    pageSize, DefaultPageSize);
                 pageSize = DefaultPageSize;
             }
 
             if (pageSize > MaxPageSize)
             {
                 logger.LogWarning(
-                    "Sayfa boyutu {PageSize} maksimum değeri {MaxPageSize} aşıyor, sınırlanıyor",
-                    pageSize, MaxPageSize);
+                    "Sayfa boyutu sınırlandırıldı - İstenen: {RequestedSize}, Kullanılan: {MaxSize}, Maksimum: {MaxPageSize}",
+                    pageSize, MaxPageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
         }
 
+ 
         private void ValidateId(TKey id)
         {
             if (id == null)
             {
-                logger.LogError("Null ID değeri sağlandı");
-                throw new ArgumentNullException(nameof(id), "ID null olamaz");
+                logger.LogError(
+                    "Null ID parametresi - Varlık: {EntityType}",
+                    typeof(T).Name);
+                throw new ArgumentNullException(
+                    nameof(id),
+                    $"{typeof(T).Name} için ID parametresi null olamaz.");
             }
 
             if (id.Equals(default(TKey)))
             {
-                logger.LogError("Geçersiz ID değeri sağlandı");
-                throw new ArgumentException("Geçersiz ID değeri", nameof(id));
+                logger.LogError(
+                    "Varsayılan ID değeri - Varlık: {EntityType}, ID Tipi: {KeyType}",
+                    typeof(T).Name, typeof(TKey).Name);
+                throw new ArgumentException(
+                    $"{typeof(T).Name} için geçersiz ID değeri sağlandı. ID varsayılan değer olamaz.",
+                    nameof(id));
             }
         }
+
 
         private IQueryable<T> ApplySoftDeleteFilter(IQueryable<T> query)
         {
             if (typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
             {
-                logger.LogDebug("Soft delete filtresi uygulanıyor - Tür: {Type}", typeof(T).Name);
+                logger.LogDebug(
+                    "Soft delete filtresi uygulanıyor - Varlık: {EntityType}",
+                    typeof(T).Name);
                 query = query.Where(x => !((ISoftDelete)(object)x).IsDeleted);
             }
             return query;
@@ -251,12 +321,13 @@ namespace Identity.Infrastructure.Repository
             if (typeof(IUserOwnedEntity).IsAssignableFrom(typeof(T)))
             {
                 logger.LogDebug(
-                    "Kullanıcı yetkilendirme filtresi uygulanıyor - Tür: {Type}",
-                    typeof(T).Name);
+                    "Kullanıcı yetkilendirme filtresi uygulanıyor - Varlık: {EntityType}, Kullanıcı: {UserId}",
+                    typeof(T).Name, userId);
                 query = query.Where(x => ((IUserOwnedEntity)(object)x).UserId == userId);
             }
             return query;
         }
+
 
         private IQueryable<T> SafeInclude(
             IQueryable<T> query,
@@ -265,18 +336,40 @@ namespace Identity.Infrastructure.Repository
             try
             {
                 var includedQuery = inc(query);
-                logger.LogDebug("Include işlemi uygulandı - Tür: {Type}", typeof(T).Name);
+                logger.LogDebug(
+                    "İlişkili varlıklar dahil edildi - Varlık: {EntityType}",
+                    typeof(T).Name);
                 return includedQuery;
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogError(ex,
+                    "Geçersiz navigation property - Varlık: {EntityType}, Hata: {Message}",
+                    typeof(T).Name, ex.Message);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} için geçersiz navigation property kullanıldı. " +
+                    "Lütfen Include işlemindeki ilişki adlarını ve varlık yapısını kontrol edin. " +
+                    $"Detay: {ex.Message}",
+                    ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogError(ex,
+                    "Include işlemi hatası - Varlık: {EntityType}, Hata: {Message}",
+                    typeof(T).Name, ex.Message);
+                throw new InvalidOperationException(
+                    $"{typeof(T).Name} için ilişkili varlıklar yüklenirken hata oluştu. " +
+                    "Include işlemi yapılandırmasını kontrol edin. " +
+                    $"Detay: {ex.Message}",
+                    ex);
             }
             catch (Exception ex)
             {
-                logger.LogError(
-                    ex,
-                    "Include işlemi uygulanırken hata oluştu - Tür: {Type}",
+                logger.LogError(ex,
+                    "Beklenmeyen include hatası - Varlık: {EntityType}",
                     typeof(T).Name);
-
                 throw new InvalidOperationException(
-                    "Geçersiz include işlemi. Lütfen navigation property'lerinizi kontrol edin.",
+                    $"{typeof(T).Name} için ilişkili varlıklar yüklenirken beklenmeyen bir hata oluştu.",
                     ex);
             }
         }

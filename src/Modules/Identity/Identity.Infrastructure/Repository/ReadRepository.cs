@@ -14,15 +14,13 @@ namespace Identity.Infrastructure.Repository
     {
         private const int MaxPageSize = 100;
         private const int DefaultPageSize = 20;
-        private const int MaxIncludeDepth = 3;
         private const int MaxTotalRecords = 10000;
 
         private DbSet<T> db => context.Set<T>();
 
 
-        public async Task<PagedResult<T>> GetAllAsync(
+        public async Task<PagedResult<T>> GetAllAsync(int pageSize,
             int page = 1,
-            int pageSize = DefaultPageSize,
             bool trackChanges = false,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
         {
@@ -34,7 +32,13 @@ namespace Identity.Infrastructure.Repository
 
             try
             {
-                var query = BuildQuery(trackChanges, inc);
+                var query = trackChanges ? db.AsTracking() : db.AsNoTracking();
+
+                if (inc != null)
+                {
+                    query = inc(query);
+                }
+
                 var totalCount = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -84,7 +88,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        public async Task<T> GetByIdAsync(
+        public async Task<T?> GetByIdAsync(
             bool trackChanges,
             TKey id,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
@@ -97,7 +101,13 @@ namespace Identity.Infrastructure.Repository
 
             try
             {
-                var query = BuildQuery(trackChanges, inc);
+                var query = trackChanges ? db.AsTracking() : db.AsNoTracking();
+
+                if (inc != null)
+                {
+                    query = inc(query);
+                }
+
                 var result = await query.FirstOrDefaultAsync(x => x.Id!.Equals(id));
 
                 if (result == null)
@@ -134,6 +144,7 @@ namespace Identity.Infrastructure.Repository
                     ex);
             }
         }
+
         private void ValidatePagination(ref int page, ref int pageSize)
         {
             if (page < 1)
@@ -161,7 +172,6 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
- 
         private void ValidateId(TKey id)
         {
             if (id == null)

@@ -61,7 +61,6 @@ namespace Tenant.Infrastructure.Data.Repositories
                     query = query.AsNoTracking();
 
                 var plan = await query.FirstOrDefaultAsync(p => p.Id == id);
-
                 if (plan is null)
                 {
                     _logger.LogWarning(
@@ -78,7 +77,6 @@ namespace Tenant.Infrastructure.Data.Repositories
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex,
                     "Plan getirilirken hata oluştu - Id: {PlanId}",
                     id);

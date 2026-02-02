@@ -6,46 +6,9 @@ using TaskFlow.BuildingBlocks.Common;
 
 namespace Identity.Infrastructure.Repository
 {
-    public interface ISoftDelete
-    {
-        bool IsDeleted { get; set; }
-        DateTime? DeletedAt { get; set; }
-        Guid? DeletedBy { get; set; }
-    }
-
-    public interface IUserOwnedEntity
-    {
-        Guid UserId { get; set; }
-    }
-
-    public interface IHasConcurrencyToken
-    {
-        byte[] RowVersion { get; set; }
-    }
-
-    public interface ICurrentUserService
-    {
-        Guid UserId { get; }
-        bool IsAuthenticated { get; }
-    }
-
-    public interface ICreatableEntity
-    {
-        DateTime CreatedAt { get; set; }
-        Guid CreatedBy { get; set; }
-    }
-
-    public interface IUpdatableEntity
-    {
-        DateTime? UpdatedAt { get; set; }
-        Guid? UpdatedBy { get; set; }
-    }
-
-
     public class WriteRepository<T>(
         IdentityManagementDbContext context,
-        ILogger<WriteRepository<T>> logger,
-        ICurrentUserService currentUserService) : IWriteRepository<T>
+        ILogger<WriteRepository<T>> logger) : IWriteRepository<T>
         where T : class
     {
         private DbSet<T> db => context.Set<T>();
@@ -53,28 +16,26 @@ namespace Identity.Infrastructure.Repository
         public void Add(T entity)
         {
             ValidateEntity(entity, "ekleme");
-            ValidateUserAuthentication("ekleme");
-            ValidateAddPermission(entity);
 
             SetCreationMetadata(entity);
 
             try
             {
                 logger.LogInformation(
-                    "Yeni kayıt ekleniyor - Varlık: {EntityType}, Kullanıcı: {UserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
+                    "Yeni kayıt ekleniyor - Varlık: {EntityType}, Zaman: {Timestamp}",
+                    typeof(T).Name, DateTime.UtcNow);
 
                 db.Add(entity);
 
                 logger.LogDebug(
-                    "Kayıt context'e başarıyla eklendi - Varlık: {EntityType}, Kullanıcı: {UserId}",
-                    typeof(T).Name, currentUserService.UserId);
+                    "Kayıt context'e başarıyla eklendi - Varlık: {EntityType}",
+                    typeof(T).Name);
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Kullanıcı: {UserId}, Hata: {Message}",
-                    typeof(T).Name, currentUserService.UserId, ex.Message);
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Hata: {Message}",
+                    typeof(T).Name, ex.Message);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} ekleme işlemi veritabanı kısıtlamalarını ihlal ediyor. " +
                     "Lütfen benzersiz alanları ve gerekli ilişkileri kontrol edin. " +
@@ -84,8 +45,8 @@ namespace Identity.Infrastructure.Repository
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen ekleme hatası - Varlık: {EntityType}, Kullanıcı: {UserId}",
-                    typeof(T).Name, currentUserService.UserId);
+                    "Beklenmeyen ekleme hatası - Varlık: {EntityType}",
+                    typeof(T).Name);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} varlığı eklenirken beklenmeyen bir hata oluştu. " +
                     "Lütfen daha sonra tekrar deneyin.",
@@ -96,8 +57,7 @@ namespace Identity.Infrastructure.Repository
         public void Update(T entity)
         {
             ValidateEntity(entity, "güncelleme");
-            ValidateUserAuthentication("güncelleme");
-            ValidateUpdatePermission(entity);
+
 
             SetUpdateMetadata(entity);
             HandleConcurrencyToken(entity);
@@ -105,20 +65,20 @@ namespace Identity.Infrastructure.Repository
             try
             {
                 logger.LogInformation(
-                    "Kayıt güncelleniyor - Varlık: {EntityType}, Kullanıcı: {UserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
+                    "Kayıt güncelleniyor - Varlık: {EntityType}, Zaman: {Timestamp}",
+                    typeof(T).Name, DateTime.UtcNow);
 
                 db.Update(entity);
 
                 logger.LogDebug(
-                    "Kayıt başarıyla güncellendi - Varlık: {EntityType}, Kullanıcı: {UserId}",
-                    typeof(T).Name, currentUserService.UserId);
+                    "Kayıt başarıyla güncellendi - Varlık: {EntityType}",
+                    typeof(T).Name);
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 logger.LogWarning(ex,
-                    "Eşzamanlılık hatası - Varlık: {EntityType}, Kullanıcı: {UserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
+                    "Eşzamanlılık hatası - Varlık: {EntityType}, Zaman: {Timestamp}",
+                    typeof(T).Name,DateTime.UtcNow);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} kaydı başka bir kullanıcı tarafından değiştirilmiş. " +
                     "Lütfen sayfayı yenileyip güncel veriyi yükledikten sonra tekrar deneyin.",
@@ -127,8 +87,8 @@ namespace Identity.Infrastructure.Repository
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Kullanıcı: {UserId}, Hata: {Message}",
-                    typeof(T).Name, currentUserService.UserId, ex.Message);
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Hata: {Message}",
+                    typeof(T).Name, ex.Message);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} güncelleme işlemi veritabanı kısıtlamalarını ihlal ediyor. " +
                     "Lütfen benzersiz alanları ve ilişkileri kontrol edin. " +
@@ -138,8 +98,8 @@ namespace Identity.Infrastructure.Repository
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen güncelleme hatası - Varlık: {EntityType}, Kullanıcı: {UserId}",
-                    typeof(T).Name, currentUserService.UserId);
+                    "Beklenmeyen güncelleme hatası - Varlık: {EntityType}",
+                    typeof(T).Name);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} varlığı güncellenirken beklenmeyen bir hata oluştu. " +
                     "Lütfen daha sonra tekrar deneyin.",
@@ -151,9 +111,6 @@ namespace Identity.Infrastructure.Repository
         public void Delete(T entity)
         {
             ValidateEntity(entity, "silme");
-            ValidateUserAuthentication("silme");
-            ValidateDeletePermission(entity);
-
             try
             {
                 if (entity is ISoftDelete softDelete)
@@ -168,8 +125,8 @@ namespace Identity.Infrastructure.Repository
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, İşlem: Silme, Kullanıcı: {UserId}, Hata: {Message}",
-                    typeof(T).Name, currentUserService.UserId, ex.Message);
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, İşlem: Silme, Hata: {Message}",
+                    typeof(T).Name, ex.Message);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} silme işlemi başarısız. " +
                     "Bu kayıt başka kayıtlar tarafından kullanılıyor olabilir. " +
@@ -180,8 +137,8 @@ namespace Identity.Infrastructure.Repository
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen silme hatası - Varlık: {EntityType}, Kullanıcı: {UserId}",
-                    typeof(T).Name, currentUserService.UserId);
+                    "Beklenmeyen silme hatası - Varlık: {EntityType}",
+                    typeof(T).Name);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} varlığı silinirken beklenmeyen bir hata oluştu. " +
                     "Lütfen daha sonra tekrar deneyin.",
@@ -193,28 +150,26 @@ namespace Identity.Infrastructure.Repository
         public void PermanentDelete(T entity)
         {
             ValidateEntity(entity, "kalıcı silme");
-            ValidateUserAuthentication("kalıcı silme");
-            ValidateDeletePermission(entity);
 
             var entityId = entity is BaseEntity<Guid> baseEntity ? baseEntity.Id.ToString() : "N/A";
 
             try
             {
                 logger.LogCritical(
-                    "KALICI SİLME İŞLEMİ BAŞLATILDI - Varlık: {EntityType}, ID: {EntityId}, Kullanıcı: {UserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, entityId, currentUserService.UserId, DateTime.UtcNow);
+                    "KALICI SİLME İŞLEMİ BAŞLATILDI - Varlık: {EntityType}, ID: {EntityId} Zaman: {Timestamp}",
+                    typeof(T).Name, entityId, DateTime.UtcNow);
 
                 db.Remove(entity);
 
                 logger.LogWarning(
-                    "Varlık veritabanından kalıcı olarak kaldırıldı - Varlık: {EntityType}, ID: {EntityId}, Kullanıcı: {UserId}",
-                    typeof(T).Name, entityId, currentUserService.UserId);
+                    "Varlık veritabanından kalıcı olarak kaldırıldı - Varlık: {EntityType}, ID: {EntityId}",
+                    typeof(T).Name, entityId);
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "Kalıcı silme kısıtlama hatası - Varlık: {EntityType}, ID: {EntityId}, Kullanıcı: {UserId}, Hata: {Message}",
-                    typeof(T).Name, entityId, currentUserService.UserId, ex.Message);
+                    "Kalıcı silme kısıtlama hatası - Varlık: {EntityType}, ID: {EntityId}, Hata: {Message}",
+                    typeof(T).Name, entityId, ex.Message);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} kalıcı silme işlemi başarısız. " +
                     "Bu kayıt başka kayıtlar tarafından kullanılıyor ve silinemez. " +
@@ -225,8 +180,8 @@ namespace Identity.Infrastructure.Repository
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen kalıcı silme hatası - Varlık: {EntityType}, ID: {EntityId}, Kullanıcı: {UserId}",
-                    typeof(T).Name, entityId, currentUserService.UserId);
+                    "Beklenmeyen kalıcı silme hatası - Varlık: {EntityType}, ID: {EntityId}",
+                    typeof(T).Name, entityId);
                 throw new InvalidOperationException(
                     $"{typeof(T).Name} varlığı kalıcı silinirken beklenmeyen bir hata oluştu. " +
                     "Lütfen daha sonra tekrar deneyin.",
@@ -294,13 +249,12 @@ namespace Identity.Infrastructure.Repository
         {
             softDelete.IsDeleted = true;
             softDelete.DeletedAt = DateTime.UtcNow;
-            softDelete.DeletedBy = currentUserService.UserId;
 
             db.Update(entity);
 
             logger.LogInformation(
-                "Kayıt geçici silindi (soft delete) - Varlık: {EntityType}, Silen: {DeletedBy}, Zaman: {DeletedAt}",
-                typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
+                "Kayıt geçici silindi (soft delete) - Varlık: {EntityType}, Zaman: {DeletedAt}",
+                typeof(T).Name, DateTime.UtcNow);
         }
 
 
@@ -309,8 +263,8 @@ namespace Identity.Infrastructure.Repository
             db.Remove(entity);
 
             logger.LogWarning(
-                "Kayıt kalıcı silindi (hard delete) - Varlık: {EntityType}, Silen: {UserId}, Zaman: {Timestamp}, Uyarı: Geri alınamaz",
-                typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
+                "Kayıt kalıcı silindi (hard delete) - Varlık: {EntityType}, Zaman: {Timestamp}, Uyarı: Geri alınamaz",
+                typeof(T).Name, DateTime.UtcNow);
         }
 
  
@@ -339,118 +293,6 @@ namespace Identity.Infrastructure.Repository
                         "Lütfen geçerli bir ID ile varlık sağlayın.",
                         nameof(entity));
                 }
-            }
-        }
-
-
-        private void ValidateUserAuthentication(string operation)
-        {
-            if (!currentUserService.IsAuthenticated)
-            {
-                logger.LogError(
-                    "Kimlik doğrulaması yapılmamış erişim denemesi - İşlem: {Operation}, Varlık: {EntityType}",
-                    operation, typeof(T).Name);
-                throw new UnauthorizedAccessException(
-                    $"{typeof(T).Name} {operation} işlemi için kullanıcı kimlik doğrulaması gerekli. " +
-                    "Lütfen giriş yapın.");
-            }
-
-            if (currentUserService.UserId == Guid.Empty)
-            {
-                logger.LogError(
-                    "Geçersiz kullanıcı ID'si - İşlem: {Operation}, Varlık: {EntityType}, Kullanıcı ID: {UserId}",
-                    operation, typeof(T).Name, currentUserService.UserId);
-                throw new UnauthorizedAccessException(
-                    "Geçersiz kullanıcı kimliği tespit edildi. " +
-                    "Lütfen çıkış yapıp tekrar giriş yapın.");
-            }
-        }
-
-        private void ValidateAddPermission(T entity)
-        {
-            if (entity is not IUserOwnedEntity userOwned)
-            {
-                return;
-            }
-
-            if (userOwned.UserId == Guid.Empty)
-            {
-                userOwned.UserId = currentUserService.UserId;
-                logger.LogDebug(
-                    "Kullanıcı ID'si otomatik atandı - Varlık: {EntityType}, Atanan Kullanıcı: {AssignedUserId}",
-                    typeof(T).Name, currentUserService.UserId);
-                return;
-            }
-
-            if (userOwned.UserId != currentUserService.UserId)
-            {
-                logger.LogWarning(
-                    "Yetkisiz ekleme denemesi - Varlık: {EntityType}, Hedef Kullanıcı: {TargetUserId}, Deneme Yapan: {CurrentUserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, userOwned.UserId, currentUserService.UserId, DateTime.UtcNow);
-                throw new UnauthorizedAccessException(
-                    $"{typeof(T).Name} ekleme yetkisi yok. " +
-                    "Başka kullanıcılar adına kayıt ekleyemezsiniz. " +
-                    "Sadece kendi kayıtlarınızı oluşturabilirsiniz.");
-            }
-        }
-
-
-        private void ValidateUpdatePermission(T entity)
-        {
-            if (entity is not IUserOwnedEntity userOwned)
-            {
-                return;
-            }
-
-            if (userOwned.UserId == Guid.Empty)
-            {
-                logger.LogError(
-                    "Boş kullanıcı ID'si hatası - Varlık: {EntityType}, İşlem: güncelleme",
-                    typeof(T).Name);
-                throw new InvalidOperationException(
-                    $"{typeof(T).Name} için kullanıcı ID'si geçersiz. " +
-                    "Varlık verileri bozuk olabilir. Lütfen kaydı yeniden yükleyin.");
-            }
-
-            if (userOwned.UserId != currentUserService.UserId)
-            {
-                logger.LogWarning(
-                    "Yetkisiz güncelleme denemesi - Varlık: {EntityType}, Kayıt Sahibi: {OwnerId}, Deneme Yapan: {CurrentUserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, userOwned.UserId, currentUserService.UserId, DateTime.UtcNow);
-                throw new UnauthorizedAccessException(
-                    $"{typeof(T).Name} güncelleme yetkisi yok. " +
-                    "Size ait olmayan kayıtları güncelleyemezsiniz. " +
-                    "Sadece kendi kayıtlarınızı düzenleyebilirsiniz.");
-            }
-        }
-
-
-        private void ValidateDeletePermission(T entity)
-        {
-            if (entity is not IUserOwnedEntity userOwned)
-            {
-                return;
-            }
-
-            if (userOwned.UserId == Guid.Empty)
-            {
-                logger.LogError(
-                    "Boş kullanıcı ID'si hatası - Varlık: {EntityType}, İşlem: silme",
-                    typeof(T).Name);
-                throw new InvalidOperationException(
-                    $"{typeof(T).Name} için kullanıcı ID'si geçersiz. " +
-                    "Varlık verileri bozuk olabilir. Lütfen kaydı yeniden yükleyin.");
-            }
-
-            if (userOwned.UserId != currentUserService.UserId)
-            {
-                logger.LogWarning(
-                    "Yetkisiz silme denemesi - Varlık: {EntityType}, Kayıt Sahibi: {OwnerId}, Deneme Yapan: {CurrentUserId}, Zaman: {Timestamp}",
-                    typeof(T).Name, userOwned.UserId, currentUserService.UserId, DateTime.UtcNow);
-                throw new UnauthorizedAccessException(
-                    $"{typeof(T).Name} silme yetkisi yok. " +
-                    "Size ait olmayan kayıtları silemezsiniz. " +
-                    "Sadece kendi kayıtlarınızı silebilirsiniz.");
             }
         }
     }

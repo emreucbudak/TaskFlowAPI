@@ -12,6 +12,8 @@ namespace Chat.Domain.Entities
         public Guid? GroupId { get; private set; }
         public bool isDeleted { get; private set; }
         public bool isEdited { get; private set; }
+        public bool isDelivered { get; private set; }
+        public DateTime? DeliveredTime { get; private set; }
 
         public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId, bool isDeleted, Guid? groupId, bool isEdited)
         {
@@ -23,6 +25,7 @@ namespace Chat.Domain.Entities
             this.isDeleted = isDeleted;
             GroupId = groupId;
             this.isEdited = isEdited;
+            this.isDelivered = false;
         }
 
         public Message()
@@ -47,6 +50,11 @@ namespace Chat.Domain.Entities
         public void SetTime()
         {
             SendTime = DateTime.UtcNow;
+        }
+        public void MarkAsDelivered()
+        {
+            this.isDelivered = true;
+            this.DeliveredTime = DateTime.UtcNow;
         }
 
     }

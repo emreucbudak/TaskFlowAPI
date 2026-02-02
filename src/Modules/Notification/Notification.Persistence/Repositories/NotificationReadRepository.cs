@@ -51,8 +51,8 @@ namespace Notification.Persistence.Repositories
 
         public async Task<List<NotificationMessage>> GetByUserIdAsync(
             Guid userId,
+            int pageSize,
             int page = 1,
-            int pageSize = DefaultPageSize,
             bool trackChanges = false)
         {
             ValidateUserId(userId);
@@ -144,5 +144,7 @@ namespace Notification.Persistence.Repositories
                 pageSize = MaxPageSize;
             }
         }
+
+
     }
 }

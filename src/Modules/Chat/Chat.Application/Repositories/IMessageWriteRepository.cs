@@ -8,9 +8,9 @@ namespace Chat.Application.Repositories
         Task<Message> AddAsync(Message message );
         Task<bool> DeleteAsync(Guid id );
         Task<bool> DeleteRangeAsync(IEnumerable<Guid> ids);
-        Task<bool> UpdateMessageContentAsync(string id, string newContent);
-        Task<bool> MarkAsDeliveredAsync(string messageId );
-        Task<bool> DeleteConversationAsync(string userId1, string userId2 );
+        Task<bool> UpdateMessageContentAsync(Guid id, string newContent);
+        Task<bool> MarkAsDeliveredAsync(Guid messageId );
+        Task<bool> DeleteConversationAsync(Guid userId1, Guid userId2 );
 
 
  

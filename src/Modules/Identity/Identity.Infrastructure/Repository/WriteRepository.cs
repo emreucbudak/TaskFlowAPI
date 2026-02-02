@@ -41,11 +41,7 @@ namespace Identity.Infrastructure.Repository
         Guid? UpdatedBy { get; set; }
     }
 
-    /// <summary>
-    /// Generic repository sınıfı - varlıklar için yazma işlemlerini gerçekleştirir.
-    /// Ekleme, güncelleme, silme işlemlerinde güvenlik, denetim ve concurrency kontrolü sağlar.
-    /// </summary>
-    /// <typeparam name="T">Varlık tipi</typeparam>
+
     public class WriteRepository<T>(
         IdentityManagementDbContext context,
         ILogger<WriteRepository<T>> logger,
@@ -54,12 +50,6 @@ namespace Identity.Infrastructure.Repository
     {
         private DbSet<T> db => context.Set<T>();
 
-        /// <summary>
-        /// Yeni bir varlık ekler ve otomatik olarak oluşturma bilgilerini doldurur.
-        /// </summary>
-        /// <param name="entity">Eklenecek varlık</param>
-        /// <exception cref="ArgumentNullException">Varlık null ise</exception>
-        /// <exception cref="UnauthorizedAccessException">Kullanıcı yetkisiz ise</exception>
         public void Add(T entity)
         {
             ValidateEntity(entity, "ekleme");
@@ -103,14 +93,6 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Mevcut bir varlığı günceller ve otomatik olarak güncelleme bilgilerini doldurur.
-        /// Concurrency token kontrolü yapar.
-        /// </summary>
-        /// <param name="entity">Güncellenecek varlık</param>
-        /// <exception cref="ArgumentNullException">Varlık null ise</exception>
-        /// <exception cref="UnauthorizedAccessException">Kullanıcı yetkisiz ise</exception>
-        /// <exception cref="InvalidOperationException">Concurrency hatası veya geçersiz durum</exception>
         public void Update(T entity)
         {
             ValidateEntity(entity, "güncelleme");
@@ -165,12 +147,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Varlığı siler. ISoftDelete uyguluyorsa geçici, uygulamıyorsa kalıcı siler.
-        /// </summary>
-        /// <param name="entity">Silinecek varlık</param>
-        /// <exception cref="ArgumentNullException">Varlık null ise</exception>
-        /// <exception cref="UnauthorizedAccessException">Kullanıcı yetkisiz ise</exception>
+
         public void Delete(T entity)
         {
             ValidateEntity(entity, "silme");
@@ -212,13 +189,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Varlığı veritabanından kalıcı olarak siler (geri alınamaz).
-        /// Bu işlem kritik loglama gerektirir ve dikkatli kullanılmalıdır.
-        /// </summary>
-        /// <param name="entity">Kalıcı silinecek varlık</param>
-        /// <exception cref="ArgumentNullException">Varlık null ise</exception>
-        /// <exception cref="UnauthorizedAccessException">Kullanıcı yetkisiz ise</exception>
+
         public void PermanentDelete(T entity)
         {
             ValidateEntity(entity, "kalıcı silme");
@@ -263,9 +234,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Oluşturma metadata'sını (CreatedAt, CreatedBy) ayarlar.
-        /// </summary>
+
         private void SetCreationMetadata(T entity)
         {
             if (entity is ICreatableEntity creatable)
@@ -279,9 +248,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Güncelleme metadata'sını (UpdatedAt, UpdatedBy) ayarlar.
-        /// </summary>
+
         private void SetUpdateMetadata(T entity)
         {
             if (entity is IUpdatableEntity updatable)
@@ -295,9 +262,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Concurrency token kontrolü yapar ve ayarlar.
-        /// </summary>
+
         private void HandleConcurrencyToken(T entity)
         {
             if (entity is IHasConcurrencyToken concurrency)
@@ -323,9 +288,8 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Soft delete (geçici silme) işlemini gerçekleştirir.
-        /// </summary>
+
+
         private void PerformSoftDelete(T entity, ISoftDelete softDelete)
         {
             softDelete.IsDeleted = true;
@@ -339,9 +303,7 @@ namespace Identity.Infrastructure.Repository
                 typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
         }
 
-        /// <summary>
-        /// Hard delete (kalıcı silme) işlemini gerçekleştirir.
-        /// </summary>
+
         private void PerformHardDelete(T entity)
         {
             db.Remove(entity);
@@ -351,9 +313,7 @@ namespace Identity.Infrastructure.Repository
                 typeof(T).Name, currentUserService.UserId, DateTime.UtcNow);
         }
 
-        /// <summary>
-        /// Varlık validasyonu yapar.
-        /// </summary>
+ 
         private void ValidateEntity(T entity, string operation)
         {
             if (entity == null)
@@ -382,9 +342,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Kullanıcı kimlik doğrulamasını kontrol eder.
-        /// </summary>
+
         private void ValidateUserAuthentication(string operation)
         {
             if (!currentUserService.IsAuthenticated)
@@ -408,9 +366,6 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Ekleme yetkisi kontrolü yapar.
-        /// </summary>
         private void ValidateAddPermission(T entity)
         {
             if (entity is not IUserOwnedEntity userOwned)
@@ -439,9 +394,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Güncelleme yetkisi kontrolü yapar.
-        /// </summary>
+
         private void ValidateUpdatePermission(T entity)
         {
             if (entity is not IUserOwnedEntity userOwned)
@@ -471,9 +424,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        /// <summary>
-        /// Silme yetkisi kontrolü yapar.
-        /// </summary>
+
         private void ValidateDeletePermission(T entity)
         {
             if (entity is not IUserOwnedEntity userOwned)

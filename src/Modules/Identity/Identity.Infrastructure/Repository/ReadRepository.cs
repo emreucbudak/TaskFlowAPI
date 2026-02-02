@@ -7,34 +7,6 @@ using TaskFlow.BuildingBlocks.Common;
 
 namespace Identity.Infrastructure.Repository
 {
-    public class PagedResult<T>
-    {
-        public IEnumerable<T> Items { get; set; } = new List<T>();
-        public int TotalCount { get; set; }
-        public int Page { get; set; }
-        public int PageSize { get; set; }
-        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
-        public bool HasPreviousPage => Page > 1;
-        public bool HasNextPage => Page < TotalPages;
-    }
-
-    public interface ISoftDelete
-    {
-        bool IsDeleted { get; set; }
-        DateTime? DeletedAt { get; set; }
-    }
-
-    public interface IUserOwnedEntity
-    {
-        Guid UserId { get; set; }
-    }
-
-    public interface IMultiTenant
-    {
-        Guid TenantId { get; set; }
-    }
-
-
     public class ReadRepository<T, TKey>(
         IdentityManagementDbContext context,
         ILogger<ReadRepository<T, TKey>> logger) : IReadRepository<T, TKey>
@@ -112,7 +84,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        public async Task<T?> GetByIdAsync(
+        public async Task<T> GetByIdAsync(
             bool trackChanges,
             TKey id,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Notification.Application.Repositories;
 using Notification.Domain.Models;
 using Notification.Infrastructure.Data.NotificationDb;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace Notification.Persistence.Repositories
 {
@@ -49,7 +50,7 @@ namespace Notification.Persistence.Repositories
             return result;
         }
 
-        public async Task<List<NotificationMessage>> GetByUserIdAsync(
+        public async Task<PagedResult<NotificationMessage>> GetByUserIdAsync(
             Guid userId,
             int pageSize,
             int page = 1,
@@ -69,16 +70,24 @@ namespace Notification.Persistence.Repositories
             if (!trackChanges)
                 query = query.AsNoTracking();
 
+            var totalCount = await query.CountAsync();
+
             var notifications = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
             logger.LogInformation(
-                "Kullanıcı {UserId} için {Count} adet bildirim getirildi",
-                userId, notifications.Count);
+                "Kullanıcı {UserId} için {Count}/{TotalCount} bildirim getirildi (Sayfa: {Page})",
+                userId, notifications.Count, totalCount, page);
 
-            return notifications;
+            return new PagedResult<NotificationMessage>
+            {
+                Items = notifications,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                Page = page
+            };
         }
 
         public async Task<int> GetUnreadCountAsync(Guid userId)

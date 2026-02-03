@@ -27,10 +27,10 @@
     <Project Path="src/Modules/ProjectManagement/ProjectManagement.Infrastructure/ProjectManagement.Infrastructure.csproj" Id="48a82398-5d31-405c-b78a-96a99e467430" />
   </Folder>
   <Folder Name="/src/Modules/Report/">
-    <Project Path="../Report.Application/Report.Application.csproj" Id="c7a70ac1-08fb-4f27-bc76-fdc392c0ff26" />
-    <Project Path="../Report.Domain/Report.Domain.csproj" Id="ec8886b3-304f-44da-8b33-120d520e6bc0" />
-    <Project Path="../Report.Infrastructure/Report.Infrastructure.csproj" Id="269602e0-3aa6-4496-b192-53d98c477c9d" />
-    <Project Path="../Report.Persistence/Report.Persistence.csproj" Id="62afeea3-6826-4ed7-a69e-018f8960659b" />
+    <Project Path="src/Modules/Report/Report.Application/Report.Application.csproj" Id="4e0f6675-7f3b-45d2-b8dc-52bb137930a1" />
+    <Project Path="src/Modules/Report/Report.Domain/Report.Domain.csproj" Id="dd3a92d9-80e3-4d64-8a3c-927e3be9c4be" />
+    <Project Path="src/Modules/Report/Report.Infrastructure/Report.Infrastructure.csproj" Id="cd57ab1b-356c-4bea-9cb6-187d197af56b" />
+    <Project Path="src/Modules/Report/Report.Persistence/Report.Persistence.csproj" Id="f852ed05-60b9-4317-ae04-51c5b3b475b0" />
   </Folder>
   <Folder Name="/src/Modules/Tenant/">
     <Project Path="src/Modules/Tenant/Tenant.Application/Tenant.Application.csproj" Id="0eb12f4b-3438-43b8-b8f2-95c816bef03c" />

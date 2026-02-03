@@ -4,13 +4,13 @@ namespace ProjectManagement.Domain.Entities
 {
     public class Task : BaseEntity
     {
-        public Task(string taskName, string description, DateTime deadlineTime, DateTime createdDate)
+        public Task(string taskName, string description, DateOnly deadlineTime, DateOnly createdDate)
         {
             if (string.IsNullOrWhiteSpace(taskName))
             {
                 throw new ArgumentException("Task Adı boş olamaz");
             }
-            if (deadlineTime < DateTime.Now)
+            if (deadlineTime < DateOnly.FromDateTime(DateTime.UtcNow))
             {
                 throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
             }
@@ -34,10 +34,10 @@ namespace ProjectManagement.Domain.Entities
         public IReadOnlyCollection<TaskAnswer> taskAnswers => _answers; 
         private readonly List<Subtask> _subtask = new();
         public IReadOnlyCollection<Subtask> subtask => _subtask;
-        public DateTime DeadlineTime { get; private set; }
+        public DateOnly DeadlineTime { get; private set; }
         public int? TaskPriorityCategoryId { get; private set; }
         public TaskPriorityCategory? TaskPriority { get; private set; }
-        public DateTime CreatedDate { get; private set; } = DateTime.UtcNow;
+        public DateOnly CreatedDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
 
         public void AddAnswer(string AnswerText,Guid sender)
         {
@@ -79,13 +79,13 @@ namespace ProjectManagement.Domain.Entities
                 throw new Exception("Task açıklaması boş olamaz");
             this.Description = description;
         }
-        public void UpdateDeadlineTime (DateTime? deadlineTime)
+        public void UpdateDeadlineTime (DateOnly? deadlineTime)
         {
             if(!deadlineTime.HasValue)
             {
                 return;
             }
-            if(deadlineTime.Value<DateTime.UtcNow)
+            if (deadlineTime.Value < DateOnly.FromDateTime(DateTime.UtcNow))
             {
                 throw new Exception("deadline zamanı şimdiki zamandan geride olamaz");
             }

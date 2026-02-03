@@ -32,6 +32,12 @@
     <Project Path="src/Modules/Report/Report.Infrastructure/Report.Infrastructure.csproj" Id="cd57ab1b-356c-4bea-9cb6-187d197af56b" />
     <Project Path="src/Modules/Report/Report.Persistence/Report.Persistence.csproj" Id="f852ed05-60b9-4317-ae04-51c5b3b475b0" />
   </Folder>
+  <Folder Name="/src/Modules/Stats/">
+    <Project Path="src/Modules/Stats/Stats.Application/Stats.Application.csproj" Id="a901dbae-4eb6-42b6-9098-8967275f843a" />
+    <Project Path="src/Modules/Stats/Stats.Domain/Stats.Domain.csproj" Id="c222d57e-f405-4c48-82ce-ca0ca2ffc6a4" />
+    <Project Path="src/Modules/Stats/Stats.Infrastructure/Stats.Infrastructure.csproj" Id="f83cbf9a-bd73-4cef-9111-67244eadd2bc" />
+    <Project Path="src/Modules/Stats/Stats.Persistence/Stats.Persistence.csproj" Id="58f6fbd2-c50a-445f-8b83-7eaf1f8c6d6c" />
+  </Folder>
   <Folder Name="/src/Modules/Tenant/">
     <Project Path="src/Modules/Tenant/Tenant.Application/Tenant.Application.csproj" Id="0eb12f4b-3438-43b8-b8f2-95c816bef03c" />
     <Project Path="src/Modules/Tenant/Tenant.Domain/Tenant.Domain.csproj" Id="29bd084f-6832-4ea6-9281-1172b3a8b8bc" />

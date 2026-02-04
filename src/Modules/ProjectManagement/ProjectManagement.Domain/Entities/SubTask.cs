@@ -9,8 +9,9 @@ namespace ProjectManagement.Domain.Entities
         public Guid AssignedUserId {  get; private set; }
         public int TaskStatusId { get; private set; }
         public TaskStatus TaskStatus { get; private set; }
-
-        public Subtask(string description, Guid assignedUserId, int taskStatusId, string taskTitle)
+        public Guid TaskId { get; private set; }
+        public Task Task { get; private set; }
+        public Subtask(string description, Guid assignedUserId, int taskStatusId, string taskTitle, Guid taskId)
         {
             if (string.IsNullOrWhiteSpace(taskTitle))
             {
@@ -24,6 +25,7 @@ namespace ProjectManagement.Domain.Entities
             AssignedUserId = assignedUserId;
             TaskStatusId = taskStatusId;
             TaskTitle = taskTitle;
+            TaskId = taskId;
         }
         private List<SubTaskAnswer> Answers { get; set; } = new();
         public IReadOnlyCollection<SubTaskAnswer> subTaskAnswers => Answers;

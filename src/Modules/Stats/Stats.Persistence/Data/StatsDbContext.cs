@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Stats.Persistence.Data.DataConfiguration;
 
 namespace Stats.Persistence.Data
 {
@@ -11,6 +12,13 @@ namespace Stats.Persistence.Data
         protected StatsDbContext()
         {
         }
+        
         public DbSet<Domain.Entities.WorkerStats> UserStats { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new WorkerStatsConfiguration());
+            base.OnModelCreating(modelBuilder);
         }
+    }
 }

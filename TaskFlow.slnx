@@ -26,12 +26,7 @@
     <Project Path="src/Modules/ProjectManagement/ProjectManagement.Domain/ProjectManagement.Domain.csproj" Id="5ae94238-5436-4392-96e2-dd15135d88f0" />
     <Project Path="src/Modules/ProjectManagement/ProjectManagement.Infrastructure/ProjectManagement.Infrastructure.csproj" Id="48a82398-5d31-405c-b78a-96a99e467430" />
   </Folder>
-  <Folder Name="/src/Modules/Report/">
-    <Project Path="src/Modules/Report/Report.Application/Report.Application.csproj" Id="4e0f6675-7f3b-45d2-b8dc-52bb137930a1" />
-    <Project Path="src/Modules/Report/Report.Domain/Report.Domain.csproj" Id="dd3a92d9-80e3-4d64-8a3c-927e3be9c4be" />
-    <Project Path="src/Modules/Report/Report.Infrastructure/Report.Infrastructure.csproj" Id="cd57ab1b-356c-4bea-9cb6-187d197af56b" />
-    <Project Path="src/Modules/Report/Report.Persistence/Report.Persistence.csproj" Id="f852ed05-60b9-4317-ae04-51c5b3b475b0" />
-  </Folder>
+  <Folder Name="/src/Modules/Report/" />
   <Folder Name="/src/Modules/Stats/">
     <Project Path="src/Modules/Stats/Stats.Application/Stats.Application.csproj" Id="a901dbae-4eb6-42b6-9098-8967275f843a" />
     <Project Path="src/Modules/Stats/Stats.Domain/Stats.Domain.csproj" Id="c222d57e-f405-4c48-82ce-ca0ca2ffc6a4" />

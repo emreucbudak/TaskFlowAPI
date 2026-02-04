@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\TaskFlow.BuildingBlocks\TaskFlow.BuildingBlocks.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entities" />
-  </ItemGroup>
-
 </Project>

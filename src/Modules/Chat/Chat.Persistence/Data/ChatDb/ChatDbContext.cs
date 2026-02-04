@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Chat.Domain.Entities;
+using Chat.Persistence.Data.DataConfiguration;
 
 namespace Chat.Persistence.Data.ChatDb
 {
@@ -13,14 +14,7 @@ namespace Chat.Persistence.Data.ChatDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Message>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Content).IsRequired();
-                entity.HasIndex(e => new { e.SenderId, e.ReceiverId });
-                entity.HasIndex(e => e.GroupId);
-            });
-
+            modelBuilder.ApplyConfiguration(new MessageConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -13,7 +13,6 @@ namespace ProjectManagement.Infrastructure.Data.DataConfiguration
             builder.Property(x => x.TaskTitle).IsRequired().HasMaxLength(200);
             builder.Property(x => x.Description).IsRequired();
 
-            // Adding requested indexes
             builder.HasIndex(x => x.TaskId);
             builder.HasIndex(x => x.AssignedUserId);
             builder.HasIndex(x => x.TaskStatusId);

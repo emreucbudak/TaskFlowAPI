@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Notification.Domain.Models;
+using Notification.Persistence.Data.DataConfiguration;
 
 namespace Notification.Infrastructure.Data.NotificationDb
 {
@@ -16,14 +17,8 @@ namespace Notification.Infrastructure.Data.NotificationDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new NotificationMessageConfiguration());
             base.OnModelCreating(modelBuilder);
-
-            var notification = modelBuilder.Entity<NotificationMessage>();
-
-            notification.HasIndex(n => new { n.ReceiverUserId, n.SendTime })
-                .IsDescending(false, true);
-
-
         }
     }
 }

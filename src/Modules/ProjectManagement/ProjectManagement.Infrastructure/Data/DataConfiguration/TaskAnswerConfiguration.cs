@@ -12,7 +12,7 @@ namespace ProjectManagement.Infrastructure.Data.DataConfiguration
 
             builder.Property(x => x.AnswerText).IsRequired();
 
-            // Adding requested indexes
+ 
             builder.HasIndex(x => x.SenderId);
             builder.HasIndex(x => x.TaskId);
             builder.HasIndex(x => x.CreatedDate);

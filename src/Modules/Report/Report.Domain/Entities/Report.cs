@@ -4,33 +4,20 @@ namespace Report.Domain.Entities
 {
     public class Report : BaseEntity
     {
-        public string Title { get; private set; }
-        public string Content { get; private set; }
-        public DateTime CreatedDate { get; private set; }
-        public Guid RequesterUserId { get; private set; }
-        public ReportType Type { get; private set; }
+        public int ReportTopicId { get; set; }
+        public ReportTopic ReportTopic { get; set; }
+        public string Description { get; set; }
+        public Guid UserId { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        private Report() { }
-
-        public Report(string title, string content, Guid requesterUserId, ReportType type)
+        public static Report Create(int topicId, string description, Guid userId)
         {
-            Title = title;
-            Content = content;
-            RequesterUserId = requesterUserId;
-            Type = type;
-            CreatedDate = DateTime.UtcNow;
+            return new Report
+            {
+                ReportTopicId = topicId,
+                Description = description,
+                UserId = userId
+            };
         }
-
-        public void UpdateContent(string newContent)
-        {
-            Content = newContent;
-        }
-    }
-
-    public enum ReportType
-    {
-        Performance,
-        TaskSummary,
-        ProjectStatus
     }
 }

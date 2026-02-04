@@ -1,24 +1,20 @@
 using FluentValidation;
-using Report.Domain.Entities;
 
 namespace Report.Application.Validations
 {
-    public class ReportValidator : AbstractValidator<Domain.Entities.Report>
+    public class ReportValidator : AbstractValidator<Report.Domain.Entities.Report>
     {
         public ReportValidator()
         {
-            RuleFor(x => x.Title)
-                .NotEmpty().WithMessage("Rapor başlığı boş olamaz.")
-                .MaximumLength(200).WithMessage("Rapor başlığı 200 karakterden fazla olamaz.");
+            RuleFor(r => r.Description)
+                .NotEmpty().WithMessage("Açıklama boş olamaz.")
+                .MinimumLength(10).WithMessage("Açıklama en az 10 karakter olmalıdır.");
 
-            RuleFor(x => x.Content)
-                .NotEmpty().WithMessage("Rapor içeriği boş olamaz.");
+            RuleFor(r => r.ReportTopicId)
+                .GreaterThan(0).WithMessage("Geçerli bir rapor konusu seçilmelidir.");
 
-            RuleFor(x => x.RequesterUserId)
-                .NotEmpty().WithMessage("Raporu talep eden kullanıcı bilgisi zorunludur.");
-            
-            RuleFor(x => x.Type)
-                .IsInEnum().WithMessage("Geçersiz rapor türü.");
+            RuleFor(r => r.UserId)
+                .NotEmpty().WithMessage("Kullanıcı ID'si boş olamaz.");
         }
     }
 }

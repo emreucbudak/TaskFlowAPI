@@ -1,8 +1,9 @@
-﻿namespace Report.Domain.Entities
+using TaskFlow.BuildingBlocks.Common;
+
+namespace Report.Domain.Entities
 {
-    public class ReportTopic
+    public class ReportTopic : BaseEntity<int>
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public string TopicName { get; set; }
     }
 }

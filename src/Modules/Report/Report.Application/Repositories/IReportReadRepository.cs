@@ -1,12 +1,14 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+using Microsoft.EntityFrameworkCore.Query;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace Report.Application.Repositories
 {
     public interface IReportReadRepository
     {
-        Task<PagedResult<Domain.Entities.Report>> GetAllReportByCompanyId(Guid companyId, int pageSize,
+        Task<Domain.Entities.Report?> GetByIdAsync(bool trackChanges, Guid id, Func<IQueryable<Domain.Entities.Report>, IIncludableQueryable<Domain.Entities.Report, object>>? inc = null);
+        Task<PagedResult<Domain.Entities.Report>> GetAllAsync(int pageSize,
             int page = 1,
-            bool trackChanges = false);
-        Task<Domain.Entities.Report> GetReportById(Guid reportId, bool trackChanges = false);
+            bool trackChanges = false,
+            Func<IQueryable<Domain.Entities.Report>, IIncludableQueryable<Domain.Entities.Report, object>>? inc = null);
     }
 }

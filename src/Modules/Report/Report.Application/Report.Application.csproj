@@ -8,15 +8,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Report.Domain\Report.Domain.csproj" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="FlashMediator" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories" />
-    <Folder Include="Features" />
-    <Folder Include="Validations" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
   </ItemGroup>
 
 </Project>

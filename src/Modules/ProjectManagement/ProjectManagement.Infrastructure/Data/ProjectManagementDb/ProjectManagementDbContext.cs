@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagement.Infrastructure.Data.DataConfiguration;
+
 namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
 {
     public class ProjectManagementDbContext : DbContext
@@ -19,6 +21,9 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new TaskConfiguration());
+            modelBuilder.ApplyConfiguration(new SubtaskConfiguration());
+            modelBuilder.ApplyConfiguration(new TaskAnswerConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

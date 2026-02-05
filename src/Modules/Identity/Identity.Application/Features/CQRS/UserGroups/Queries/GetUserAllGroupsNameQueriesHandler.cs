@@ -15,7 +15,7 @@ namespace Identity.Application.Features.CQRS.UserGroups.Queries
         }
         public async Task<List<string>> Handle(GetUserAllGroupsNameQueriesRequest request, CancellationToken cancellationToken)
         {
-            var groups = await _readRepository.GetAllAsync(false);
+            var groups = await _readRepository.GetAllAsync(request.PageSize,request.PageNumber,false);
             var userGroupsNames = groups.Where(g => g.Users.Any(ug => ug.UserId == request.userId))
                                         .Select(g => g.Name)
                                         .ToList();

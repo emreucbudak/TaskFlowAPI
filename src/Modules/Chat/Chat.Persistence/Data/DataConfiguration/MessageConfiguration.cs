@@ -11,13 +11,12 @@ namespace Chat.Persistence.Data.DataConfiguration
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Content).IsRequired();
 
-            // 1. GroupId + SendTime
+        
             builder.HasIndex(e => new { e.GroupId, e.SendTime });
 
-            // 2. ReceiverId + SenderId + SendTime
+  
             builder.HasIndex(e => new { e.ReceiverId, e.SenderId, e.SendTime });
 
-            // 3. ReceiverId + IsRead
             builder.HasIndex(e => new { e.ReceiverId, e.IsRead });
         }
     }

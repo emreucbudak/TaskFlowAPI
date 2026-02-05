@@ -7,5 +7,6 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Create
     {
         public string PlanName { get; set; }
         public PlanProperties PlanProperties { get; set; }
+        public int PlanPrice { get; set; }
     }
 }

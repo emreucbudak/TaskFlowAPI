@@ -24,7 +24,7 @@ namespace Identity.Application.Features.CQRS.Company.Command.Delete
             {
                 throw new CompanyNotFoundExceptions();
             }
-            await _companyWriteRepository.DeleteAsync(company);
+             _companyWriteRepository.DeleteAsync(company);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         }

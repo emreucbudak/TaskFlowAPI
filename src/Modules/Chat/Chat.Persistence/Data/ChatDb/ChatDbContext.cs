@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Chat.Domain.Entities;
-using Chat.Persistence.Data.DataConfiguration;
+using Chat.Persistence.Data.Configurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Persistence.Data.ChatDb
 {

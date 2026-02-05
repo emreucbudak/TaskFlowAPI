@@ -26,7 +26,7 @@ namespace Identity.Application.Features.CQRS.Department.Command.Delete
             {
                 throw new DepartmentNotFoundExceptions();
             }
-            await _writeRepository.DeleteAsync(department);
+             _writeRepository.DeleteAsync(department);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 

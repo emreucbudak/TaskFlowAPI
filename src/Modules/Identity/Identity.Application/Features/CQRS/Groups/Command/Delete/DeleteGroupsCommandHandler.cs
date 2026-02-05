@@ -27,7 +27,7 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
             {
                 throw new GroupsNotFoundExceptions();
             }
-            await _writeRepository.DeleteAsync(groups);
+            _writeRepository.DeleteAsync(groups);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

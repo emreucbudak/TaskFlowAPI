@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -17,9 +17,9 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
 
         public async Task Handle(CreateTasksCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = new Domain.Entities.Task(request.TaskName, request.Description, request.DeadlineTime);
+            var task = new Domain.Entities.Task(request.TaskName, request.Description, DateOnly.FromDateTime(request.DeadlineTime),DateOnly.FromDateTime(DateTime.UtcNow));
             await _writeRepository.AddTask(task);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

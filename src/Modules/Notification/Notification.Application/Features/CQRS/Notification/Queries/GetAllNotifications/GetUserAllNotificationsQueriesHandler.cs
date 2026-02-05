@@ -1,9 +1,10 @@
 ﻿using FlashMediator;
 using Notification.Application.Repositories;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace Notification.Application.Features.CQRS.Notification.Queries.GetAllNotifications
 {
-    public class GetUserAllNotificationsQueriesHandler : IRequestHandler<GetUserAllNotificationsQueriesRequest, List<GetUserAllNotificationsQueriesResponse>>
+    public class GetUserAllNotificationsQueriesHandler : IRequestHandler<GetUserAllNotificationsQueriesRequest, PagedResult<GetUserAllNotificationsQueriesResponse>>
     {
         private readonly INotificationReadRepository _notificationReadRepository;
 
@@ -12,16 +13,22 @@ namespace Notification.Application.Features.CQRS.Notification.Queries.GetAllNoti
             _notificationReadRepository = notificationReadRepository;
         }
 
-        public async Task<List<GetUserAllNotificationsQueriesResponse>> Handle(GetUserAllNotificationsQueriesRequest request, CancellationToken cancellationToken)
+        public async Task<PagedResult<GetUserAllNotificationsQueriesResponse>> Handle(GetUserAllNotificationsQueriesRequest request, CancellationToken cancellationToken)
         {
-            var notifications = await _notificationReadRepository.GetByUserIdAsync(trackChanges:false,userId:request.userId,take:request.Take);
-            return notifications.Select(n => new GetUserAllNotificationsQueriesResponse
+            var notifications = await _notificationReadRepository.GetByUserIdAsync(trackChanges:false,userId:request.userId,page:request.PageNumber,pageSize:request.PageSize);
+            return new PagedResult<GetUserAllNotificationsQueriesResponse>
             {
-                Title = n.Title,
-                Description = n.Description,
-                SendTime = n.SendTime,
-                IsRead = n.IsRead
-            }).ToList();
+                Items = notifications.Items.Select(n => new GetUserAllNotificationsQueriesResponse
+                {
+                    Title = n.Title,
+                    Description = n.Description,
+                    SendTime = n.SendTime,
+                    IsRead = n.IsRead
+                }).ToList(),
+                TotalCount = notifications.TotalCount,
+                Page = notifications.Page,
+                PageSize = notifications.PageSize
+            };
         }
     }
 }

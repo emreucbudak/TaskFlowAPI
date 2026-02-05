@@ -4,7 +4,7 @@ namespace Tenant.Infrastructure.Data.TenantDb
 {
     public class TenantDbContext : DbContext
     {
-        public TenantDbContext(DbContextOptions options) : base(options)
+        public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options)
         {
         }
 
@@ -13,5 +13,11 @@ namespace Tenant.Infrastructure.Data.TenantDb
         }
         public DbSet<Tenant.Domain.Entities.CompanyPlan> companyPlans { get; set; }
         public DbSet<Tenant.Domain.Entities.PlanProperties> planProperties { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("Tenant");
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

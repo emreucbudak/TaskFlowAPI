@@ -19,8 +19,8 @@ namespace ProjectManagement.Infrastructure.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped(typeof(IProjectManagementReadRepository<>), typeof(ProjectManagementReadRepository<>));
-            services.AddScoped(typeof(IProjectManagementWriteRepository<>), typeof(ProjectManagementWriteRepository<>));
+            services.AddScoped<IProjectManagementReadRepository, ProjectManagementReadRepository>();
+            services.AddScoped<IProjectManagementWriteRepository, ProjectManagementWriteRepository>();
 
             return services;
         }

@@ -88,7 +88,7 @@ namespace Identity.Infrastructure.Repository
             }
         }
 
-        public async Task<T?> GetByIdAsync(
+        public async Task<T> GetByIdAsync(
             bool trackChanges,
             TKey id,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)

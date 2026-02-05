@@ -6,7 +6,7 @@ namespace Identity.Infrastructure.Data.IdentityDb
 {
     public class IdentityManagementDbContext : IdentityDbContext<Domain.Entities.User, Domain.Entities.Roles, Guid>
     {
-        public IdentityManagementDbContext(DbContextOptions options) : base(options)
+        public IdentityManagementDbContext(DbContextOptions<IdentityManagementDbContext> options) : base(options)
         {
         }
 
@@ -21,5 +21,10 @@ namespace Identity.Infrastructure.Data.IdentityDb
         public DbSet<Domain.Entities.GroupRoles> GroupRoles { get; set; }
         public DbSet<Domain.Entities.Department> Departments { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("Identity");
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

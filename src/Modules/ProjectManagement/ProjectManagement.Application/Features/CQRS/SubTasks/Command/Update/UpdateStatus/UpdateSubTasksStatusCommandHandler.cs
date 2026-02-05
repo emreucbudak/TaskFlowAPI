@@ -1,5 +1,6 @@
 ﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
+using ProjectManagement.Domain.Entities;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.UpdateStatus
@@ -15,7 +16,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(UpdateSubTasksStatusCommandRequest request, CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task Handle(UpdateSubTasksStatusCommandRequest request, CancellationToken cancellationToken)
         {
             var subTask = await readRepository.GetTask(request.TasksId, true);
             subTask.UpdateTaskStatus(request.TaskStatusId);

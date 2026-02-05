@@ -1,0 +1,26 @@
+@echo off
+echo Generating migrations...
+
+echo Identity...
+dotnet ef migrations add Initial_Modules --project src\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context IdentityManagementDbContext
+
+echo Tenant...
+dotnet ef migrations add Initial_Modules --project src\Modules\Tenant\Tenant.Infrastructure\Tenant.Infrastructure.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context TenantDbContext
+
+echo Chat...
+dotnet ef migrations add Initial_Modules --project src\Modules\Chat\Chat.Persistence\Chat.Persistence.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context ChatDbContext
+
+echo Notification...
+dotnet ef migrations add Initial_Modules --project src\Modules\Notification\Notification.Persistence\Notification.Persistence.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context NotificationDbContext
+
+echo ProjectManagement...
+dotnet ef migrations add Initial_Modules --project src\Modules\ProjectManagement\ProjectManagement.Infrastructure\ProjectManagement.Infrastructure.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context ProjectManagementDbContext
+
+echo Stats...
+dotnet ef migrations add Initial_Modules --project src\Modules\Stats\Stats.Persistence\Stats.Persistence.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context StatsDbContext
+
+echo Report...
+dotnet ef migrations add Initial_Modules --project src\Modules\Report\Report.Persistence\Report.Persistence.csproj --startup-project src\Taskflow.API\Taskflow.Presentation\Taskflow.Presentation.csproj --context ReportDbContext
+
+echo Done.
+pause

@@ -1,5 +1,6 @@
 ﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
+using ProjectManagement.Domain.Entities;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetAll
 {

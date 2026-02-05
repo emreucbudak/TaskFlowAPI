@@ -1,6 +1,8 @@
-﻿namespace Tenant.Domain.Entities
+﻿using TaskFlow.BuildingBlocks.Common;
+
+namespace Tenant.Domain.Entities
 {
-    public class PlanProperties
+    public class PlanProperties : BaseEntity
     {
         public PlanProperties(int peopleAddedLimit, int teamLimit, bool isDailyPlannerEnabled, bool isIncludeTaskPriorityCategory, bool isDeadlineNotificationEnabled, bool isIncludeAddTaskNotifications)
         {

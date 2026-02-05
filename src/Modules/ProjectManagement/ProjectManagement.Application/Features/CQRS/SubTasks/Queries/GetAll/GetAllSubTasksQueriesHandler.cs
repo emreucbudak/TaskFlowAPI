@@ -5,7 +5,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
 {
     public class GetAllSubTasksQueriesHandler : IRequestHandler<GetAllSubTasksQueriesRequest, List<GetAllSubTasksQueriesResponse>>
     {
-        private readonly IProjectManagementReadRepository _repository;
+        private readonly IProjectManagementReadRepository    _repository;
 
         public GetAllSubTasksQueriesHandler(IProjectManagementReadRepository repository)
         {

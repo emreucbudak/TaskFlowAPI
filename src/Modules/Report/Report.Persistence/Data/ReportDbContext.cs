@@ -16,6 +16,7 @@ namespace Report.Persistence.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("Report");
             modelBuilder.ApplyConfiguration(new ReportTopicDataConfiguration());
             modelBuilder.ApplyConfiguration(new ReportConfiguration());
 

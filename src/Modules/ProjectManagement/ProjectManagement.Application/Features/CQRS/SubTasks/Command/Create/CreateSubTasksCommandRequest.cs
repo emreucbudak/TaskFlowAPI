@@ -8,5 +8,6 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         public string Description { get; init; }
         public Guid AssignedUserId  { get; init; }
         public string TaskTitle { get; init; }
+
     }
 }

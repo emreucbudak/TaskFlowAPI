@@ -14,6 +14,7 @@ namespace Chat.Persistence.Data.ChatDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("Chat");
             modelBuilder.ApplyConfiguration(new MessageConfiguration());
             base.OnModelCreating(modelBuilder);
         }

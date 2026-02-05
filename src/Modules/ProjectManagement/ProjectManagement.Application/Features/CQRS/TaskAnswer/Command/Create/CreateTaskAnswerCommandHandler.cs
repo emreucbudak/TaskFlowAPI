@@ -15,12 +15,12 @@ namespace ProjectManagement.Application.Features.CQRS.TaskAnswer.Command.Create
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(CreateTaskAnswerCommandRequest request, CancellationToken cancellationToken)
+
+         async System.Threading.Tasks.Task IRequestHandler<CreateTaskAnswerCommandRequest>.Handle(CreateTaskAnswerCommandRequest request, CancellationToken cancellationToken)
         {
             var task = await _repository.GetTask(request.TaskId, true);
-            task.AddAnswer(request.AnswerText, request.SenderId);
+            task.AddAnswer(request.AnswerText, request.SenderId, request.TaskId);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
         }
     }
 }

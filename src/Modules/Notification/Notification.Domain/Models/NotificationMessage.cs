@@ -4,12 +4,12 @@ namespace Notification.Domain.Models
 {
     public class NotificationMessage : BaseEntity
     {
-        public NotificationMessage(string title, string description, DateTime sendTime, bool ısRead, Guid receiverUserId)
+        public NotificationMessage(string title, string description, DateTime sendTime, bool isRead, Guid receiverUserId)
         {
             Title = title;
             Description = description;
             SendTime = sendTime;
-            IsRead = ısRead;
+            IsRead = isRead;
             ReceiverUserId = receiverUserId;
         }
 
@@ -18,5 +18,11 @@ namespace Notification.Domain.Models
         public DateTime SendTime { get; private set; }
         public bool IsRead { get; private set; }
         public Guid ReceiverUserId { get; private set; }
+        public void MarkAsRead()
+        {
+            IsRead = true;
         }
+
+
+    }
 }

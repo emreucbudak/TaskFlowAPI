@@ -1,7 +1,11 @@
 using Chat.Persistence.Extensions;
 using FlashMediator;
 using FluentValidation;
+using Identity.Domain.Entities;
+using Identity.Infrastructure.Data.IdentityDb;
 using Identity.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Notification.Persistence.Extensions;
 using ProjectManagement.Infrastructure.Extensions;
 using Report.Persistence.Extensions;
@@ -30,7 +34,34 @@ builder.Services.AddReportModule(builder.Configuration);
 builder.Services.AddStatsModule(builder.Configuration);
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddFlashMediator(typeof(Program).Assembly);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWTSecretKey:SecretKey"])),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
+builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
+{
+    opt.Password.RequireDigit = true;
+    opt.Password.RequireLowercase = true;
+    opt.Password.RequireUppercase = true;
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.Password.RequiredLength = 8;
+    opt.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<IdentityManagementDbContext>()
+    .AddDefaultTokenProviders();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -39,6 +70,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

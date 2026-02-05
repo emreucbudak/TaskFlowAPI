@@ -2,10 +2,11 @@
 using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.Tasks.Queries.DTOS;
 using ProjectManagement.Application.Repositories;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
 {
-    public class GetAllTasksQueriesHandler : IRequestHandler<GetAllTasksQueriesRequest, List<GetAllTasksQueriesResponse>>
+    public class GetAllTasksQueriesHandler : IRequestHandler<GetAllTasksQueriesRequest, PagedResult<GetAllTasksQueriesResponse>>
     {
         private readonly IProjectManagementReadRepository _repository;
 
@@ -14,29 +15,36 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
             _repository = repository;
         }
 
-        public async Task<List<GetAllTasksQueriesResponse>> Handle(GetAllTasksQueriesRequest request, CancellationToken cancellationToken)
+        public async Task<PagedResult<GetAllTasksQueriesResponse>> Handle(GetAllTasksQueriesRequest request, CancellationToken cancellationToken)
         {
-            var tasks = await _repository.GetAllTasks(false);
-            return tasks.Select(x=> new GetAllTasksQueriesResponse()
+            var tasks = await _repository.GetAllTasks(false,request.pageNumber,request.pageSize);
+            return new PagedResult<GetAllTasksQueriesResponse>
             {
-                TaskName = x.TaskName,
-                DeadlineTime = x.DeadlineTime,
-                Description = x.Description,
-                StatusName = x.GetTaskStatus(),
-                CategoryName = x.GetTaskPriorityCategory(),
-                TaskAnswers = x.taskAnswers.Select(x=> new TaskAnswerDTO()
+                Items = tasks.Select(t => new GetAllTasksQueriesResponse
                 {
-                    AnswerText = x.AnswerText,
-                    SenderId = x.SenderId,
+                    TaskName = t.TaskName,
+                    Description = t.Description,
+                    DeadlineTime = t.DeadlineTime,
+                    StatusName = t.GetTaskStatus(),
+                    CategoryName = t.GetTaskPriorityCategory(),
+                    SubTasks = t.GetAllSubTasks().Select(st => new SubTaskDTO
+                    {
+                        TaskTitle = st.TaskTitle,
+                        Description = st.Description,
+                        AssignedUserId = st.AssignedUserId
+                    }).ToList(),
+                    TaskAnswers = t.GetAllTaskAnwers().Select(ta => new TaskAnswerDTO
+                    {
+                        AnswerText = ta.AnswerText,
+                        SenderId = ta.SenderId
+                    }).ToList()
                 }).ToList(),
-                SubTasks = x.subtask.Select(x=> new SubTaskDTO()
-                {
-                    Description = x.Description,
-                    AssignedUserId = x.AssignedUserId,
-                    TaskTitle = x.TaskTitle,
-                    StatusName = x.GetTaskStatus()
-                }).ToList(),                
-            }).ToList();
+                TotalCount = tasks.Count(),
+                Page = request.pageNumber,
+                PageSize = request.pageSize,
+                
+            };
+
         }
     }
 }

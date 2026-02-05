@@ -20,21 +20,16 @@ namespace Notification.Persistence.Repositories
             ArgumentNullException.ThrowIfNull(notification);
 
             ValidateReceiverUserId(notification.ReceiverUserId);
-            ValidateContent(notification.Content);
+            ValidateContent(notification.Description);
             ValidateTitle(notification.Title);
 
-            if (notification.SendTime == default)
-            {
-                notification.SendTime = DateTime.UtcNow;
-            }
 
-            notification.IsRead = false;
+            notification.MarkAsRead(); 
 
             logger.LogInformation(
-                "Bildirim gönderiliyor - Alıcı: {UserId}, Tip: {Type}, İçerik Uzunluğu: {Length}",
+                "Bildirim gönderiliyor - Alıcı: {UserId}, İçerik Uzunluğu: {Length}",
                 notification.ReceiverUserId,
-                notification.Type ?? "Bilinmiyor",
-                notification.Content.Length);
+                notification.Description.Length);
 
             await context.notificationMessages.AddAsync(notification);
 
@@ -50,10 +45,9 @@ namespace Notification.Persistence.Repositories
             ValidateId(notification.Id);
 
             logger.LogWarning(
-                "Bildirim siliniyor - Id: {NotificationId}, Alıcı: {UserId}, Tip: {Type}",
+                "Bildirim siliniyor - Id: {NotificationId}, Alıcı: {UserId}",
                 notification.Id,
-                notification.ReceiverUserId,
-                notification.Type ?? "Bilinmiyor");
+                notification.ReceiverUserId);
 
             var entry = context.Entry(notification);
 

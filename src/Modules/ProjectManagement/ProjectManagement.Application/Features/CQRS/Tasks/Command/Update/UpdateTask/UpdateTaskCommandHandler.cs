@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -20,8 +20,8 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
             var getTask = await _repository.GetTask(request.TaskId, true);
             getTask.UpdateTaskName(request.TaskName);
             getTask.UpdateTaskDescription(request.Description);
-            getTask.UpdateDeadlineTime(request.DeadlineTime);
-            await unitOfWork.SaveChangesAsync();
+            getTask.UpdateDeadlineTime(DateOnly.FromDateTime(DateTime.UtcNow));
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             
 
         }

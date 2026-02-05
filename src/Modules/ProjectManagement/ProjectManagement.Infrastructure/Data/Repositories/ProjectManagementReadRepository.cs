@@ -1,46 +1,50 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Infrastructure.Data.ProjectManagementDb;
-using TaskFlow.BuildingBlocks.Common;
+using Task = ProjectManagement.Domain.Entities.Task;
 
 namespace ProjectManagement.Infrastructure.Data.Repositories
 {
-    public class ProjectManagementReadRepository<T>(
+    public class ProjectManagementReadRepository(
         ProjectManagementDbContext context,
-        ILogger<ProjectManagementReadRepository<T>> logger)
-        : IProjectManagementReadRepository<T>
-        where T : BaseEntity
+        ILogger<ProjectManagementReadRepository> logger)
+        : IProjectManagementReadRepository
     {
         private const int MaxPageSize = 100;
         private const int DefaultPageSize = 20;
         private const int MinPageSize = 1;
 
-        public async Task<List<T>> GetAllTasks(bool trackChanges, int pageSize)
+        public async Task<List<Task>> GetAllTasks(bool trackChanges, int pageNumber, int pageSize)
         {
+            if (pageNumber < 1)
+            {
+                logger.LogWarning("Geçersiz sayfa numarası {PageNumber}. 1 kullanılıyor", pageNumber);
+                pageNumber = 1;
+            }
+
             if (pageSize < MinPageSize)
             {
-                logger.LogWarning(
-                    "{EntityType} için geçersiz sayfa boyutu {PageSize}. Minimum değer kullanılıyor: {MinPageSize}",
-                    typeof(T).Name, pageSize, MinPageSize);
+                logger.LogWarning("Geçersiz sayfa boyutu {PageSize}. Minimum değer kullanılıyor: {MinPageSize}", pageSize, MinPageSize);
                 pageSize = MinPageSize;
             }
 
             if (pageSize > MaxPageSize)
             {
-                logger.LogWarning(
-                    "{EntityType} için sayfa boyutu {PageSize} maksimum değeri aşıyor. Kullanılan: {MaxPageSize}",
-                    typeof(T).Name, pageSize, MaxPageSize);
+                logger.LogWarning("Sayfa boyutu {PageSize} maksimum değeri aşıyor. Kullanılan: {MaxPageSize}", pageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
 
             try
             {
-                logger.LogInformation(
-                    "{EntityType} kayıtları getiriliyor. Sayfa Boyutu: {PageSize}, Takip: {TrackChanges}",
-                    typeof(T).Name, pageSize, trackChanges);
+                logger.LogInformation("Task kayıtları getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
+                     pageNumber, pageSize, trackChanges);
 
-                var query = context.Set<T>().AsQueryable();
+                var query = context.Tasks
+                    .Include(t => t.subtask)
+                        .ThenInclude(s => s.subTaskAnswers)
+                    .Include(t => t.taskAnswers)
+                    .AsQueryable();
 
                 if (!trackChanges)
                 {
@@ -48,67 +52,58 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 }
 
                 var results = await query
+                    .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
-                logger.LogInformation(
-                    "{Count} adet {EntityType} kaydı başarıyla getirildi",
-                    results.Count, typeof(T).Name);
+                logger.LogInformation("{Count} adet Task kaydı başarıyla getirildi", results.Count);
 
                 return results;
             }
             catch (OperationCanceledException)
             {
-                logger.LogWarning("{EntityType} sorgusu iptal edildi", typeof(T).Name);
+                logger.LogWarning("Task sorgusu iptal edildi");
                 throw;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex,
-                    "{EntityType} kayıtları getirilirken hata oluştu. Sayfa Boyutu: {PageSize}",
-                    typeof(T).Name, pageSize);
+                logger.LogError(ex, "Task kayıtları getirilirken hata oluştu. Sayfa: {PageNumber}, Boyut: {PageSize}", pageNumber, pageSize);
                 throw;
             }
         }
 
-        public async Task<T> GetTask(Guid id, bool trackChanges)
+        public async Task<Task> GetTask(Guid id, bool trackChanges)
         {
             if (id == Guid.Empty)
             {
-                logger.LogWarning(
-                    "{EntityType} için boş ID sağlandı",
-                    typeof(T).Name);
+                logger.LogWarning("Task için boş ID sağlandı");
                 throw new ArgumentException("ID boş olamaz", nameof(id));
             }
 
             try
             {
-                logger.LogInformation(
-                    "{EntityType} kaydı getiriliyor. ID: {Id}, Takip: {TrackChanges}",
-                    typeof(T).Name, id, trackChanges);
+                logger.LogInformation("Task kaydı getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
 
-                var query = context.Set<T>().AsQueryable();
+                var query = context.Tasks
+                    .Include(t => t.subtask)
+                        .ThenInclude(s => s.subTaskAnswers)
+                    .Include(t => t.taskAnswers)
+                    .AsQueryable();
 
                 if (!trackChanges)
                 {
                     query = query.AsNoTracking();
                 }
 
-                var entity = await query
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                var entity = await query.FirstOrDefaultAsync(x => x.Id == id);
 
                 if (entity == null)
                 {
-                    logger.LogWarning(
-                        "{EntityType} bulunamadı. ID: {Id}",
-                        typeof(T).Name, id);
-                    throw new KeyNotFoundException(
-                        $"{typeof(T).Name} bulunamadı. ID: {id}");
+                    logger.LogWarning("Task bulunamadı. ID: {Id}", id);
+                    throw new KeyNotFoundException($"Task bulunamadı. ID: {id}");
                 }
 
-                logger.LogInformation(
-                    "{EntityType} kaydı başarıyla getirildi. ID: {Id}",
-                    typeof(T).Name, id);
+                logger.LogInformation("Task kaydı başarıyla getirildi. ID: {Id}", id);
 
                 return entity;
             }
@@ -118,67 +113,12 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
             }
             catch (OperationCanceledException)
             {
-                logger.LogWarning(
-                    "{EntityType} sorgusu iptal edildi. ID: {Id}",
-                    typeof(T).Name, id);
+                logger.LogWarning("Task sorgusu iptal edildi. ID: {Id}", id);
                 throw;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex,
-                    "{EntityType} kaydı getirilirken hata oluştu. ID: {Id}",
-                    typeof(T).Name, id);
-                throw;
-            }
-        }
-        public async Task<List<T>> GetPagedAsync(
-            int pageNumber,
-            int pageSize,
-            bool trackChanges = false)
-        {
-            if (pageNumber < 1)
-            {
-                logger.LogWarning(
-                    "{EntityType} için geçersiz sayfa numarası {PageNumber}. 1 kullanılıyor",
-                    typeof(T).Name, pageNumber);
-                pageNumber = 1;
-            }
-
-            if (pageSize < MinPageSize || pageSize > MaxPageSize)
-            {
-                logger.LogWarning(
-                    "{EntityType} için geçersiz sayfa boyutu {PageSize}. Varsayılan kullanılıyor: {DefaultPageSize}",
-                    typeof(T).Name, pageSize, DefaultPageSize);
-                pageSize = DefaultPageSize;
-            }
-
-            try
-            {
-                var query = context.Set<T>().AsQueryable();
-
-                if (!trackChanges)
-                {
-                    query = query.AsNoTracking();
-                }
-
-                var totalCount = await query.CountAsync();
-
-                var items = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                logger.LogInformation(
-                    "{EntityType} sayfa {PageNumber} getirildi. Sayfa Boyutu: {PageSize}, Toplam: {TotalCount}",
-                    typeof(T).Name, pageNumber, pageSize, totalCount);
-
-                return items;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex,
-                    "{EntityType} sayfalama sırasında hata oluştu. Sayfa: {PageNumber}, Boyut: {PageSize}",
-                    typeof(T).Name, pageNumber, pageSize);
+                logger.LogError(ex, "Task kaydı getirilirken hata oluştu. ID: {Id}", id);
                 throw;
             }
         }

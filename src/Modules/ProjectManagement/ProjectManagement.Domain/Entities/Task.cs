@@ -39,9 +39,9 @@ namespace ProjectManagement.Domain.Entities
         public TaskPriorityCategory? TaskPriority { get; private set; }
         public DateOnly CreatedDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        public void AddAnswer(string AnswerText,Guid sender)
+        public void AddAnswer(string AnswerText,Guid sender,Guid taskId)
         {
-            var answer = new TaskAnswer(answerText:AnswerText,senderId:sender);
+            var answer = new TaskAnswer(answerText:AnswerText,senderId:sender,taskId:taskId);
             _answers.Add(answer);
         }
         public void UpdateTaskPriority (int taskPriority)
@@ -52,13 +52,13 @@ namespace ProjectManagement.Domain.Entities
         {
             this.TaskStatusId = taskStatusId;
         }
-        public void AddSubTask (string description,Guid AssignedUserId,string Title)
+        public void AddSubTask (string description,Guid AssignedUserId,string Title,Guid taskId)
         {
             if (TaskStatusId == 2)
             {
                 throw new InvalidOperationException("TAMAMLANMIŞ GÖREVE SUBTASK EKLENEMEZ");
             }
-            var subtask = new Subtask(description,AssignedUserId,1,Title);
+            var subtask = new Subtask(description,AssignedUserId,1,Title,taskId);
             _subtask.Add(subtask);
         }
         public void RemoveSubTask (Guid taskId)

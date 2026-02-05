@@ -5,7 +5,7 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
 {
     public class ProjectManagementDbContext : DbContext
     {
-        public ProjectManagementDbContext(DbContextOptions options) : base(options)
+        public ProjectManagementDbContext(DbContextOptions<ProjectManagementDbContext> options) : base(options)
         {
         }
 
@@ -21,6 +21,7 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("ProjectManagement");
             modelBuilder.ApplyConfiguration(new TaskConfiguration());
             modelBuilder.ApplyConfiguration(new SubtaskConfiguration());
             modelBuilder.ApplyConfiguration(new TaskAnswerConfiguration());

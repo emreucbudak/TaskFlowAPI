@@ -1,4 +1,4 @@
-﻿using FlashMediator.src.FlashMediator.Contracts;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -21,7 +21,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
         {
             var task = await readRepository.GetTask(request.Id, false);
              projectManagementWriteRepository.DeleteTask(task);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
 {
     public class UpdateSubTaskCommandHandler : IRequestHandler<UpdateSubTaskCommandRequest>
     {
-        private readonly IProjectManagementReadRepository _repository;
+        private readonly IProjectManagementReadRepository  _repository;
         private readonly IUnitOfWork unitOfWork;
 
         public UpdateSubTaskCommandHandler(IProjectManagementReadRepository repository, IUnitOfWork unitOfWork)

@@ -7,7 +7,7 @@ namespace ProjectManagement.Application.Features.CQRS.TaskAnswer.Command.Delete
 {
     public class DeleteTaskAnswerCommandHandler : IRequestHandler<DeleteTaskAnswerCommandRequest>
     {
-        private readonly IProjectManagementReadRepository readRepository;
+        private readonly IProjectManagementReadRepository    readRepository;
         private readonly IUnitOfWork unitOfWork;
 
         public DeleteTaskAnswerCommandHandler(IProjectManagementReadRepository readRepository, IUnitOfWork unitOfWork)

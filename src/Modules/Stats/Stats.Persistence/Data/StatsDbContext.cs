@@ -5,7 +5,7 @@ namespace Stats.Persistence.Data
 {
     public class StatsDbContext : DbContext
     {
-        public StatsDbContext(DbContextOptions options) : base(options)
+        public StatsDbContext(DbContextOptions<StatsDbContext> options) : base(options)
         {
         }
 
@@ -17,6 +17,7 @@ namespace Stats.Persistence.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("Stats");
             modelBuilder.ApplyConfiguration(new WorkerStatsConfiguration());
             base.OnModelCreating(modelBuilder);
         }

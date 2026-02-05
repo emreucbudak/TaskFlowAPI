@@ -6,7 +6,7 @@ namespace Notification.Infrastructure.Data.NotificationDb
 {
     public class NotificationDbContext : DbContext
     {
-        public NotificationDbContext(DbContextOptions options) : base(options)
+        public NotificationDbContext(DbContextOptions<NotificationDbContext> options) : base(options)
         {
         }
 
@@ -17,6 +17,7 @@ namespace Notification.Infrastructure.Data.NotificationDb
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("Notification");
             modelBuilder.ApplyConfiguration(new NotificationMessageConfiguration());
             base.OnModelCreating(modelBuilder);
         }

@@ -1,20 +1,13 @@
-﻿using Identity.Infrastructure.Data.IdentityDb;
+using Identity.Infrastructure.Data.IdentityDb;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Infrastructure.Data.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(IdentityManagementDbContext context) : IUnitOfWork
     {
-        private readonly IdentityManagementDbContext _context;
-
-        public UnitOfWork(IdentityManagementDbContext context)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            _context = context;
-        }
-
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            return await _context.SaveChangesAsync(cancellationToken);
+            return await context.SaveChangesAsync(cancellationToken);
         }
     }
 }

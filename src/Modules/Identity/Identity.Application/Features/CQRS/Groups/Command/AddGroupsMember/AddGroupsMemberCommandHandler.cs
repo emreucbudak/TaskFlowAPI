@@ -21,20 +21,41 @@ namespace Identity.Application.Features.CQRS.Groups.Command.AddGroupsMember
 
         public async Task Handle(AddGroupsMemberCommandRequest request, CancellationToken cancellationToken)
         {
-            var groups = await _groupsReadRepository.GetByIdAsync(true,request.GroupId);
-            if (groups is null)
+            try
+            {
+                var groups = await _groupsReadRepository.GetByIdAsync(true, request.GroupId);
+                if (groups is null)
+                {
+                    throw new GroupsNotFoundExceptions();
+                }
+
+                groups.AddUser(request.UserId, request.RolesId);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _identityProducer.PublishAsync("UserAddedToGroup", new
+                {
+                    GroupId = request.GroupId,
+                    UserId = request.UserId,
+                    RolesId = request.RolesId
+                });
+            }
+            catch (GroupsNotFoundExceptions)
             {
                 throw new GroupsNotFoundExceptions();
             }
-            groups.AddUser(request.UserId, request.RolesId);
-            await _identityProducer.PublishAsync("UserAddedToGroup", new
+            catch (ArgumentException ex)
             {
-                GroupId = request.GroupId,
-                UserId = request.UserId,
-                RolesId = request.RolesId
-            });
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+                throw new Exception(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Grup üyesi eklenirken beklenmedik bir hata oluştu: {ex.Message}");
+            }
         }
     }
 }

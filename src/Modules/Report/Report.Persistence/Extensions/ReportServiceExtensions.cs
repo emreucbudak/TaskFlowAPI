@@ -20,7 +20,7 @@ namespace Report.Persistence.Extensions
 
             services.AddScoped<IUnitOfWork, Data.UnitOfWork.UnitOfWork>();
             
-            // Repositories (Specific to Report model)
+
             services.AddScoped<IReportReadRepository, ReportReadRepository>();
             services.AddScoped<IReportWriteRepository, ReportWriteRepository>();
 

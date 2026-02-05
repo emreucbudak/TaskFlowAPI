@@ -18,7 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Chat\Chat.Persistence\Chat.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Notification\Notification.Persistence\Notification.Persistence.csproj" />
+    <ProjectReference Include="..\..\Modules\ProjectManagement\ProjectManagement.Infrastructure\ProjectManagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Report\Report.Persistence\Report.Persistence.csproj" />
+    <ProjectReference Include="..\..\Modules\Stats\Stats.Persistence\Stats.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Tenant\Tenant.Infrastructure\Tenant.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -3,11 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Identity.Application.Repositories;
 using Identity.Application.TokenService;
+using Identity.Application.Messaging;
 using Identity.Infrastructure.Data.IdentityDb;
 using Identity.Infrastructure.Data.UnitOfWork;
-using Identity.Infrastructure.Infrastructure.TokenService;
 using Identity.Infrastructure.Repository;
 using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Infrastructure.TokenService;
+using Identity.Infrastructure.Messaging;
+
 
 namespace Identity.Infrastructure.Extensions
 {
@@ -25,7 +28,8 @@ namespace Identity.Infrastructure.Extensions
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));
 
             services.Configure<TokenSettings>(configuration.GetSection("TokenSettings"));
-            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<ITokenService, Infrastructure.TokenService.TokenService>();
+            services.AddScoped<IIdentityProducer, IdentityProducer>();
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿namespace Identity.Infrastructure.Infrastructure.TokenService
+﻿namespace Identity.Infrastructure.TokenService
 {
     public class TokenSettings
     {

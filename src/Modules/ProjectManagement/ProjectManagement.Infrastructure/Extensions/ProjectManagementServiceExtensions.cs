@@ -7,6 +7,9 @@ using ProjectManagement.Infrastructure.Data.Repositories;
 using ProjectManagement.Infrastructure.Data.UnitOfWork;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
+using ProjectManagement.Application.Messaging;
+using ProjectManagement.Infrastructure.Messaging;
+
 namespace ProjectManagement.Infrastructure.Extensions
 {
     public static class ProjectManagementServiceExtensions
@@ -21,6 +24,8 @@ namespace ProjectManagement.Infrastructure.Extensions
 
             services.AddScoped<IProjectManagementReadRepository, ProjectManagementReadRepository>();
             services.AddScoped<IProjectManagementWriteRepository, ProjectManagementWriteRepository>();
+
+            services.AddScoped<IProjectManagementProducer, ProjectManagementProducer>();
 
             return services;
         }

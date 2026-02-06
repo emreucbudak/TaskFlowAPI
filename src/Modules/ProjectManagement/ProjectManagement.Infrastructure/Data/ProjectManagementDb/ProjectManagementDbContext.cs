@@ -18,6 +18,7 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
         public DbSet<Domain.Entities.TaskStatus> TaskStatuses { get; set; }
         public DbSet<Domain.Entities.Subtask> Subtasks { get; set; }
         public DbSet<Domain.Entities.SubTaskAnswer> SubTaskAnswers { get; set; }
+        public DbSet<Domain.Entities.IndividualTasks> IndividualTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

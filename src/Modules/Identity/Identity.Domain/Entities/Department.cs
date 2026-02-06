@@ -35,6 +35,19 @@ namespace Identity.Domain.Entities
             _users.Add(user);
         }
 
+        public void RemoveUser(User user)
+        {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user), "Çalışan null olamaz.");
+            }
+            if (_users.Any(u => u.Id == user.Id) is false)
+            {
+                throw new InvalidOperationException("Çalışan bu departmanın üyesi değil.");
+            }
+            _users.Remove(user);
+        }
+
 
     }
 }

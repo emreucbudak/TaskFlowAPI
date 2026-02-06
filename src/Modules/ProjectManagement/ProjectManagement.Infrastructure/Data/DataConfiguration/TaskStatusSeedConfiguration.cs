@@ -15,12 +15,16 @@ namespace ProjectManagement.Infrastructure.Data.DataConfiguration
             new Domain.Entities.TaskStatus()
             {
                 TaskStatusId = 2,
-                StatusName = "Tamamlandı"
+                StatusName = "Yapım Aşamasında"
             },
             new Domain.Entities.TaskStatus()
             {
                 TaskStatusId = 3,
                 StatusName = "Onay Bekliyor"
+            }, new Domain.Entities.TaskStatus()
+            {
+                TaskStatusId = 4,
+                StatusName = "Tamamlandı"
             });
         }
     }

@@ -1,4 +1,4 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Domain.Entities
 {
@@ -7,7 +7,7 @@ namespace ProjectManagement.Domain.Entities
         public SubTaskAnswer(string answerText, Guid senderId)
         {
             if (string.IsNullOrEmpty(answerText)) {
-                throw new Exception("AnswerText boş veya null olamaz");
+                throw new Exception("AnswerText bo� veya null olamaz");
             }
             AnswerText = answerText;
             SenderId = senderId;

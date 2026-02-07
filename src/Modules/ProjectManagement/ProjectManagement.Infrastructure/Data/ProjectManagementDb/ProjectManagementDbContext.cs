@@ -26,6 +26,7 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
             modelBuilder.ApplyConfiguration(new TaskConfiguration());
             modelBuilder.ApplyConfiguration(new SubtaskConfiguration());
             modelBuilder.ApplyConfiguration(new TaskAnswerConfiguration());
+            modelBuilder.ApplyConfiguration(new IndividualTaskConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -15,10 +15,10 @@ namespace Chat.Domain.Entities
         public bool isDelivered { get; private set; }
         public DateTime? DeliveredTime { get; private set; }
 
-        public Message(string content, bool ısRead, DateTime sendTime, Guid senderId, Guid receiverId, bool isDeleted, Guid? groupId, bool isEdited)
+        public Message(string content, bool isRead, DateTime sendTime, Guid senderId, Guid? receiverId, bool isDeleted, Guid? groupId, bool isEdited)
         {
             Content = content;
-            IsRead = ısRead;
+            IsRead = isRead;
             SendTime = sendTime;
             SenderId = senderId;
             ReceiverId = receiverId;

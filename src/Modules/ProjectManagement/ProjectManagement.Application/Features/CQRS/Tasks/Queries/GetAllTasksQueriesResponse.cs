@@ -10,7 +10,6 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
         public string StatusName { get; init; }
         public string CategoryName { get; init; }
         public List<SubTaskDTO> SubTasks { get; init; }
-        public List<TaskAnswerDTO> TaskAnswers { get; init; }
 
     }
 }

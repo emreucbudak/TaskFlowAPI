@@ -13,7 +13,6 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
         {
         }
         public DbSet<Domain.Entities.Task> Tasks { get; set; }
-        public DbSet<Domain.Entities.TaskAnswer> TaskAnswers { get; set; }
         public DbSet<Domain.Entities.TaskPriorityCategory> TaskPriorityCategories { get; set; }
         public DbSet<Domain.Entities.TaskStatus> TaskStatuses { get; set; }
         public DbSet<Domain.Entities.Subtask> Subtasks { get; set; }
@@ -25,7 +24,6 @@ namespace ProjectManagement.Infrastructure.Data.ProjectManagementDb
             modelBuilder.HasDefaultSchema("ProjectManagement");
             modelBuilder.ApplyConfiguration(new TaskConfiguration());
             modelBuilder.ApplyConfiguration(new SubtaskConfiguration());
-            modelBuilder.ApplyConfiguration(new TaskAnswerConfiguration());
             modelBuilder.ApplyConfiguration(new IndividualTaskConfiguration());
             base.OnModelCreating(modelBuilder);
         }

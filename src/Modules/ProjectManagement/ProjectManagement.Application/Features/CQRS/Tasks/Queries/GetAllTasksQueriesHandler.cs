@@ -32,11 +32,6 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
                         TaskTitle = st.TaskTitle,
                         Description = st.Description,
                         AssignedUserId = st.AssignedUserId
-                    }).ToList(),
-                    TaskAnswers = t.GetAllTaskAnwers().Select(ta => new TaskAnswerDTO
-                    {
-                        AnswerText = ta.AnswerText,
-                        SenderId = ta.SenderId
                     }).ToList()
                 }).ToList(),
                 TotalCount = tasks.Count(),

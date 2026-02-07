@@ -30,8 +30,6 @@ namespace ProjectManagement.Domain.Entities
         public string Description { get; private set; }
         public int TaskStatusId { get; private set; }
         public TaskStatus TaskStatus { get; private set; }
-        private readonly List<TaskAnswer> _answers = new();
-        public IReadOnlyCollection<TaskAnswer> taskAnswers => _answers; 
         private readonly List<Subtask> _subtask = new();
         public IReadOnlyCollection<Subtask> subtask => _subtask;
         public DateOnly DeadlineTime { get; private set; }
@@ -39,11 +37,6 @@ namespace ProjectManagement.Domain.Entities
         public TaskPriorityCategory? TaskPriority { get; private set; }
         public DateOnly CreatedDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        public void AddAnswer(string AnswerText,Guid sender,Guid taskId)
-        {
-            var answer = new TaskAnswer(answerText:AnswerText,senderId:sender,taskId:taskId);
-            _answers.Add(answer);
-        }
         public void UpdateTaskPriority (int taskPriority)
         {
             this.TaskPriorityCategoryId = taskPriority;
@@ -106,29 +99,9 @@ namespace ProjectManagement.Domain.Entities
             return subTaskAnswer.ToList();
 
         }
-        public void RemoveTaskAnswer (Guid AnswerId)
-        {
-            var taskAnswer = _answers.Where(x=> x.Id == AnswerId).FirstOrDefault();
-            ArgumentNullException.ThrowIfNull(taskAnswer);
-            _answers.Remove(taskAnswer);
-
-        }
-        public void UpdateTaskAnswer (Guid TaskId,string answerText)
-        {
-            var taskAnswer = _answers.Where(x => x.Id == TaskId).FirstOrDefault();
-            if (taskAnswer is null)
-            {
-                throw new Exception("TASKANSWER BULUNAMADI!");
-            }
-           taskAnswer.UpdateAnswerText(answerText);
-        }
         public List<Subtask> GetAllSubTasks()
         {
             return subtask.ToList();
-        }
-        public List<TaskAnswer> GetAllTaskAnwers ()
-        {
-            return taskAnswers.ToList();
         }
         public string GetTaskStatus()
         {

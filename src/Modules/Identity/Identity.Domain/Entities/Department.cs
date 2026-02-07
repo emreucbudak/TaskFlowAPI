@@ -12,8 +12,8 @@ namespace Identity.Domain.Entities
 
         public string Name { get; private set; }
         public Guid CompanyId { get; private set; }
-        private readonly List<User> _users = new();
-        public IReadOnlyCollection<User> Users => _users.AsReadOnly();
+        private readonly List<DepartmentMember> _departmentMembers = new();
+        public IReadOnlyCollection<DepartmentMember> DepartmentMembers => _departmentMembers.AsReadOnly();
         public void UpdateName(string newName)
         {
             if (string.IsNullOrWhiteSpace(newName))
@@ -22,30 +22,32 @@ namespace Identity.Domain.Entities
             }
             Name = newName;
         }
-        public void AddUser(User user)
+        public void AddUser(Guid userId, int roleId)
         {
-            if (user is null)
+            if (userId == Guid.Empty)
             {
-                throw new ArgumentNullException(nameof(user), "Çalışan null olamaz.");
+                throw new ArgumentException("Çalışan idsi boş olamaz.", nameof(userId));
             }
-            if(_users.Any(u => u.Id == user.Id))
+            if(_departmentMembers.Any(u => u.UserId == userId))
             {
-                throw new InvalidOperationException("Çalışan zaten gruba üye.");
+                throw new InvalidOperationException("Çalışan zaten departmana üye.");
             }
-            _users.Add(user);
+            var member = new DepartmentMember(userId, this.Id, roleId);
+            _departmentMembers.Add(member);
         }
 
-        public void RemoveUser(User user)
+        public void RemoveUser(Guid userId)
         {
-            if (user is null)
+            if (userId == Guid.Empty)
             {
-                throw new ArgumentNullException(nameof(user), "Çalışan null olamaz.");
+                throw new ArgumentException("Çalışan idsi boş olamaz.", nameof(userId));
             }
-            if (_users.Any(u => u.Id == user.Id) is false)
+            var member = _departmentMembers.FirstOrDefault(u => u.UserId == userId);
+            if (member == null)
             {
                 throw new InvalidOperationException("Çalışan bu departmanın üyesi değil.");
             }
-            _users.Remove(user);
+            _departmentMembers.Remove(member);
         }
 
 

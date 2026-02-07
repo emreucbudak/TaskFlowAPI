@@ -36,7 +36,7 @@ namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartm
             {
                 throw new DepartmentNotFoundExceptions();
             }
-            department.AddUser(user);
+            department.AddUser(user.Id, request.RoleId);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await identityProducer.PublishAsync("UserAddedToDepartment",new
             {

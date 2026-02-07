@@ -20,11 +20,14 @@ namespace Identity.Infrastructure.Data.IdentityDb
         public DbSet<Domain.Entities.GroupsMember> GroupsMembers { get; set; }
         public DbSet<Domain.Entities.GroupRoles> GroupRoles { get; set; }
         public DbSet<Domain.Entities.Department> Departments { get; set; }
+        public DbSet<Domain.Entities.DepartmentRole> DepartmentRoles { get; set; }
+        public DbSet<Domain.Entities.DepartmentMember> DepartmentMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Identity");
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityManagementDbContext).Assembly);
         }
     }
 }

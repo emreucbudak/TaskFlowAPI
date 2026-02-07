@@ -8,10 +8,10 @@ namespace Identity.Infrastructure.Data.ConfigurationData
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasOne(u => u.Department)
-                   .WithMany(d=> d.Users)
-                   .HasForeignKey(u => u.DepartmentId)
-                   .OnDelete(DeleteBehavior.SetNull);
+            builder.HasMany(u => u.DepartmentMembers)
+                   .WithOne(dm => dm.User)
+                   .HasForeignKey(dm => dm.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

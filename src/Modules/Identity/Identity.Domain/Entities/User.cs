@@ -14,9 +14,9 @@ namespace Identity.Domain.Entities
         public string Name { get; private set; }
         public Guid CompanyId { get; private set; }
         public Company Company { get; private set; }
-        public Guid? DepartmentId { get; private set; }
-        public Department? Department { get; private set; }
         public IReadOnlyCollection<GroupsMember> GroupsMembers => _groupsMembers.AsReadOnly();
+        private readonly List<DepartmentMember> _departmentMembers = new();
+        public IReadOnlyCollection<DepartmentMember> DepartmentMembers => _departmentMembers.AsReadOnly();
 
         public static User Create(string name, string email, Guid companyId)
         {
@@ -46,16 +46,22 @@ namespace Identity.Domain.Entities
             Name = name;
         }
 
-        public void AssignToDepartment(Guid departmentId)
+        public void AssignToDepartment(DepartmentMember member)
         {
-            if (departmentId == Guid.Empty)
-                throw new ArgumentException("Department ID cannot be empty", nameof(departmentId));
-            DepartmentId = departmentId;
+            if (member == null)
+                throw new ArgumentNullException(nameof(member));
+
+            if (_departmentMembers.Any(x => x.DepartmentId == member.DepartmentId))
+                throw new InvalidOperationException("User is already member of this department");
+
+            _departmentMembers.Add(member);
         }
 
-        public void RemoveFromDepartment()
+        public void RemoveFromDepartment(Guid departmentId)
         {
-            DepartmentId = null;
+             var member = _departmentMembers.FirstOrDefault(x => x.DepartmentId == departmentId);
+            if (member != null)
+                _departmentMembers.Remove(member);
         }
 
         public void AddToGroup(GroupsMember member)

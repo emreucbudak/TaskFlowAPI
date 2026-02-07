@@ -37,7 +37,7 @@ namespace Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDe
                 throw new DepartmentNotFoundExceptions();
             }
 
-            department.RemoveUser(user);
+            department.RemoveUser(user.Id);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

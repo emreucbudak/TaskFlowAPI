@@ -43,7 +43,6 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 var query = context.Tasks
                     .Include(t => t.subtask)
                         .ThenInclude(s => s.subTaskAnswers)
-                    .Include(t => t.taskAnswers)
                     .AsQueryable();
 
                 if (!trackChanges)
@@ -87,7 +86,6 @@ namespace ProjectManagement.Infrastructure.Data.Repositories
                 var query = context.Tasks
                     .Include(t => t.subtask)
                         .ThenInclude(s => s.subTaskAnswers)
-                    .Include(t => t.taskAnswers)
                     .AsQueryable();
 
                 if (!trackChanges)

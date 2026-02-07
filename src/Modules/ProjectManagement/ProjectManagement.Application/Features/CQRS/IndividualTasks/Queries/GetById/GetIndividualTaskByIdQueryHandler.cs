@@ -18,7 +18,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
             var task = await _readRepository.GetIndividualTask(request.Id, false);
             if (task == null)
             {
-                throw new IndividualTaskNotFoundException(request.Id);
+                throw new IndividualTaskNotFoundException();
             }
 
             return new GetIndividualTaskByIdQueryResponse(task.Id, task.AssignedUserId, task.TaskTitle, task.Description, task.Deadline);

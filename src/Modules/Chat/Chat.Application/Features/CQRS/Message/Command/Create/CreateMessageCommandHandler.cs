@@ -1,5 +1,4 @@
 using Chat.Application.Repositories;
-using Chat.Domain.Entities;
 using FlashMediator;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 

@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\Modules\Report\Report.Persistence\Report.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Stats\Stats.Persistence\Stats.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Tenant\Tenant.Infrastructure\Tenant.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Chat\Chat.Infrastructure\Chat.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

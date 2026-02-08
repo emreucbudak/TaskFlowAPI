@@ -1,77 +1,81 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Chat.Infrastructure.Hubs
 {
+    [Authorize]
     public class ChatHubs : Hub
     {
+        private string? CurrentUserId => Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        private string? CurrentUserName => Context.User?.Identity?.Name;
 
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
-
-            await Clients.All.SendAsync("UserConnected", Context.ConnectionId);
         }
-
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Clients.All.SendAsync("UserDisconnected", Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
 
-
-        public async Task SendMessage(string user, string message)
+        public async Task SendPrivateMessage(string targetUserId, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message, DateTime.UtcNow);
+            var senderId = CurrentUserId;
+            await Clients.User(targetUserId).SendAsync("ReceivePrivateMessage", senderId, message, DateTime.UtcNow);
         }
 
-
-        public async Task SendPrivateMessage(string targetConnectionId, string user, string message)
+        public async Task SendMessageToGroup(string groupName, string message)
         {
-            await Clients.Client(targetConnectionId).SendAsync("ReceivePrivateMessage", user, message, DateTime.UtcNow);
+            var senderId = CurrentUserId;
+            await Clients.Group(groupName).SendAsync("ReceiveGroupMessage", groupName, senderId, message, DateTime.UtcNow);
         }
 
-
-        public async Task SendMessageToGroup(string groupName, string user, string message)
-        {
-            await Clients.Group(groupName).SendAsync("ReceiveGroupMessage", groupName, user, message, DateTime.UtcNow);
-        }
-
-
-        public async Task JoinGroup(string groupName, string userName)
+        public async Task JoinGroup(string groupName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-            await Clients.Group(groupName).SendAsync("UserJoinedGroup", groupName, userName);
+            await Clients.Group(groupName).SendAsync("UserJoinedGroup", groupName, CurrentUserId);
         }
 
-        public async Task LeaveGroup(string groupName, string userName)
+        public async Task LeaveGroup(string groupName)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-            await Clients.Group(groupName).SendAsync("UserLeftGroup", groupName, userName);
+            await Clients.Group(groupName).SendAsync("UserLeftGroup", groupName, CurrentUserId);
         }
 
-
-        public async Task UserTyping(string user, bool isTyping)
+        public async Task UpdateMessage(string messageId, string newContent, string? groupName, string? targetUserId)
         {
-            await Clients.Others.SendAsync("UserIsTyping", user, isTyping);
+            if (!string.IsNullOrEmpty(groupName))
+            {
+                await Clients.Group(groupName).SendAsync("ReceiveMessageUpdate", messageId, newContent);
+            }
+            else if (!string.IsNullOrEmpty(targetUserId))
+            {
+                await Clients.User(targetUserId).SendAsync("ReceiveMessageUpdate", messageId, newContent);
+            }
         }
 
-
-        public async Task UserTypingInGroup(string groupName, string user, bool isTyping)
+        public async Task UserTyping(string targetUserId, bool isTyping)
         {
-            await Clients.OthersInGroup(groupName).SendAsync("UserIsTypingInGroup", groupName, user, isTyping);
+            await Clients.User(targetUserId).SendAsync("UserIsTyping", CurrentUserId, isTyping);
         }
 
-
-        public async Task MessageRead(string messageId, string userId)
+        public async Task UserTypingInGroup(string groupName, bool isTyping)
         {
-            await Clients.All.SendAsync("MessageReadNotification", messageId, userId, DateTime.UtcNow);
+            await Clients.OthersInGroup(groupName).SendAsync("UserIsTypingInGroup", groupName, CurrentUserId, isTyping);
         }
 
-
-        public async Task BroadcastOnlineCount(int count)
+        public async Task MessageRead(string messageId, string? groupName, string? targetUserId)
         {
-            await Clients.All.SendAsync("OnlineUsersCount", count);
+            if (!string.IsNullOrEmpty(groupName))
+            {
+                await Clients.Group(groupName).SendAsync("MessageReadNotification", messageId, CurrentUserId, groupName, DateTime.UtcNow);
+            }
+            else if (!string.IsNullOrEmpty(targetUserId))
+            {
+                await Clients.User(targetUserId).SendAsync("MessageReadNotification", messageId, CurrentUserId, DateTime.UtcNow);
+            }
         }
     }
 }

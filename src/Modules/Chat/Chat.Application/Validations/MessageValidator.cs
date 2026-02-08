@@ -1,9 +1,8 @@
-using Chat.Domain.Entities;
 using FluentValidation;
 
 namespace Chat.Application.Validations
 {
-    public class MessageValidator : AbstractValidator<Message>
+    public class MessageValidator : AbstractValidator<Chat.Domain.Entities.Message>
     {
         public MessageValidator()
         {

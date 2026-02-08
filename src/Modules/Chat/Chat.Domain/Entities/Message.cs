@@ -31,6 +31,21 @@ namespace Chat.Domain.Entities
         public Message()
         {
         }
+
+        public static Message Create(string content, Guid senderId, Guid? receiverId = null, Guid? groupId = null)
+        {
+            return new Message(
+                content,
+                false,
+                DateTime.UtcNow,
+                senderId,
+                receiverId,
+                false,
+                groupId,
+                false
+            );
+        }
+
         public void UpdateContent(string newContent)
         {
             Content = newContent;

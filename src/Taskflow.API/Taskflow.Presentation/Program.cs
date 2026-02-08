@@ -1,4 +1,6 @@
 using Chat.Persistence.Extensions;
+using Chat.Infrastructure.Extensions;
+using Chat.Infrastructure.Hubs;
 using FlashMediator;
 using FluentValidation;
 using Identity.Domain.Entities;
@@ -28,6 +30,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddConfigureTenant(builder.Configuration);
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddChatPersistence(builder.Configuration);
+builder.Services.AddChatInfrastructure();
 builder.Services.AddProjectManagementInfrastructure(builder.Configuration);
 builder.Services.AddNotificationPersistence(builder.Configuration);
 builder.Services.AddReportModule(builder.Configuration);
@@ -77,5 +80,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHubs>("/chatHub");
 
 app.Run();

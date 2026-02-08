@@ -1,17 +1,26 @@
 ﻿using Chat.Application.ChatNotification;
+using Chat.Infrastructure.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Chat.Infrastructure.ChatNotification
 {
     public class ChatNotificationService : IChatNotificationService
     {
-        public Task SendMessageToGroupAsync(Guid groupId, object message)
+        private readonly IHubContext<ChatHubs> _hubContext;
+
+        public ChatNotificationService(IHubContext<ChatHubs> hubContext)
         {
-            throw new NotImplementedException();
+            _hubContext = hubContext;
         }
 
-        public Task SendMessageToUserAsync(Guid userId, object message)
+        public async Task SendMessageToGroupAsync(Guid groupId, object message)
         {
-            throw new NotImplementedException();
+            await _hubContext.Clients.Group(groupId.ToString()).SendAsync("ReceiveGroupMessage", groupId.ToString(), message);
+        }
+
+        public async Task SendMessageToUserAsync(Guid userId, object message)
+        {
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceivePrivateMessage", userId.ToString(), message);
         }
     }
 }

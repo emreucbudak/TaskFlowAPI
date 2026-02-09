@@ -24,8 +24,6 @@ namespace Chat.Persistence.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMessageReadRepository, MessageReadRepository>();
             services.AddScoped<IMessageWriteRepository, MessageWriteRepository>();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddScoped<IGroupValidationService, GroupValidationService>();
             services.AddScoped<IMessageControlService, MessageControlService>();
 
             return services;

@@ -16,6 +16,8 @@ using Stats.Persistence.Extensions;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 using Tenant.Infrastructure.Extensions;
+using Identity.Infrastructure.Services;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
@@ -24,6 +26,8 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog(logger);
 builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+builder.Services.AddScoped<IGroupValidationService, GroupValidationService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();

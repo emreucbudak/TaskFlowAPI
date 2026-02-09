@@ -26,7 +26,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
             var task = await _readRepository.GetIndividualTask(request.Id, false);
             if (task == null)
             {
-                throw new IndividualTaskNotFoundException(request.Id);
+                throw new IndividualTaskNotFoundException();
             }
 
             await _writeRepository.DeleteIndividualTask(task);

@@ -1,6 +1,6 @@
 using Chat.Application.Services;
 
-namespace Chat.Infrastructure.Services
+namespace Chat.Application.Services
 {
     public class GroupValidationService : IGroupValidationService
     {

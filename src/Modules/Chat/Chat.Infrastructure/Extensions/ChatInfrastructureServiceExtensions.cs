@@ -13,6 +13,7 @@ namespace Chat.Infrastructure.Extensions
             services.AddScoped<IChatNotificationService, ChatNotificationService>();
             services.AddScoped<IGroupValidationService, GroupValidationService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IMessageControlService, MessageControlService>();
             return services;
         }
     }

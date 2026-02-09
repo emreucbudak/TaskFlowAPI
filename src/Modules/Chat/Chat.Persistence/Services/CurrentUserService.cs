@@ -2,7 +2,7 @@ using Chat.Application.Services;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace Chat.Infrastructure.Services
+namespace Chat.Application.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

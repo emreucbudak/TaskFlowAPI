@@ -1,7 +1,7 @@
-using Identity.Infrastructure.Data.IdentityDb;
+using Identity.Persistence.Data.IdentityDb;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
-namespace Identity.Infrastructure.Data.UnitOfWork
+namespace Identity.Persistence.Data.UnitOfWork
 {
     public class UnitOfWork(IdentityManagementDbContext context) : IUnitOfWork
     {

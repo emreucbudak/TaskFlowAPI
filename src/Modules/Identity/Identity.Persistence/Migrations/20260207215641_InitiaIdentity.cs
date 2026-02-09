@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Identity.Infrastructure.Migrations
+namespace Identity.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitiaIdentity : Migration
@@ -98,8 +98,8 @@ namespace Identity.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { 1, "Lider" },
-                    { 2, "YardÄ±mcÄ± Lider" },
-                    { 3, "Ã‡alÄ±ÅŸan" }
+                    { 2, "Yardýmcý Lider" },
+                    { 3, "Çalýþan" }
                 });
 
             migrationBuilder.InsertData(

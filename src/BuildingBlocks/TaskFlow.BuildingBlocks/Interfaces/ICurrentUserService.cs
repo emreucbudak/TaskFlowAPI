@@ -1,4 +1,4 @@
-namespace Chat.Application.Services
+namespace TaskFlow.BuildingBlocks.Interfaces
 {
     public interface ICurrentUserService
     {

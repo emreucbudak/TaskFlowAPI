@@ -1,8 +1,8 @@
-using Chat.Application.Services;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using TaskFlow.BuildingBlocks.Interfaces;
 
-namespace Chat.Application.Services
+namespace Identity.Infrastructure.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

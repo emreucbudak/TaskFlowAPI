@@ -1,10 +1,9 @@
 using Chat.Application.ChatNotification;
 using Chat.Application.Features.CQRS.Message.Command.Create;
 using Chat.Application.Repositories;
-using Chat.Application.Services;
-using TaskFlow.BuildingBlocks.Bases.Exceptions;
-using TaskFlow.BuildingBlocks.Exceptions;
+using Chat.Application.Exceptions;
 using TaskFlow.BuildingBlocks.UnitOfWork;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Chat.Application.Services
 {
@@ -59,12 +58,12 @@ namespace Chat.Application.Services
             var currentUserId = _currentUserService.UserId;
             if (!currentUserId.HasValue)
             {
-                throw new AuthExceptions("Kullanıcı kimliği doğrulanmadı.");
+                throw new MessageAuthException("Kullanıcı kimliği doğrulanmadı.");
             }
 
             if (senderId != currentUserId.Value)
             {
-                throw new AuthExceptions("Gönderen ID, kimliği doğrulanmış kullanıcı ile eşleşmiyor.");
+                throw new MessageAuthException("Gönderen ID, kimliği doğrulanmış kullanıcı ile eşleşmiyor.");
             }
         }
 
@@ -72,18 +71,18 @@ namespace Chat.Application.Services
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new BaseExceptions("Mesaj içeriği boş olamaz.");
+                throw new MessageControlException("Mesaj içeriği boş olamaz.");
             }
 
             if (content.Length > 1000)
             {
-                throw new BaseExceptions("Mesaj içeriği 1000 karakter sınırını aşıyor.");
+                throw new MessageControlException("Mesaj içeriği 1000 karakter sınırını aşıyor.");
             }
 
             if (System.Text.RegularExpressions.Regex.IsMatch(content, @"<[^>]+>") ||
                 content.Contains("javascript:", StringComparison.OrdinalIgnoreCase))
             {
-                throw new BaseExceptions("Mesaj içeriği geçersiz karakterler veya potansiyel güvenlik riskleri içeriyor.");
+                throw new MessageControlException("Mesaj içeriği geçersiz karakterler veya potansiyel güvenlik riskleri içeriyor.");
             }
         }
 
@@ -91,12 +90,12 @@ namespace Chat.Application.Services
         {
             if (receiverId.HasValue && groupId.HasValue)
             {
-                throw new BaseExceptions("Bir mesaj hem alıcıya hem de gruba aynı anda gönderilemez.");
+                throw new MessageControlException("Bir mesaj hem alıcıya hem de gruba aynı anda gönderilemez.");
             }
 
             if (!receiverId.HasValue && !groupId.HasValue)
             {
-                throw new BaseExceptions("Bir mesajın ya bir alıcısı ya da bir grubu olmalıdır.");
+                throw new MessageControlException("Bir mesajın ya bir alıcısı ya da bir grubu olmalıdır.");
             }
         }
 
@@ -105,7 +104,7 @@ namespace Chat.Application.Services
             var canSend = await _groupValidationService.ValidateGroupMembershipAsync(userId, groupId);
             if (!canSend)
             {
-                throw new BaseExceptions("Grup bulunamadı, pasif veya kullanıcı grubun üyesi değil.");
+                throw new MessageControlException("Grup bulunamadı, pasif veya kullanıcı grubun üyesi değil.");
             }
         }
 

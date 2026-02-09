@@ -5,15 +5,16 @@
   </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Chat/">
-    <Project Path="src/Modules/Chat/Chat.Persistence/Chat.Persistence.csproj" Id="9f440e6f-1e09-4438-8b3a-5ea19b999186" />
     <Project Path="src/Modules/Chat/Chat.Application/Chat.Application.csproj" Id="ccacf866-86d0-402d-bec0-2cd428e00af8" />
     <Project Path="src/Modules/Chat/Chat.Domain/Chat.Domain.csproj" Id="efa9d582-167e-4482-b4fc-0b9f4626fd6e" />
     <Project Path="src/Modules/Chat/Chat.Infrastructure/Chat.Infrastructure.csproj" Id="ba73c298-f795-4b6b-b6e0-00591fcaaa05" />
+    <Project Path="src/Modules/Chat/Chat.Persistence/Chat.Persistence.csproj" Id="9f440e6f-1e09-4438-8b3a-5ea19b999186" />
   </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" Id="fdafa603-3f3b-4267-9985-b155365c68b3" />
     <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" Id="2928a877-515f-438c-8320-eaf1cf1a3b86" />
     <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" Id="7602f7fa-2d5c-4e4b-95da-4b39e3353bd8" />
+    <Project Path="src/Modules/Identity/Identity.Persistence/Identity.Persistence.csproj" Id="fe9edd86-acb2-45a1-8d3a-157c85674410" />
   </Folder>
   <Folder Name="/src/Modules/Notification/">
     <Project Path="src/Modules/Notification/Notification.Application/Notification.Application.csproj" Id="70736c31-1d2b-4e72-88b3-e180838b9123" />

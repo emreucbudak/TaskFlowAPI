@@ -2,7 +2,7 @@ using Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Identity.Infrastructure.Data.SeedData
+namespace Identity.Persistence.Data.SeedData
 {
     public class DepartmentRoleDataConfiguration : IEntityTypeConfiguration<DepartmentRole>
     {

@@ -4,7 +4,7 @@ using Chat.Infrastructure.Hubs;
 using FlashMediator;
 using FluentValidation;
 using Identity.Domain.Entities;
-using Identity.Infrastructure.Data.IdentityDb;
+using Identity.Persistence.Data.IdentityDb;
 using Identity.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

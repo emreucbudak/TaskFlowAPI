@@ -1,10 +1,10 @@
-ï»¿using Identity.Application.Repositories;
-using Identity.Infrastructure.Data.IdentityDb;
+using Identity.Application.Repositories;
+using Identity.Persistence.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskFlow.BuildingBlocks.Common;
 
-namespace Identity.Infrastructure.Repository
+namespace Identity.Persistence.Repositories
 {
     public class WriteRepository<T>(
         IdentityManagementDbContext context,
@@ -19,34 +19,34 @@ namespace Identity.Infrastructure.Repository
             try
             {
                 logger.LogInformation(
-                    "Yeni kayÄ±t ekleniyor - VarlÄ±k: {EntityType}, Zaman: {Timestamp}",
+                    "Yeni kayıt ekleniyor - Varlık: {EntityType}, Zaman: {Timestamp}",
                     typeof(T).Name, DateTime.UtcNow);
 
                 await db.AddAsync(entity);
 
                 logger.LogInformation(
-                    "KayÄ±t context'e baÅŸarÄ±yla eklendi - VarlÄ±k: {EntityType}",
+                    "Kayıt context'e başarıyla eklendi - Varlık: {EntityType}",
                     typeof(T).Name);
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "VeritabanÄ± kÄ±sÄ±tlama hatasÄ± - VarlÄ±k: {EntityType}, Hata: {Message}",
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Hata: {Message}",
                     typeof(T).Name, ex.Message);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} ekleme iÅŸlemi veritabanÄ± kÄ±sÄ±tlamalarÄ±nÄ± ihlal ediyor. " +
-                    "LÃ¼tfen benzersiz alanlarÄ± ve gerekli iliÅŸkileri kontrol edin. " +
+                    $"{typeof(T).Name} ekleme işlemi veritabanı kısıtlamalarını ihlal ediyor. " +
+                    "Lütfen benzersiz alanları ve gerekli ilişkileri kontrol edin. " +
                     $"Detay: {ex.InnerException?.Message ?? ex.Message}",
                     ex);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen ekleme hatasÄ± - VarlÄ±k: {EntityType}",
+                    "Beklenmeyen ekleme hatası - Varlık: {EntityType}",
                     typeof(T).Name);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} varlÄ±ÄŸÄ± eklenirken beklenmeyen bir hata oluÅŸtu. " +
-                    "LÃ¼tfen daha sonra tekrar deneyin.",
+                    $"{typeof(T).Name} varlığı eklenirken beklenmeyen bir hata oluştu. " +
+                    "Lütfen daha sonra tekrar deneyin.",
                     ex);
             }
         }
@@ -57,44 +57,44 @@ namespace Identity.Infrastructure.Repository
             try
             {
                 logger.LogInformation(
-                    "KayÄ±t gÃ¼ncelleniyor - VarlÄ±k: {EntityType}, Zaman: {Timestamp}",
+                    "Kayıt güncelleniyor - Varlık: {EntityType}, Zaman: {Timestamp}",
                     typeof(T).Name, DateTime.UtcNow);
 
                 db.Update(entity);
 
                 logger.LogDebug(
-                    "KayÄ±t baÅŸarÄ±yla gÃ¼ncellendi - VarlÄ±k: {EntityType}",
+                    "Kayıt başarıyla güncellendi - Varlık: {EntityType}",
                     typeof(T).Name);
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 logger.LogWarning(ex,
-                    "EÅŸzamanlÄ±lÄ±k hatasÄ± - VarlÄ±k: {EntityType}, Zaman: {Timestamp}",
+                    "Eşzamanlılık hatası - Varlık: {EntityType}, Zaman: {Timestamp}",
                     typeof(T).Name,DateTime.UtcNow);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} kaydÄ± baÅŸka bir kullanÄ±cÄ± tarafÄ±ndan deÄŸiÅŸtirilmiÅŸ. " +
-                    "LÃ¼tfen sayfayÄ± yenileyip gÃ¼ncel veriyi yÃ¼kledikten sonra tekrar deneyin.",
+                    $"{typeof(T).Name} kaydı başka bir kullanıcı tarafından değiştirilmiş. " +
+                    "Lütfen sayfayı yenileyip güncel veriyi yükledikten sonra tekrar deneyin.",
                     ex);
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "VeritabanÄ± kÄ±sÄ±tlama hatasÄ± - VarlÄ±k: {EntityType}, Hata: {Message}",
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, Hata: {Message}",
                     typeof(T).Name, ex.Message);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} gÃ¼ncelleme iÅŸlemi veritabanÄ± kÄ±sÄ±tlamalarÄ±nÄ± ihlal ediyor. " +
-                    "LÃ¼tfen benzersiz alanlarÄ± ve iliÅŸkileri kontrol edin. " +
+                    $"{typeof(T).Name} güncelleme işlemi veritabanı kısıtlamalarını ihlal ediyor. " +
+                    "Lütfen benzersiz alanları ve ilişkileri kontrol edin. " +
                     $"Detay: {ex.InnerException?.Message ?? ex.Message}",
                     ex);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen gÃ¼ncelleme hatasÄ± - VarlÄ±k: {EntityType}",
+                    "Beklenmeyen güncelleme hatası - Varlık: {EntityType}",
                     typeof(T).Name);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} varlÄ±ÄŸÄ± gÃ¼ncellenirken beklenmeyen bir hata oluÅŸtu. " +
-                    "LÃ¼tfen daha sonra tekrar deneyin.",
+                    $"{typeof(T).Name} varlığı güncellenirken beklenmeyen bir hata oluştu. " +
+                    "Lütfen daha sonra tekrar deneyin.",
                     ex);
             }
         }
@@ -102,7 +102,7 @@ namespace Identity.Infrastructure.Repository
 
         public void DeleteAsync(T entity)
         {
-            // VarlÄ±k doÄŸrulama
+            // Varlık doğrulama
             ValidateEntity(entity);
 
             try
@@ -112,31 +112,31 @@ namespace Identity.Infrastructure.Repository
             catch (DbUpdateConcurrencyException ex)
             {
                 logger.LogWarning(ex,
-                    "EÅŸzamanlÄ±lÄ±k hatasÄ± - VarlÄ±k: {EntityType}, Hata: {Message}",
+                    "Eşzamanlılık hatası - Varlık: {EntityType}, Hata: {Message}",
                     typeof(T).Name, ex.Message);
 
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} silme iÅŸlemi baÅŸarÄ±sÄ±z. Bu kayÄ±t baÅŸka bir kullanÄ±cÄ± tarafÄ±ndan deÄŸiÅŸtirilmiÅŸ veya silinmiÅŸ olabilir.",
+                    $"{typeof(T).Name} silme işlemi başarısız. Bu kayıt başka bir kullanıcı tarafından değiştirilmiş veya silinmiş olabilir.",
                     ex);
             }
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex,
-                    "VeritabanÄ± kÄ±sÄ±tlama hatasÄ± - VarlÄ±k: {EntityType}, Ä°ÅŸlem: Silme",
+                    "Veritabanı kısıtlama hatası - Varlık: {EntityType}, İşlem: Silme",
                     typeof(T).Name);
 
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} silme iÅŸlemi baÅŸarÄ±sÄ±z. Bu kayÄ±t baÅŸka kayÄ±tlar tarafÄ±ndan kullanÄ±lÄ±yor olabilir.",
+                    $"{typeof(T).Name} silme işlemi başarısız. Bu kayıt başka kayıtlar tarafından kullanılıyor olabilir.",
                     ex);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen silme hatasÄ± - VarlÄ±k: {EntityType}",
+                    "Beklenmeyen silme hatası - Varlık: {EntityType}",
                     typeof(T).Name);
 
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} varlÄ±ÄŸÄ± silinirken beklenmeyen bir hata oluÅŸtu.",
+                    $"{typeof(T).Name} varlığı silinirken beklenmeyen bir hata oluştu.",
                     ex);
             }
         }
@@ -145,12 +145,12 @@ namespace Identity.Infrastructure.Repository
             if (entity == null)
             {
                 logger.LogError(
-                    "Null varlÄ±k hatasÄ± , VarlÄ±k Tipi: {EntityType}",
+                    "Null varlık hatası , Varlık Tipi: {EntityType}",
                     typeof(T).Name);
                 throw new ArgumentNullException(
                     nameof(entity),
-                    $"{typeof(T).Name} iÅŸlemi iÃ§in varlÄ±k null olamaz. " +
-                    "LÃ¼tfen geÃ§erli bir varlÄ±k nesnesi saÄŸlayÄ±n.");
+                    $"{typeof(T).Name} işlemi için varlık null olamaz. " +
+                    "Lütfen geçerli bir varlık nesnesi sağlayın.");
             }
         }
     }

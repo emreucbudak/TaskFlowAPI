@@ -1,8 +1,8 @@
-﻿using Identity.Domain.Entities;
+using Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Identity.Infrastructure.Data.ConfigurationData
+namespace Identity.Persistence.Data.ConfigurationData
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {

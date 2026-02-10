@@ -18,6 +18,8 @@ namespace Report.Domain.Entities
         public string Description { get; private set; }
         public Guid UserId { get; private set; }
         public DateTime CreatedAt { get; private set; } 
+        public int ReportStatusId { get; private set; }
+        public ReportStatus ReportStatus { get; private set; }
 
 
     }

@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using ProjectManagement.Application.Messaging;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -8,11 +9,13 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
     {
         private readonly IProjectManagementReadRepository  _repository;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IProjectManagementProducer _producer;
 
-        public UpdateSubTaskCommandHandler(IProjectManagementReadRepository repository, IUnitOfWork unitOfWork)
+        public UpdateSubTaskCommandHandler(IProjectManagementReadRepository repository, IUnitOfWork unitOfWork, IProjectManagementProducer producer)
         {
             _repository = repository;
             this.unitOfWork = unitOfWork;
+            _producer = producer;
         }
 
         public async Task Handle(UpdateSubTaskCommandRequest request, CancellationToken cancellationToken)
@@ -22,6 +25,14 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
             task.UpdateTaskTitle(request.TaskTitle);
             task.UpdateTaskDescription(request.Description);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _producer.PublishAsync("SubTaskUpdated", new
+            {
+                TaskId = request.TaskId,
+                SubTaskId = request.SubTasksId,
+                TaskTitle = request.TaskTitle,
+                Description = request.Description
+            });
         }
     }
 }

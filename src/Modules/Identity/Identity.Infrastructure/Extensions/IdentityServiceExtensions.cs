@@ -17,6 +17,7 @@ namespace Identity.Infrastructure.Extensions
             services.Configure<TokenSettings>(configuration.GetSection("TokenSettings"));
             services.AddScoped<ITokenService, Infrastructure.TokenService.TokenService>();
             services.AddScoped<IIdentityProducer, IdentityProducer>();
+            services.AddHostedService<Messaging.Consumers.ReportCreatedConsumer>();
 
             return services;
         }

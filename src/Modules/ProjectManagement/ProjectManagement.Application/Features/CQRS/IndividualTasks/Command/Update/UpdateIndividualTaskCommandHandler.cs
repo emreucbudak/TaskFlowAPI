@@ -37,7 +37,8 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Up
             {
                 Id = task.Id,
                 AssignedUserId = task.AssignedUserId,
-                TaskTitle = task.TaskTitle
+                TaskTitle = task.TaskTitle,
+                TaskDescription = task.Description,
             });
         }
     }

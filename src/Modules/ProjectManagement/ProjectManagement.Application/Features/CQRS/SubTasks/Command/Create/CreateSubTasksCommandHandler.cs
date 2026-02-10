@@ -31,7 +31,8 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
                 TaskId = request.TaskId,
                 Description = request.Description,
                 AssignedUserId = request.AssignedUserId,
-                TaskTitle = request.TaskTitle
+                TaskTitle = request.TaskTitle,
+                TaskDescription = request.Description
             });
         }
     }

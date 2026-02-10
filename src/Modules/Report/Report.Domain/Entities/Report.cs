@@ -4,25 +4,26 @@ namespace Report.Domain.Entities
 {
     public class Report : BaseEntity
     {
-        public Report(int reportTopicId, ReportTopic reportTopic, string description, Guid userId, int reportStatusId, string title)
+        public Report(int reportTopicId, string description, Guid userId, int reportStatusId, string title, Guid notifiedDepartmantId)
         {
             ReportTopicId = reportTopicId;
-            ReportTopic = reportTopic;
             Description = description;
-            UserId = userId;
+            ReportingUserId = userId;
             CreatedAt = DateTime.UtcNow;
             ReportStatusId = reportStatusId;
             Title = title;
+            NotifiedDepartmantId = notifiedDepartmantId;
         }
 
         public int ReportTopicId { get; private set; }
         public ReportTopic ReportTopic { get; private set; }
         public string Title { get; private set; }
         public string Description { get; private set; }
-        public Guid UserId { get; private set; }
+        public Guid ReportingUserId { get; private set; }
         public DateTime CreatedAt { get; private set; } 
         public int ReportStatusId { get; private set; }
         public ReportStatus ReportStatus { get; private set; }
+        public Guid NotifiedDepartmantId { get; private set; }
         public void UpdateReportStatus(int reportStatusId)
         {
             ReportStatusId = reportStatusId;

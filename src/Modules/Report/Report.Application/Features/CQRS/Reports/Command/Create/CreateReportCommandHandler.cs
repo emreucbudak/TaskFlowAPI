@@ -1,6 +1,8 @@
 using FlashMediator;
 using Report.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
+using Report.Application.Messaging;
+using TaskFlow.BuildingBlocks.Contracts.EventBus.Messages;
 
 namespace Report.Application.Features.CQRS.Reports.Command.Create
 {
@@ -8,11 +10,13 @@ namespace Report.Application.Features.CQRS.Reports.Command.Create
     {
         private readonly IReportWriteRepository _writeRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IReportProducer _reportProducer;
 
-        public CreateReportCommandHandler(IReportWriteRepository writeRepository, IUnitOfWork unitOfWork)
+        public CreateReportCommandHandler(IReportWriteRepository writeRepository, IUnitOfWork unitOfWork, IReportProducer reportProducer)
         {
             _writeRepository = writeRepository;
             _unitOfWork = unitOfWork;
+            _reportProducer = reportProducer;
         }
 
         public async Task Handle(CreateReportCommandRequest request, CancellationToken cancellationToken)
@@ -28,6 +32,8 @@ namespace Report.Application.Features.CQRS.Reports.Command.Create
 
             await _writeRepository.AddAsync(report);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _reportProducer.PublishAsync("report.created", new ReportCreatedIntegrationEvent(report.Id, report.Description, report.NotifiedDepartmantId));
         }
     }
 }

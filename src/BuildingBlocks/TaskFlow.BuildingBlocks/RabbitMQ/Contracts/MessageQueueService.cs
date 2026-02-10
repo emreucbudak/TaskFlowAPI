@@ -28,13 +28,18 @@ namespace TaskFlow.BuildingBlocks.RabbitMQ.Contracts
             }
             catch (Exception ex)
             {
-                logger.LogError($"Could not create RabbitMQ connection: {ex.Message}");
+                logger.LogError($"RabbitMQ bağlantısı oluşturulamadı: {ex.Message}");
             }
         }
 
 
         public async Task PublishMessageAsync<T>(string queueName, T message) where T : class
         {
+            if (_channel is null || !_channel.IsOpen)
+            {
+                await CreateConnection();
+            }
+
             if (_channel == null || !_channel.IsOpen)
             {
                 logger.LogError("RabbitMQ kanalı kullanıma hazır değil (Başlatılmadı veya Koptu). Mesaj gönderilemedi: {QueueName}", queueName);
@@ -74,7 +79,7 @@ namespace TaskFlow.BuildingBlocks.RabbitMQ.Contracts
             }
             catch (Exception ex)
             {
-                logger.LogError(ex,$"Error disposing RabbitMQ resources: {ex.Message}");
+                logger.LogError(ex,$"RabbitMQ kaynakları temizlenirken hata oluştu: {ex.Message}");
             }
         }
     }

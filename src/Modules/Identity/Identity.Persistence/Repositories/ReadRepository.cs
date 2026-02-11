@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using TaskFlow.BuildingBlocks.Common;
+using Identity.Domain.Entities;
 
 namespace Identity.Persistence.Repositories
 {
@@ -27,7 +28,7 @@ namespace Identity.Persistence.Repositories
             ValidatePagination(ref page, ref pageSize);
 
             logger.LogInformation(
-                "Kayýtlar getiriliyor - Varlýk: {EntityType}, Sayfa: {Page}/{TotalPages}, Boyut: {PageSize}",
+                "Kayï¿½tlar getiriliyor - Varlï¿½k: {EntityType}, Sayfa: {Page}/{TotalPages}, Boyut: {PageSize}",
                 typeof(T).Name, page, "?", pageSize);
 
             try
@@ -45,7 +46,7 @@ namespace Identity.Persistence.Repositories
                 if (totalCount > MaxTotalRecords)
                 {
                     logger.LogWarning(
-                        "Kayýt sayýsý limiti aþýyor - Varlýk: {EntityType}, Toplam: {TotalCount}, Limit: {MaxLimit}, Öneri: Filtreleme kullanýn",
+                        "Kayï¿½t sayï¿½sï¿½ limiti aï¿½ï¿½yor - Varlï¿½k: {EntityType}, Toplam: {TotalCount}, Limit: {MaxLimit}, ï¿½neri: Filtreleme kullanï¿½n",
                         typeof(T).Name, totalCount, MaxTotalRecords);
                 }
 
@@ -55,7 +56,7 @@ namespace Identity.Persistence.Repositories
                     .ToListAsync();
 
                 logger.LogInformation(
-                    "Kayýtlar baþarýyla getirildi - Varlýk: {EntityType}, Getirilen: {ItemCount}/{TotalCount}, Sayfa: {Page}/{TotalPages}",
+                    "Kayï¿½tlar baï¿½arï¿½yla getirildi - Varlï¿½k: {EntityType}, Getirilen: {ItemCount}/{TotalCount}, Sayfa: {Page}/{TotalPages}",
                     typeof(T).Name, items.Count, totalCount, page, totalPages);
 
                 return new PagedResult<T>
@@ -69,23 +70,32 @@ namespace Identity.Persistence.Repositories
             catch (InvalidOperationException ex)
             {
                 logger.LogError(ex,
-                    "Geçersiz sorgu iþlemi - Varlýk: {EntityType}, Sayfa: {Page}, Hata: {Message}",
+                    "Geï¿½ersiz sorgu iï¿½lemi - Varlï¿½k: {EntityType}, Sayfa: {Page}, Hata: {Message}",
                     typeof(T).Name, page, ex.Message);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} kayýtlarý getirilirken geçersiz sorgu hatasý oluþtu. " +
-                    "Lütfen include parametrelerini ve filtreleri kontrol edin.",
+                    $"{typeof(T).Name} kayï¿½tlarï¿½ getirilirken geï¿½ersiz sorgu hatasï¿½ oluï¿½tu. " +
+                    "Lï¿½tfen include parametrelerini ve filtreleri kontrol edin.",
                     ex);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen hata - Varlýk: {EntityType}, Sayfa: {Page}, Boyut: {PageSize}",
+                    "Beklenmeyen hata - Varlï¿½k: {EntityType}, Sayfa: {Page}, Boyut: {PageSize}",
                     typeof(T).Name, page, pageSize);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} kayýtlarý getirilirken beklenmeyen bir hata oluþtu. " +
-                    "Lütfen daha sonra tekrar deneyin.",
+                    $"{typeof(T).Name} kayï¿½tlarï¿½ getirilirken beklenmeyen bir hata oluï¿½tu. " +
+                    "Lï¿½tfen daha sonra tekrar deneyin.",
                     ex);
             }
+        }
+
+        public async Task<Guid?> GetDepartmentLeaderIdAsync(Guid departmentId)
+        {
+             var leader = await context.Set<DepartmentMember>()
+                 .AsNoTracking()
+                 .FirstOrDefaultAsync(x => x.DepartmentId == departmentId && x.DepartmentRoleId == 1);
+                 
+             return leader?.UserId;
         }
 
         public async Task<T> GetByIdAsync(
@@ -96,7 +106,7 @@ namespace Identity.Persistence.Repositories
             ValidateId(id);
 
             logger.LogInformation(
-                "ID ile kayýt getiriliyor - Varlýk: {EntityType}, ID: {Id}, Takip: {TrackChanges}",
+                "ID ile kayï¿½t getiriliyor - Varlï¿½k: {EntityType}, ID: {Id}, Takip: {TrackChanges}",
                 typeof(T).Name, id, trackChanges);
 
             try
@@ -113,34 +123,34 @@ namespace Identity.Persistence.Repositories
                 if (result == null)
                 {
                     logger.LogWarning(
-                        "Kayýt bulunamadý - Varlýk: {EntityType}, ID: {Id}",
+                        "Kayï¿½t bulunamadï¿½ - Varlï¿½k: {EntityType}, ID: {Id}",
                         typeof(T).Name, id);
                     return null;
                 }
 
                 logger.LogDebug(
-                    "Kayýt baþarýyla bulundu - Varlýk: {EntityType}, ID: {Id}",
+                    "Kayï¿½t baï¿½arï¿½yla bulundu - Varlï¿½k: {EntityType}, ID: {Id}",
                     typeof(T).Name, id);
                 return result;
             }
             catch (InvalidOperationException ex)
             {
                 logger.LogError(ex,
-                    "Geçersiz sorgu iþlemi - Varlýk: {EntityType}, ID: {Id}, Hata: {Message}",
+                    "Geï¿½ersiz sorgu iï¿½lemi - Varlï¿½k: {EntityType}, ID: {Id}, Hata: {Message}",
                     typeof(T).Name, id, ex.Message);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} kaydý (ID: {id}) getirilirken geçersiz sorgu hatasý oluþtu. " +
-                    "Lütfen include parametrelerini kontrol edin.",
+                    $"{typeof(T).Name} kaydï¿½ (ID: {id}) getirilirken geï¿½ersiz sorgu hatasï¿½ oluï¿½tu. " +
+                    "Lï¿½tfen include parametrelerini kontrol edin.",
                     ex);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex,
-                    "Beklenmeyen hata - Varlýk: {EntityType}, ID: {Id}",
+                    "Beklenmeyen hata - Varlï¿½k: {EntityType}, ID: {Id}",
                     typeof(T).Name, id);
                 throw new InvalidOperationException(
-                    $"{typeof(T).Name} kaydý (ID: {id}) getirilirken beklenmeyen bir hata oluþtu. " +
-                    "Lütfen daha sonra tekrar deneyin.",
+                    $"{typeof(T).Name} kaydï¿½ (ID: {id}) getirilirken beklenmeyen bir hata oluï¿½tu. " +
+                    "Lï¿½tfen daha sonra tekrar deneyin.",
                     ex);
             }
         }
@@ -150,7 +160,7 @@ namespace Identity.Persistence.Repositories
             if (page < 1)
             {
                 logger.LogWarning(
-                    "Geçersiz sayfa numarasý düzeltildi - Ýstenen: {RequestedPage}, Kullanýlan: 1",
+                    "Geï¿½ersiz sayfa numarasï¿½ dï¿½zeltildi - ï¿½stenen: {RequestedPage}, Kullanï¿½lan: 1",
                     page);
                 page = 1;
             }
@@ -158,7 +168,7 @@ namespace Identity.Persistence.Repositories
             if (pageSize < 1)
             {
                 logger.LogWarning(
-                    "Geçersiz sayfa boyutu düzeltildi - Ýstenen: {RequestedSize}, Kullanýlan: {DefaultSize}",
+                    "Geï¿½ersiz sayfa boyutu dï¿½zeltildi - ï¿½stenen: {RequestedSize}, Kullanï¿½lan: {DefaultSize}",
                     pageSize, DefaultPageSize);
                 pageSize = DefaultPageSize;
             }
@@ -166,7 +176,7 @@ namespace Identity.Persistence.Repositories
             if (pageSize > MaxPageSize)
             {
                 logger.LogWarning(
-                    "Sayfa boyutu sýnýrlandýrýldý - Ýstenen: {RequestedSize}, Kullanýlan: {MaxSize}, Maksimum: {MaxPageSize}",
+                    "Sayfa boyutu sï¿½nï¿½rlandï¿½rï¿½ldï¿½ - ï¿½stenen: {RequestedSize}, Kullanï¿½lan: {MaxSize}, Maksimum: {MaxPageSize}",
                     pageSize, MaxPageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
@@ -177,20 +187,20 @@ namespace Identity.Persistence.Repositories
             if (id == null)
             {
                 logger.LogError(
-                    "Null ID parametresi - Varlýk: {EntityType}",
+                    "Null ID parametresi - Varlï¿½k: {EntityType}",
                     typeof(T).Name);
                 throw new ArgumentNullException(
                     nameof(id),
-                    $"{typeof(T).Name} için ID parametresi null olamaz.");
+                    $"{typeof(T).Name} iï¿½in ID parametresi null olamaz.");
             }
 
             if (id.Equals(default(TKey)))
             {
                 logger.LogError(
-                    "Varsayýlan ID deðeri - Varlýk: {EntityType}, ID Tipi: {KeyType}",
+                    "Varsayï¿½lan ID deï¿½eri - Varlï¿½k: {EntityType}, ID Tipi: {KeyType}",
                     typeof(T).Name, typeof(TKey).Name);
                 throw new ArgumentException(
-                    $"{typeof(T).Name} için geçersiz ID deðeri saðlandý. ID varsayýlan deðer olamaz.",
+                    $"{typeof(T).Name} iï¿½in geï¿½ersiz ID deï¿½eri saï¿½landï¿½. ID varsayï¿½lan deï¿½er olamaz.",
                     nameof(id));
             }
         }

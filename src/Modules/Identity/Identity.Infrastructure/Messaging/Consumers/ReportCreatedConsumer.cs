@@ -1,8 +1,8 @@
+using FlashMediator;
+using Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader;
 using System.Text;
 using System.Text.Json;
 using Identity.Application.Messaging;
-using Identity.Persistence.Data.IdentityDb;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -79,16 +79,15 @@ namespace Identity.Infrastructure.Messaging.Consumers
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                 var producer = scope.ServiceProvider.GetRequiredService<IIdentityProducer>();
 
-                var leader = await dbContext.DepartmentMembers
-                    .FirstOrDefaultAsync(x => x.DepartmentId == eventData.NotifiedDepartmentId && x.DepartmentRoleId == 1);
+                var leaderId = await mediator.Send(new GetDepartmentLeaderQueryRequest(eventData.NotifiedDepartmentId));
 
-                if (leader != null)
+                if (leaderId.HasValue)
                 {
-                    await producer.PublishAsync("notification.send", new NotifyUserIntegrationEvent(leader.UserId, $"Yeni Rapor: {eventData.Content}"));
-                    _logger.LogInformation($"Rapor {eventData.ReportId} için lider {leader.UserId} kullanıcısına bildirim gönderildi");
+                    await producer.PublishAsync("notification.send", new NotifyUserIntegrationEvent(leaderId.Value, $"Yeni Rapor: {eventData.Content}"));
+                    _logger.LogInformation($"Rapor {eventData.ReportId} için lider {leaderId.Value} kullanıcısına bildirim gönderildi");
                 }
                 else
                 {

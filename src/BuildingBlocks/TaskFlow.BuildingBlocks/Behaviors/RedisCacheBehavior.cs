@@ -12,9 +12,23 @@ namespace TaskFlow.BuildingBlocks.Behaviors
             _cacheService = cacheService;
         }
 
-        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+                var cacheKey = request.CacheKey;
+                var cachedResponse = await _cacheService.GetAsync<TResponse>(cacheKey);
+                if (cachedResponse != null)
+                {
+                    return cachedResponse;
+                }
+                var response = await next();
+                if (response != null)
+                {
+                    await _cacheService.SetAsync(cacheKey, response, request.ExpirationTime);
+                }
+
+                return response;
+            
+
         }
     }
 }

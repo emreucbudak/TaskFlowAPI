@@ -26,14 +26,21 @@ namespace TaskFlow.BuildingBlocks.Contracts.Redis
 
         }
 
-        public Task RemoveAsync(string key)
+        public async Task RemoveAsync(string key)
         {
-            throw new NotImplementedException();
+            await cache.RemoveAsync(key);
         }
 
-        public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
+        public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
         {
-            TimeSpan expirations = TimeSpan.FromMinutes();
+            if (expiration is null)
+            {
+                expiration = TimeSpan.FromMinutes(60);
+            }
+            await cache.SetAsync(key, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value)), new DistributedCacheEntryOptions
+            {
+                SlidingExpiration = expiration
+            });
         }
     }
 }

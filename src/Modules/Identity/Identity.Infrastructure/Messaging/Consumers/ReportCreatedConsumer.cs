@@ -19,12 +19,13 @@ namespace Identity.Infrastructure.Messaging.Consumers
         private IConnection _connection;
         private IChannel _channel;
         private readonly string _queueName = "report.created";
+        private readonly IIdentityProducer producer;
 
-        public ReportCreatedConsumer(ILogger<ReportCreatedConsumer> logger, IServiceProvider serviceProvider)
+        public ReportCreatedConsumer(ILogger<ReportCreatedConsumer> logger, IServiceProvider serviceProvider, IMediator mediator, IIdentityProducer producer)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            InitializeRabbitMQAsync().GetAwaiter().GetResult();
+            this.producer = producer;
         }
 
         private async Task InitializeRabbitMQAsync()
@@ -50,6 +51,7 @@ namespace Identity.Infrastructure.Messaging.Consumers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await InitializeRabbitMQAsync();
             if (_channel == null) return;
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -79,10 +81,9 @@ namespace Identity.Infrastructure.Messaging.Consumers
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                var producer = scope.ServiceProvider.GetRequiredService<IIdentityProducer>();
+                var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                var leaderId = await mediator.Send(new GetDepartmentLeaderQueryRequest(eventData.NotifiedDepartmentId));
+                var leaderId = await scopedMediator.Send(new GetDepartmentLeaderQueryRequest(eventData.NotifiedDepartmentId));
 
                 if (leaderId.HasValue)
                 {

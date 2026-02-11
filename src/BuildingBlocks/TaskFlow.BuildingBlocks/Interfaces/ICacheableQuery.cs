@@ -1,6 +1,6 @@
 ﻿namespace TaskFlow.BuildingBlocks.Interfaces
 {
-    public class ICacheableQuery
+    public interface ICacheableQuery
     {
         string CacheKey { get;  }    
         TimeSpan? ExpirationTime { get; }

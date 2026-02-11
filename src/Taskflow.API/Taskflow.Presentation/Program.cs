@@ -66,6 +66,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "Taskflow_";
 });
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
 builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
 {
     opt.Password.RequireDigit = true;

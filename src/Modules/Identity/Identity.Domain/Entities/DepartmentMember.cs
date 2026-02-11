@@ -1,6 +1,8 @@
+using TaskFlow.BuildingBlocks.Common;
+
 namespace Identity.Domain.Entities
 {
-    public class DepartmentMember
+    public class DepartmentMember : BaseEntity<int>
     {
         public DepartmentMember(Guid userId, Guid departmentId, int departmentRoleId)
         {
@@ -9,7 +11,6 @@ namespace Identity.Domain.Entities
             DepartmentRoleId = departmentRoleId;
         }
 
-        public int DepartmentMemberId { get; set; }
         public Guid DepartmentId { get; private set; }
         public Department Department { get; private set; }
         public Guid UserId { get; private set; }

@@ -8,7 +8,7 @@ namespace Identity.Persistence.Data.ConfigurationData
     {
         public void Configure(EntityTypeBuilder<DepartmentMember> builder)
         {
-            builder.HasKey(dm => dm.DepartmentMemberId);
+            builder.HasKey(dm => dm.Id);
 
             builder.HasOne(dm => dm.Department)
                    .WithMany(d => d.DepartmentMembers)

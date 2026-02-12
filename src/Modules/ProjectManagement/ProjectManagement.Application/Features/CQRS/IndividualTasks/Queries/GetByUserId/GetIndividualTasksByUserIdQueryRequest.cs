@@ -1,13 +1,16 @@
 using FlashMediator;
 using TaskFlow.BuildingBlocks.Interfaces;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.GetByUserId
 {
-    public record GetIndividualTasksByUserIdQueryRequest : IRequest<List<GetIndividualTasksByUserIdQueryResponse>> , ICacheableQuery
+    public record GetIndividualTasksByUserIdQueryRequest : IRequest<PagedResult<GetIndividualTasksByUserIdQueryResponse>> , ICacheableQuery
     {
         public Guid UserId { get; init; }
+        public int PageNumber { get; init; } = 1;
+        public int PageSize { get; init; } = 10;
 
-        public string CacheKey => "getuserindividualtasks";
+        public string CacheKey => $"getuserindividualtasks_{UserId}_{PageNumber}_{PageSize}";
 
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(15);
     };

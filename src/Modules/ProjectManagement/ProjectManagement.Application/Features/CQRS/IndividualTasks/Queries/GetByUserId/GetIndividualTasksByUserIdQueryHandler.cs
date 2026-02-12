@@ -1,9 +1,10 @@
 using FlashMediator;
 using ProjectManagement.Application.Repositories;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.GetByUserId
 {
-    public class GetIndividualTasksByUserIdQueryHandler : IRequestHandler<GetIndividualTasksByUserIdQueryRequest, List<GetIndividualTasksByUserIdQueryResponse>>
+    public class GetIndividualTasksByUserIdQueryHandler : IRequestHandler<GetIndividualTasksByUserIdQueryRequest, PagedResult<GetIndividualTasksByUserIdQueryResponse>>
     {
         private readonly IProjectManagementReadRepository _readRepository;
 
@@ -12,11 +13,17 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
             _readRepository = readRepository;
         }
 
-        public async Task<List<GetIndividualTasksByUserIdQueryResponse>> Handle(GetIndividualTasksByUserIdQueryRequest request, CancellationToken cancellationToken)
+        public async Task<PagedResult<GetIndividualTasksByUserIdQueryResponse>> Handle(GetIndividualTasksByUserIdQueryRequest request, CancellationToken cancellationToken)
         {
-            var tasks = await _readRepository.GetIndividualTasksByUserId(request.UserId, false);
+            var tasks = await _readRepository.GetAllIndividualTasks(false, request.PageNumber, request.PageSize,request.UserId);
 
-            return tasks.Select(task => new GetIndividualTasksByUserIdQueryResponse(task.Id, task.AssignedUserId, task.TaskTitle, task.Description, task.Deadline)).ToList();
+            return new PagedResult<GetIndividualTasksByUserIdQueryResponse>
+            {
+                Items = tasks.Select(task => new GetIndividualTasksByUserIdQueryResponse(task.Id, task.AssignedUserId, task.TaskTitle, task.Description, task.Deadline)).ToList(),
+                TotalCount = tasks.Count(),
+                Page = request.PageNumber,
+                PageSize = request.PageSize
+            };
         }
     }
 }

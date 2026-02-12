@@ -1,13 +1,18 @@
 using FlashMediator;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesByGroupId
 {
-    public class GetMessagesByGroupIdQueryRequest : IRequest<List<GetMessagesByGroupIdQueryResponse>>
+    public class GetMessagesByGroupIdQueryRequest : IRequest<List<GetMessagesByGroupIdQueryResponse>>,ICacheableQuery
     {
         public Guid CurrentUserId { get; init; }
         public Guid GroupId { get; init; }
         public int PageSize { get; init; } = 20;
         public int Page { get; init; } = 1;
+
+        public string CacheKey => GroupId.ToString()+"_chats";
+
+        public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(60);
 
         public GetMessagesByGroupIdQueryRequest(Guid currentUserId, Guid groupId, int pageSize = 20, int page = 1)
         {

@@ -3,7 +3,7 @@ using Chat.Application.Features.CQRS.Message.Command.Create;
 using Chat.Application.Repositories;
 using Chat.Application.Exceptions;
 using TaskFlow.BuildingBlocks.UnitOfWork;
-using TaskFlow.BuildingBlocks.Interfaces;
+using Identity.Application.Services;
 
 namespace Chat.Application.Services
 {

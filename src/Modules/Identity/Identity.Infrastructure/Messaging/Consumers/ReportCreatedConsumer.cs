@@ -85,10 +85,10 @@ namespace Identity.Infrastructure.Messaging.Consumers
 
                 var leaderId = await scopedMediator.Send(new GetDepartmentLeaderQueryRequest(eventData.NotifiedDepartmentId));
 
-                if (leaderId.HasValue)
+                if (leaderId is not null)
                 {
-                    await producer.PublishAsync("notification.send", new NotifyUserIntegrationEvent(leaderId.Value, $"Yeni Rapor: {eventData.Content}"));
-                    _logger.LogInformation($"Rapor {eventData.ReportId} için lider {leaderId.Value} kullanıcısına bildirim gönderildi");
+                    await producer.PublishAsync("notification.send", new NotifyUserIntegrationEvent(leaderId.LeaderId, $"Yeni Rapor: {eventData.Content}"));
+                    _logger.LogInformation($"Rapor {eventData.ReportId} için lider {leaderId.LeaderId} kullanıcısına bildirim gönderildi");
                 }
                 else
                 {

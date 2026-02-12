@@ -15,7 +15,7 @@ namespace Report.Persistence.Data.DataConfiguration
                 .HasForeignKey(e => e.ReportTopicId);
 
      
-            builder.HasIndex(e => e.UserId);
+            builder.HasIndex(e => e.ReportingUserId);
             builder.HasIndex(e => e.ReportTopicId);
             builder.HasIndex(e => e.CreatedAt);
         }

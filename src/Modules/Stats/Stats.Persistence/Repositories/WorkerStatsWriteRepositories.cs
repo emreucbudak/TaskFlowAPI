@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Stats.Application.Repoitories;
+using Stats.Application.Repositories;
 using Stats.Domain.Entities;
 using Stats.Persistence.Data;
 using Microsoft.EntityFrameworkCore;

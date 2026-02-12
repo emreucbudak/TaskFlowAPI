@@ -218,5 +218,41 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 throw;
             }
         }
+        public async System.Threading.Tasks.Task<List<Domain.Entities.IndividualTasks>> GetIndividualTasksByUserId(Guid userId, bool trackChanges)
+        {
+            if (userId == Guid.Empty)
+            {
+                logger.LogWarning("IndividualTask sorgusu için boş User ID sağlandı");
+                throw new ArgumentException("User ID boş olamaz", nameof(userId));
+            }
+
+            try
+            {
+                logger.LogInformation("Kullanıcıya ait IndividualTask kayıtları getiriliyor. UserID: {UserId}, Takip: {TrackChanges}", userId, trackChanges);
+
+                var query = context.IndividualTasks.Where(x => x.AssignedUserId == userId);
+
+                if (!trackChanges)
+                {
+                    query = query.AsNoTracking();
+                }
+
+                var results = await query.ToListAsync();
+
+                logger.LogInformation("{Count} adet IndividualTask kaydı başarıyla getirildi. UserID: {UserId}", results.Count, userId);
+
+                return results;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogWarning("IndividualTask sorgusu iptal edildi. UserID: {UserId}", userId);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "IndividualTask kayıtları getirilirken hata oluştu. UserID: {UserId}", userId);
+                throw;
+            }
+        }
     }
 }

@@ -18,14 +18,6 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
 
         public async Task<List<GetMessagesBetweenUsersQueryResponse>> Handle(GetMessagesBetweenUsersQueryRequest request, CancellationToken cancellationToken)
         {
-            string cacheKey = $"messages_{request.CurrentUserId}_{request.UserId1}_{request.UserId2}_{request.PageSize}_{request.Page}";
-            var cachedMessages = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
-
-            if (!string.IsNullOrEmpty(cachedMessages))
-            {
-                return JsonSerializer.Deserialize<List<GetMessagesBetweenUsersQueryResponse>>(cachedMessages)!;
-            }
-
             var messages = await _messageReadRepository.GetMessagesBetweenUsersAsync(
                 request.CurrentUserId,
                 request.UserId1,
@@ -48,13 +40,6 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
                 isDelivered = m.isDelivered,
                 DeliveredTime = m.DeliveredTime
             }).ToList();
-
-            var serializedResponse = JsonSerializer.Serialize(response);
-            await _distributedCache.SetStringAsync(cacheKey, serializedResponse, new DistributedCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromMinutes(60)
-            }, cancellationToken);
-
             return response;
         }
     }

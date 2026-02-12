@@ -4,7 +4,7 @@ using Identity.Domain.Entities;
 
 namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader
 {
-    public class GetDepartmentLeaderQueryHandler : IRequestHandler<GetDepartmentLeaderQueryRequest, Guid?>
+    public class GetDepartmentLeaderQueryHandler : IRequestHandler<GetDepartmentLeaderQueryRequest, GetDepartmentLeaderQueryResponse>
     {
         private readonly IReadRepository<DepartmentMember, int> _repository;
 
@@ -13,9 +13,12 @@ namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeade
             _repository = repository;
         }
 
-        public async Task Handle(GetDepartmentLeaderQueryRequest request, CancellationToken cancellationToken)
+        public async Task<GetDepartmentLeaderQueryResponse> Handle(GetDepartmentLeaderQueryRequest request, CancellationToken cancellationToken)
         {
-            return await _repository.GetDepartmentLeaderIdAsync(request.DepartmentId);
+            return new GetDepartmentLeaderQueryResponse
+            {
+                LeaderId = await _repository.GetDepartmentLeaderIdAsync(request.DepartmentId)
+            };
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using FlashMediator;
+using TaskFlow.BuildingBlocks.Common;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Company.Queries.GetAll
 {
-    public record GetAllCompaniesQueriesRequest : IRequest<List<GetAllCompaniesQueriesResponse>>
+    public record GetAllCompaniesQueriesRequest : IRequest<PagedResult<GetAllCompaniesQueriesResponse>>, ICacheableQuery
     {
         public GetAllCompaniesQueriesRequest(int? pageNumber, int? pageSize)
         {
@@ -13,5 +15,8 @@ namespace Identity.Application.Features.CQRS.Company.Queries.GetAll
         public int PageNumber { get; init; } 
         public int PageSize { get; init; }
 
+        public string CacheKey => "all_companies";
+
+        public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(30);
     }
 }

@@ -1,6 +1,6 @@
 using Stats.Domain.Entities;
 
-namespace Stats.Application.Repoitories
+namespace Stats.Application.Repositories
 {
     public interface IWorkerStatsWriteRepositories
     {

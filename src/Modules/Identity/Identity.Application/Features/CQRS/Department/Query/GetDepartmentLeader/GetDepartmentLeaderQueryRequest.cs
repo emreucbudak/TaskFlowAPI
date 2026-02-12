@@ -5,6 +5,11 @@ namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeade
 {
     public record GetDepartmentLeaderQueryRequest : IRequest<GetDepartmentLeaderQueryResponse>, ICacheableQuery
     {
+        public GetDepartmentLeaderQueryRequest(Guid departmentId)
+        {
+            DepartmentId = departmentId;
+        }
+
         public Guid DepartmentId { get; init; }
         public string CacheKey => "getdepartmentleader";
 

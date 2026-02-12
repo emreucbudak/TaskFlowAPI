@@ -17,7 +17,7 @@ namespace Report.Persistence.Repositories
 
             try
             {
-                logger.LogInformation("Yeni rapor ekleniyor. User: {UserId}", entity.UserId);
+                logger.LogInformation("Yeni report ekleniyor. User: {UserId}", entity.ReportingUserId);
                 await db.AddAsync(entity);
             }
             catch (DbUpdateException ex)

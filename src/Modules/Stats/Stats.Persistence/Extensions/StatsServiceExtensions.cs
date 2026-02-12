@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Stats.Application.Repoitories;
+using Stats.Application.Repositories;
 using Stats.Persistence.Data;
 using Stats.Persistence.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;

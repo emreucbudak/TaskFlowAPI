@@ -1,7 +1,7 @@
 using Stats.Domain.Entities;
 using TaskFlow.BuildingBlocks.Common;
 
-namespace Stats.Application.Repoitories
+namespace Stats.Application.Repositories
 {
     public interface IWorkerStatsReadRepositories
     {

@@ -2,6 +2,6 @@
 {
     public record GetDepartmentLeaderQueryResponse
     {
-        public Guid? LeaderId { get; init; }
+        public Guid LeaderId { get; init; }
     }
 }

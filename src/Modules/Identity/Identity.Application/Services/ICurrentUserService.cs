@@ -1,4 +1,4 @@
-namespace TaskFlow.BuildingBlocks.Interfaces
+﻿namespace Identity.Application.Services
 {
     public interface ICurrentUserService
     {

@@ -19,7 +19,7 @@ using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 using Tenant.Infrastructure.Extensions;
 using Identity.Infrastructure.Services;
-using TaskFlow.BuildingBlocks.Interfaces;
+using Identity.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()

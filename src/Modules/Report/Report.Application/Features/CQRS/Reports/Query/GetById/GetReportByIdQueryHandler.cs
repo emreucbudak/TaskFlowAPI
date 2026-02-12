@@ -15,7 +15,7 @@ namespace Report.Application.Features.CQRS.Reports.Query.GetById
 
         public async Task<GetReportByIdQueryResponse> Handle(GetReportByIdQueryRequest request, CancellationToken cancellationToken)
         {
-            var report = await _readRepository.GetByIdAsync(false, request.Id);
+            var report = await _readRepository.GetByIdAsync(false, request.ReportId);
             if (report == null)
             {
                 throw new ReportNotFoundException();

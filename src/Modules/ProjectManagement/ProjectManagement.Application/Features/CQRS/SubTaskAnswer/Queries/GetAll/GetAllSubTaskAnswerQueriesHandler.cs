@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Exceptions;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Domain.Entities;
 
@@ -18,7 +19,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetA
             var task = await _repository.GetTask(request.TaskId, false);
             if (task is null)
             {
-                throw new Exception("task bulunamadı");
+                throw new SubTaskAnswerNotFoundExceptions();
             }
             var subTaskAnswers = task.GetAllSubTaskAnswer(request.SubTaskId);
             var Answers = subTaskAnswers.Select(x=> new GetAllSubTaskAnswerQueriesResponse()

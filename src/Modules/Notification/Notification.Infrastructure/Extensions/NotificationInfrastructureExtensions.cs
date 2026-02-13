@@ -7,7 +7,7 @@ namespace Notification.Infrastructure.Extensions
     {
         public static IServiceCollection AddNotificationInfrastructure(this IServiceCollection services)
         {
-            services.AddHostedService<NotifyUserConsumer>();
+            services.AddScoped<NotifyUserConsumer>();
             return services;
         }
     }

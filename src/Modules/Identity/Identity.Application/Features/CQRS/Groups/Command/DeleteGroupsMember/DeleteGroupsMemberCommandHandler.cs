@@ -1,6 +1,7 @@
+using DotNetCore.CAP;
 using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
-
+using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -9,21 +10,25 @@ namespace Identity.Application.Features.CQRS.Groups.Command.DeleteGroupsMember
     public class DeleteGroupsMemberCommandHandler : IRequestHandler<DeleteGroupsMemberCommandRequest>
     {
         private readonly IReadRepository<Domain.Entities.Groups, Guid> _groupsReadRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IIdentityProducer _identityProducer;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _capPublisher;
 
-        public DeleteGroupsMemberCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> groupsReadRepository, IUnitOfWork unitOfWork, IIdentityProducer identityProducer)
+        public DeleteGroupsMemberCommandHandler(
+            IReadRepository<Domain.Entities.Groups, Guid> groupsReadRepository,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher)
         {
             _groupsReadRepository = groupsReadRepository;
             _unitOfWork = unitOfWork;
-            _identityProducer = identityProducer;
+            _capPublisher = capPublisher;
         }
 
         public async Task Handle(DeleteGroupsMemberCommandRequest request, CancellationToken cancellationToken)
         {
-            try
+            using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
                 var groups = await _groupsReadRepository.GetByIdAsync(true, request.GroupId);
+
                 if (groups is null)
                 {
                     throw new GroupsNotFoundExceptions();
@@ -33,27 +38,12 @@ namespace Identity.Application.Features.CQRS.Groups.Command.DeleteGroupsMember
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                await _identityProducer.PublishAsync("UserRemovedFromGroup", new
-                {
-                    GroupId = request.GroupId,
-                    UserId = request.UserId
-                });
-            }
-            catch (GroupsNotFoundExceptions)
-            {
-                throw new GroupsNotFoundExceptions();
-            }
-            catch (ArgumentException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Grup üyesi silinirken beklenmedik bir hata oluştu: {ex.Message}");
+                await _capPublisher.PublishAsync("UserRemovedFromGroup", new UserRemovedFromGroupIntegrationEvent(
+                    request.GroupId,
+                    request.UserId
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
             }
         }
     }

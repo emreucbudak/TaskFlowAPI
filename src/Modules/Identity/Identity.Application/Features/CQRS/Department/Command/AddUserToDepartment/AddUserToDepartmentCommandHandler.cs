@@ -1,5 +1,7 @@
-﻿using FlashMediator;
+﻿using DotNetCore.CAP;
+using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
+using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -10,37 +12,49 @@ namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartm
     public class AddUserToDepartmentCommandHandler : IRequestHandler<AddUserToDepartmentCommandRequest>
     {
         private readonly IReadRepository<Domain.Entities.Department, Guid> _departmentReadRepository;
-        private readonly UserManager<Domain.Entities.User> _userManager;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IIdentityProducer identityProducer;
+        private readonly UserManager<User> _userManager;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _identityProducer;
 
-        public AddUserToDepartmentCommandHandler(IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository, UserManager<User> userManager, IUnitOfWork unitOfWork, IIdentityProducer identityProducer)
+        public AddUserToDepartmentCommandHandler(
+            IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
+            UserManager<User> userManager,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher identityProducer)
         {
             _departmentReadRepository = departmentReadRepository;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
-            this.identityProducer = identityProducer;
+            _identityProducer = identityProducer;
         }
 
         public async Task Handle(AddUserToDepartmentCommandRequest request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
-            if (user is null)
+            using (var transaction = _unitOfWork.BeginTransaction(_identityProducer, autoCommit: false))
             {
-                throw new Department.Exceptions.UserNotFoundExceptions();
+                var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                if (user is null)
+                {
+                    throw new UserNotFoundExceptions();
+                }
+
+                var department = await _departmentReadRepository.GetByIdAsync(true, request.DepartmentId);
+                if (department is null)
+                {
+                    throw new DepartmentNotFoundExceptions();
+                }
+
+                department.AddUser(user.Id, request.RoleId);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _identityProducer.PublishAsync("UserAddedToDepartment", new UserAddedToDepartmentIntegrationEvent(
+                    user.Id,
+                    department.Id
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
             }
-            var department = await _departmentReadRepository.GetByIdAsync(true,request.DepartmentId);
-            if (department is null)
-            {
-                throw new DepartmentNotFoundExceptions();
-            }
-            department.AddUser(user.Id, request.RoleId);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            await identityProducer.PublishAsync("UserAddedToDepartment",new
-            {
-                UserId = user.Id,
-                DepartmentId = department.Id
-            });
         }
     }
 }

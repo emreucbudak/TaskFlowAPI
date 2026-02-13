@@ -1,3 +1,4 @@
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Exceptions;
 using ProjectManagement.Application.Repositories;
@@ -9,33 +10,42 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
     {
         private readonly IProjectManagementReadRepository _readRepository;
         private readonly IProjectManagementWriteRepository _writeRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IProjectManagementProducer _producer;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _capPublisher;
 
-        public DeleteIndividualTaskCommandHandler(IProjectManagementReadRepository readRepository, IProjectManagementWriteRepository writeRepository, IUnitOfWork unitOfWork, IProjectManagementProducer producer)
+        public DeleteIndividualTaskCommandHandler(
+            IProjectManagementReadRepository readRepository,
+            IProjectManagementWriteRepository writeRepository,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher)
         {
             _readRepository = readRepository;
             _writeRepository = writeRepository;
             _unitOfWork = unitOfWork;
-            _producer = producer;
+            _capPublisher = capPublisher;
         }
 
-        public async System.Threading.Tasks.Task Handle(DeleteIndividualTaskCommandRequest request, CancellationToken cancellationToken)
+        public async Task Handle(DeleteIndividualTaskCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await _readRepository.GetIndividualTask(request.Id, false);
-            if (task == null)
+            using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                throw new IndividualTaskNotFoundException();
+                var task = await _readRepository.GetIndividualTask(request.Id, false);
+                if (task == null)
+                {
+                    throw new IndividualTaskNotFoundException();
+                }
+
+                await _writeRepository.DeleteIndividualTask(task);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _capPublisher.PublishAsync("IndividualTaskDeleted", new IndividualTaskDeletedIntegrationEvent(
+                    task.Id,
+                    task.AssignedUserId
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
             }
-
-            await _writeRepository.DeleteIndividualTask(task);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await _producer.PublishAsync("IndividualTaskDeleted", new
-            {
-                Id = task.Id,
-                AssignedUserId = task.AssignedUserId
-            });
         }
     }
 }

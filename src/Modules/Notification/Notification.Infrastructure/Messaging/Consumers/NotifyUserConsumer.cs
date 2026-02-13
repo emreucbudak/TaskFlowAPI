@@ -2,7 +2,8 @@ using DotNetCore.CAP;
 using FlashMediator;
 using Microsoft.Extensions.Logging;
 using Notification.Application.Features.CQRS.Notification.Command.Create;
-using TaskFlow.BuildingBlocks.Contracts.EventBus.Messages;
+using Notification.Application.IntegrationEvents;
+
 
 namespace Notification.Infrastructure.Messaging.Consumers
 {

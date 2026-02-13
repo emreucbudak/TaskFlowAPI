@@ -1,8 +1,8 @@
+using DotNetCore.CAP;
 using FlashMediator;
+using Report.Application.IntegrationEvents;
 using Report.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
-using Report.Application.Messaging;
-using TaskFlow.BuildingBlocks.Contracts.EventBus.Messages;
 
 namespace Report.Application.Features.CQRS.Reports.Command.Create
 {
@@ -10,7 +10,7 @@ namespace Report.Application.Features.CQRS.Reports.Command.Create
     {
         private readonly IReportWriteRepository _writeRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IReportProducer _reportProducer;
+        private readonly ICapPublisher _reportProducer;
 
         public CreateReportCommandHandler(IReportWriteRepository writeRepository, IUnitOfWork unitOfWork, IReportProducer reportProducer)
         {

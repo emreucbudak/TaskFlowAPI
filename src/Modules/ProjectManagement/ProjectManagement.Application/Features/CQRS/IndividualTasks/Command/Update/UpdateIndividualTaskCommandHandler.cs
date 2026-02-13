@@ -1,6 +1,5 @@
 using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Exceptions;
-using ProjectManagement.Application.Messaging;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 

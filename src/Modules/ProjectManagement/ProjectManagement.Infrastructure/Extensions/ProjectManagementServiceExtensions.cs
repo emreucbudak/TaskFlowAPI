@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProjectManagement.Application.Messaging;
-using ProjectManagement.Infrastructure.Messaging;
 using ProjectManagement.Persistence.Extensions;
 
 namespace ProjectManagement.Infrastructure.Extensions
@@ -12,7 +10,7 @@ namespace ProjectManagement.Infrastructure.Extensions
         {
             services.AddProjectManagementPersistence(configuration);
 
-            services.AddScoped<IProjectManagementProducer, ProjectManagementProducer>();
+
 
             return services;
         }

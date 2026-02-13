@@ -1,5 +1,5 @@
+using DotNetCore.CAP;
 using FlashMediator;
-using ProjectManagement.Application.Messaging;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -9,9 +9,9 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Cr
     {
         private readonly IProjectManagementWriteRepository _writeRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IProjectManagementProducer _producer;
+        private readonly ICapPublisher _producer;
 
-        public CreateIndividualTaskCommandHandler(IProjectManagementWriteRepository writeRepository, IUnitOfWork unitOfWork, IProjectManagementProducer producer)
+        public CreateIndividualTaskCommandHandler(IProjectManagementWriteRepository writeRepository, IUnitOfWork unitOfWork, ICapPublisher producer)
         {
             _writeRepository = writeRepository;
             _unitOfWork = unitOfWork;

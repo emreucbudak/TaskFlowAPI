@@ -1,5 +1,4 @@
 ﻿using FlashMediator;
-using ProjectManagement.Application.Messaging;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 

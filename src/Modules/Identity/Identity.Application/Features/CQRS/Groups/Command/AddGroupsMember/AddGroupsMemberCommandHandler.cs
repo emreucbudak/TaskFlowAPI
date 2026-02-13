@@ -1,6 +1,6 @@
-﻿using FlashMediator;
+﻿using DotNetCore.CAP;
+using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
-using Identity.Application.Messaging;
 using Identity.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -10,9 +10,9 @@ namespace Identity.Application.Features.CQRS.Groups.Command.AddGroupsMember
     {
         private readonly IReadRepository<Domain.Entities.Groups, Guid> _groupsReadRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IIdentityProducer _identityProducer;
+        private readonly ICapPublisher _identityProducer;
 
-        public AddGroupsMemberCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> groupsReadRepository, IUnitOfWork unitOfWork, IIdentityProducer identityProducer)
+        public AddGroupsMemberCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> groupsReadRepository, IUnitOfWork unitOfWork, ICapPublisher identityProducer)
         {
             _groupsReadRepository = groupsReadRepository;
             _unitOfWork = unitOfWork;

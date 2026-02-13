@@ -1,4 +1,4 @@
-namespace TaskFlow.BuildingBlocks.Contracts.EventBus.Messages
+namespace Notification.Application.IntegrationEvents
 {
     public record NotifyUserIntegrationEvent(Guid UserId, string Content);
 }

@@ -1,6 +1,5 @@
 using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
-using Identity.Application.Messaging;
 using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;

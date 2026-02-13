@@ -5,7 +5,7 @@ namespace TaskFlow.BuildingBlocks.Extensions
 {
     public static  class CAPExtensions
     {
-        public static IServiceCollection RegisterCapExtensions(this IServiceCollection services,IConfiguration configuration,string groupName)
+        public static IServiceCollection RegisterCapExtensions(this IServiceCollection services,IConfiguration configuration,string groupName = "taskflow.messaging")
         {
             services.AddCap(options =>
             {

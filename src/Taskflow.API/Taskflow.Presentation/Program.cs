@@ -20,6 +20,7 @@ using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 using Tenant.Infrastructure.Extensions;
 using Identity.Infrastructure.Services;
 using Identity.Application.Services;
+using TaskFlow.BuildingBlocks.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
@@ -41,7 +42,8 @@ builder.Services.AddProjectManagementInfrastructure(builder.Configuration);
 builder.Services.AddNotificationPersistence(builder.Configuration);
 builder.Services.AddNotificationInfrastructure();
 builder.Services.AddReportModule(builder.Configuration);
-builder.Services.AddReportInfrastructure();
+builder.Services.AddReportInfrastructure(builder.Configuration);
+builder.Services.RegisterCapExtensions(builder.Configuration,"taskflow.host");
 builder.Services.AddStatsModule(builder.Configuration);
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddFlashMediator(typeof(Program).Assembly);

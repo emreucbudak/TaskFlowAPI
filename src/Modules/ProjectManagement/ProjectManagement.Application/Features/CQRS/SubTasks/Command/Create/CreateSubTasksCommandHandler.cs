@@ -1,4 +1,6 @@
-﻿using FlashMediator;
+﻿using DotNetCore.CAP;
+using FlashMediator;
+using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -6,33 +8,50 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
 {
     public class CreateSubTasksCommandHandler : IRequestHandler<CreateSubTasksCommandRequest>
     {
-    
-        private readonly IProjectManagementReadRepository _projectManagementReadRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IProjectManagementProducer _projectManagementProducer;
+        private readonly IProjectManagementReadRepository _readRepository;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _capPublisher;
 
-        public CreateSubTasksCommandHandler(IProjectManagementReadRepository projectManagementReadRepository, IUnitOfWork unitOfWork, IProjectManagementProducer projectManagementProducer)
+        public CreateSubTasksCommandHandler(
+            IProjectManagementReadRepository readRepository,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher)
         {
-
-            _projectManagementReadRepository = projectManagementReadRepository;
+            _readRepository = readRepository;
             _unitOfWork = unitOfWork;
-            _projectManagementProducer = projectManagementProducer;
+            _capPublisher = capPublisher;
         }
 
         public async Task Handle(CreateSubTasksCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await _projectManagementReadRepository.GetTask(request.TaskId, true);
-            task.AddSubTask(description:request.Description,AssignedUserId:request.AssignedUserId,Title:request.TaskTitle,taskId:request.TaskId);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await _projectManagementProducer.PublishAsync("SubTaskCreated", new
+            using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                TaskId = request.TaskId,
-                Description = request.Description,
-                AssignedUserId = request.AssignedUserId,
-                TaskTitle = request.TaskTitle,
-                TaskDescription = request.Description
-            });
+                var task = await _readRepository.GetTask(request.TaskId, true);
+
+                if (task == null)
+                {
+
+                    throw new Exception("Task bulunamadı.");
+                }
+
+                task.AddSubTask(
+                    description: request.Description,
+                    AssignedUserId: request.AssignedUserId,
+                    Title: request.TaskTitle,
+                    taskId: request.TaskId
+                );
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _capPublisher.PublishAsync("SubTaskCreated", new SubTaskCreatedIntegrationEvent(
+                    request.TaskId,
+                    request.TaskTitle,
+                    request.Description,
+                    request.AssignedUserId
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
+            }
         }
     }
 }

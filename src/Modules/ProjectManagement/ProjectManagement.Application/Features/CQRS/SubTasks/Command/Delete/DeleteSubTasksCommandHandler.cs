@@ -1,34 +1,51 @@
-﻿using FlashMediator;
+﻿using DotNetCore.CAP;
+using FlashMediator;
+using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
+
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
 {
     public class DeleteSubTasksCommandHandler : IRequestHandler<DeleteSubTasksCommandRequest>
     {
+        private readonly IProjectManagementReadRepository _readRepository;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _capPublisher;
 
-        private readonly IProjectManagementReadRepository projectManagementReadRepository;
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IProjectManagementProducer _producer;
-
-        public DeleteSubTasksCommandHandler(IProjectManagementReadRepository projectManagementReadRepository, IUnitOfWork unitOfWork, IProjectManagementProducer producer)
+        public DeleteSubTasksCommandHandler(
+            IProjectManagementReadRepository readRepository,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher)
         {
-            this.projectManagementReadRepository = projectManagementReadRepository;
-            this.unitOfWork = unitOfWork;
-            _producer = producer;
+            _readRepository = readRepository;
+            _unitOfWork = unitOfWork;
+            _capPublisher = capPublisher;
         }
 
         public async Task Handle(DeleteSubTasksCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await projectManagementReadRepository.GetTask(request.TaskId, false);
-            task.RemoveSubTask(request.SubTaskId);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await _producer.PublishAsync("SubTaskDeleted", new
+            using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                TaskId = request.TaskId,
-                SubTaskId = request.SubTaskId
-            });
+
+                var task = await _readRepository.GetTask(request.TaskId, true);
+
+                if (task == null)
+                {
+                    throw new Exception("Task bulunamadı.");
+                }
+
+                task.RemoveSubTask(request.SubTaskId);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _capPublisher.PublishAsync("SubTaskDeleted", new SubTaskDeletedIntegrationEvent(
+                    request.TaskId,
+                    request.SubTaskId
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
+            }
         }
     }
 }

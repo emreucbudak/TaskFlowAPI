@@ -1,5 +1,7 @@
+using DotNetCore.CAP;
 using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
+using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -10,41 +12,49 @@ namespace Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDe
     public class DeleteUserFromDepartmentCommandHandler : IRequestHandler<DeleteUserFromDepartmentCommandRequest>
     {
         private readonly IReadRepository<Domain.Entities.Department, Guid> _departmentReadRepository;
-        private readonly UserManager<Domain.Entities.User> _userManager;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IIdentityProducer _identityProducer;
+        private readonly UserManager<User> _userManager;
+        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly ICapPublisher _capPublisher;
 
-        public DeleteUserFromDepartmentCommandHandler(IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository, UserManager<User> userManager, IUnitOfWork unitOfWork, IIdentityProducer identityProducer)
+        public DeleteUserFromDepartmentCommandHandler(
+            IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
+            UserManager<User> userManager,
+            ICapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher)
         {
             _departmentReadRepository = departmentReadRepository;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
-            _identityProducer = identityProducer;
+            _capPublisher = capPublisher;
         }
 
         public async Task Handle(DeleteUserFromDepartmentCommandRequest request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
-            if (user is null)
+            using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                throw new Department.Exceptions.UserNotFoundExceptions();
+                var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                if (user is null)
+                {
+                    throw new UserNotFoundExceptions();
+                }
+
+                var department = await _departmentReadRepository.GetByIdAsync(true, request.DepartmentId);
+                if (department is null)
+                {
+                    throw new DepartmentNotFoundExceptions();
+                }
+
+                department.RemoveUser(user.Id);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _capPublisher.PublishAsync("UserRemovedFromDepartment", new UserRemovedFromDepartmentIntegrationEvent(
+                    user.Id,
+                    department.Id
+                ));
+
+                await transaction.CommitAsync(cancellationToken);
             }
-
-            var department = await _departmentReadRepository.GetByIdAsync(true, request.DepartmentId);
-            if (department is null)
-            {
-                throw new DepartmentNotFoundExceptions();
-            }
-
-            department.RemoveUser(user.Id);
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await _identityProducer.PublishAsync("UserRemovedFromDepartment", new
-            {
-                UserId = user.Id,
-                DepartmentId = department.Id
-            });
         }
     }
 }

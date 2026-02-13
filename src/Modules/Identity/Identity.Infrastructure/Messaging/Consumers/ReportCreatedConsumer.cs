@@ -2,6 +2,7 @@ using DotNetCore.CAP;
 using FlashMediator; 
 using Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader;
 using Microsoft.Extensions.Logging;
+using Notification.Application.IntegrationEvents;
 using Report.Application.IntegrationEvents;
 
 namespace Identity.Infrastructure.Messaging.Consumers

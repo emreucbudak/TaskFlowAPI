@@ -12,7 +12,7 @@ namespace Report.Application.Features.CQRS.Reports.Command.Create
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICapPublisher _reportProducer;
 
-        public CreateReportCommandHandler(IReportWriteRepository writeRepository, IUnitOfWork unitOfWork, IReportProducer reportProducer)
+        public CreateReportCommandHandler(IReportWriteRepository writeRepository, IUnitOfWork unitOfWork, ICapPublisher reportProducer)
         {
             _writeRepository = writeRepository;
             _unitOfWork = unitOfWork;

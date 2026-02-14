@@ -8,5 +8,6 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
         public string TaskTitle { get; init; }
         public Guid SubTasksId  { get; init; }
         public Guid TaskId  { get; init; }
+        public Guid ReceiverUserId { get; init; }
     }
 }

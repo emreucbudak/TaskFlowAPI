@@ -49,7 +49,8 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
                     request.TaskId,
                     request.SubTasksId,
                     request.TaskTitle,
-                    request.Description
+                    request.Description,
+                    request.ReceiverUserId
                 ));
 
                 await transaction.CommitAsync(cancellationToken);

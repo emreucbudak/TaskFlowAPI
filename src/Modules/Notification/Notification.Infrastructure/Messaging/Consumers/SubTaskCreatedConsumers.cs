@@ -4,27 +4,27 @@ using Microsoft.Extensions.Logging;
 using Notification.Application.Features.CQRS.Notification.Command.Create;
 using Notification.Application.IntegrationEvents;
 
+
 namespace Notification.Infrastructure.Messaging.Consumers
 {
-    public class IndividualTaskCreatedConsumers : ICapSubscribe
+    public class SubTaskCreatedConsumers : ICapSubscribe
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<IndividualTaskCreatedConsumers> _logger;
+        private readonly ILogger<SubTaskCreatedConsumers> _logger;
 
-        public IndividualTaskCreatedConsumers(IMediator mediator, ILogger<IndividualTaskCreatedConsumers> logger)
+        public SubTaskCreatedConsumers(IMediator mediator, ILogger<SubTaskCreatedConsumers> logger)
         {
             _mediator = mediator;
             _logger = logger;
         }
 
-        [CapSubscribe("IndividualTaskCreated", Group = "module.notification")]
-        public async Task Handle(IndividualTaskCreatedIntegrationEvent eventData)
+        [CapSubscribe("SubTaskCreated", Group = "module.notification")]
+        public async Task Handle(SubTaskCreatedIntegrationEvent eventData)
         {
-
-            var content = $"Yeni bir görev atandı: {eventData.TaskTitle}. Son tarih: {eventData.Deadline:dd/MM/yyyy}";
+            var content = $"Yeni bir alt görev atandı: {eventData.TaskTitle}.";
 
             var command = new CreateNotificationCommandRequest(
-                title: "Yeni Görev Atandı",
+                title: "Yeni Alt Görev",
                 description: content,
                 sendTime: DateTime.UtcNow,
                 isRead: false,
@@ -33,7 +33,7 @@ namespace Notification.Infrastructure.Messaging.Consumers
 
             await _mediator.Send(command);
 
-            _logger.LogInformation($"Task created bildirimi kullanıcı {eventData.AssignedUserId} için Mediator'a iletildi.");
+            _logger.LogInformation($"Alt görev bildirimi (TaskID: {eventData.TaskId}) kullanıcı {eventData.AssignedUserId} için Mediator'a gönderildi.");
         }
     }
 }

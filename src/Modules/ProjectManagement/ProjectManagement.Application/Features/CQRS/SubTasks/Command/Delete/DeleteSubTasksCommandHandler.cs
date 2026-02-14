@@ -41,7 +41,8 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
 
                 await _capPublisher.PublishAsync("SubTaskDeleted", new SubTaskDeletedIntegrationEvent(
                     request.TaskId,
-                    request.SubTaskId
+                    request.SubTaskId,
+                    request.ReceiverUserId
                 ));
 
                 await transaction.CommitAsync(cancellationToken);

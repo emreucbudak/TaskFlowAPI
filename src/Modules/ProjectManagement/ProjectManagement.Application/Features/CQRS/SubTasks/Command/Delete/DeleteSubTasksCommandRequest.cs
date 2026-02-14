@@ -6,5 +6,6 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
     {
         public Guid SubTaskId { get; init; }
         public Guid TaskId { get; init; }
+        public Guid ReceiverUserId { get; init; }
     }
 }

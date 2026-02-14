@@ -4,12 +4,12 @@ namespace Notification.Application.Features.CQRS.Notification.Command.Create
 {
     public record CreateNotificationCommandRequest : IRequest
     {
-        public CreateNotificationCommandRequest(string title, string description, DateTime sendTime, bool ısRead, Guid receiverUserId)
+        public CreateNotificationCommandRequest(string title, string description, DateTime sendTime, bool isRead, Guid receiverUserId)
         {
             Title = title;
             Description = description;
             SendTime = sendTime;
-            IsRead = ısRead;
+            IsRead = isRead;
             ReceiverUserId = receiverUserId;
         }
 

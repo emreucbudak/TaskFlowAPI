@@ -1,5 +1,5 @@
 ﻿using TaskFlow.BuildingBlocks.Common;
-using Tenant.Domain.Enums;
+using TaskFlow.BuildingBlocks.Enums;
 
 namespace Tenant.Domain.Entities
 {

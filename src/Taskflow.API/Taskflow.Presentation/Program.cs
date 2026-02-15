@@ -1,26 +1,27 @@
-using Chat.Persistence.Extensions;
 using Chat.Infrastructure.Extensions;
 using Chat.Infrastructure.Hubs;
+using Chat.Persistence.Extensions;
 using FlashMediator;
 using FluentValidation;
+using Identity.Application.Services;
 using Identity.Domain.Entities;
-using Identity.Persistence.Data.IdentityDb;
 using Identity.Infrastructure.Extensions;
+using Identity.Infrastructure.Services;
+using Identity.Persistence.Data.IdentityDb;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Notification.Persistence.Extensions;
 using Notification.Infrastructure.Extensions;
+using Notification.Persistence.Extensions;
 using ProjectManagement.Infrastructure.Extensions;
-using Report.Persistence.Extensions;
 using Report.Infrastructure.Extensions;
+using Report.Persistence.Extensions;
 using Serilog;
 using Stats.Persistence.Extensions;
+using TaskFlow.BuildingBlocks.Extensions;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
+using TaskFlow.BuildingBlocks.Enums;
 using Tenant.Infrastructure.Extensions;
-using Identity.Infrastructure.Services;
-using Identity.Application.Services;
-using TaskFlow.BuildingBlocks.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
@@ -61,36 +62,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWTSecretKey:SecretKey"])),
         ClockSkew = TimeSpan.Zero
-    };
+    };  
 });
-builder.Services.AddStackExchangeRedisCache(options =>
+builder.Services.AddAuthorization(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "Taskflow_";
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = builder.Configuration.GetConnectionString("Redis");
+        options.InstanceName = "Taskflow_";
+    });
+    builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
+    builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
+    {
+        opt.Password.RequireDigit = true;
+        opt.Password.RequireLowercase = true;
+        opt.Password.RequireUppercase = true;
+        opt.Password.RequireNonAlphanumeric = false;
+        opt.Password.RequiredLength = 8;
+        opt.User.RequireUniqueEmail = true;
+    })
+        .AddEntityFrameworkStores<IdentityManagementDbContext>()
+        .AddDefaultTokenProviders();
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.MapHub<ChatHubs>("/chatHub");
+
+    app.Run();
 });
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
-builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
-{
-    opt.Password.RequireDigit = true;
-    opt.Password.RequireLowercase = true;
-    opt.Password.RequireUppercase = true;
-    opt.Password.RequireNonAlphanumeric = false;
-    opt.Password.RequiredLength = 8;
-    opt.User.RequireUniqueEmail = true;
-})
-    .AddEntityFrameworkStores<IdentityManagementDbContext>()
-    .AddDefaultTokenProviders();
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-app.MapHub<ChatHubs>("/chatHub");
-
-app.Run();

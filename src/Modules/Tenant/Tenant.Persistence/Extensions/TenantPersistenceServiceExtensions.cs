@@ -6,6 +6,8 @@ using Tenant.Persistence.Data.Repositories;
 using Tenant.Persistence.Data.TenantDb;
 using Tenant.Persistence.Data.UnitOfWork;
 using TaskFlow.BuildingBlocks.UnitOfWork;
+using TaskFlow.BuildingBlocks.Interfaces;
+using Tenant.Persistence.Services;
 
 namespace Tenant.Persistence.Extensions
 {
@@ -23,6 +25,7 @@ namespace Tenant.Persistence.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
+            services.AddScoped<ISubscriptionChecker, SubscriptionChecker>();
 
             return services;
         }

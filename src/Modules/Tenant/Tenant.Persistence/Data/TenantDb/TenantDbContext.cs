@@ -13,6 +13,7 @@ namespace Tenant.Persistence.Data.TenantDb
         }
         public DbSet<Tenant.Domain.Entities.CompanyPlan> companyPlans { get; set; }
         public DbSet<Tenant.Domain.Entities.PlanProperties> planProperties { get; set; }
+        public DbSet<Tenant.Domain.Entities.TenantSubscription> tenantSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -14,7 +14,8 @@ namespace Tenant.Domain.Entities
         public string PaymentProviderSubscriptionId { get; private set; }
 
         public SubscriptionStatus Status { get; private set; }
-
+        public Guid TenantUsageId { get; private set; }
+        public TenantUsage TenantUsage { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime NextBillingDate { get; private set; }
         public DateTime? CanceledAt { get; private set; }

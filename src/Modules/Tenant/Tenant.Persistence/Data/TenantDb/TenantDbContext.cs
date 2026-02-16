@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Identity.Domain.Entities;
+using Tenant.Domain.Entities;
 
 namespace Tenant.Persistence.Data.TenantDb
 {
@@ -11,13 +13,27 @@ namespace Tenant.Persistence.Data.TenantDb
         protected TenantDbContext()
         {
         }
-        public DbSet<Tenant.Domain.Entities.CompanyPlan> companyPlans { get; set; }
-        public DbSet<Tenant.Domain.Entities.PlanProperties> planProperties { get; set; }
-        public DbSet<Tenant.Domain.Entities.TenantSubscription> tenantSubscriptions { get; set; }
+        public DbSet<CompanyPlan> companyPlans { get; set; }
+        public DbSet<PlanProperties> planProperties { get; set; }
+        public DbSet<TenantSubscription> tenantSubscriptions { get; set; }
+
+        public DbSet<User> Users { get; set; }
+        public DbSet<Groups> Groups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Tenant");
+            
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("AspNetUsers", "Identity");
+            });
+
+            modelBuilder.Entity<Groups>(entity =>
+            {
+                entity.ToTable("Groups", "Identity");
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }

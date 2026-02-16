@@ -2,8 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskFlow.BuildingBlocks.Exceptions;
 using TaskFlow.BuildingBlocks.Interfaces;
 using Tenant.Persistence.Data.TenantDb;
-using TaskFlow.BuildingBlocks.Enums;
-using Tenant.Domain.Entities;
+
 
 namespace Tenant.Persistence.Services
 {
@@ -18,8 +17,6 @@ namespace Tenant.Persistence.Services
 
         public async Task CheckUserLimitAsync(Guid tenantId)
         {
-            var subscription = await GetActiveSubscriptionAsync(tenantId);
-            if (subscription == null) return; 
 
             var limit = subscription.CompanyPlan.PlanProperties.PeopleAddedLimit;
             if (limit == -1) return;
@@ -53,13 +50,6 @@ namespace Tenant.Persistence.Services
              await Task.CompletedTask;
         }
 
-        private async Task<TenantSubscription?> GetActiveSubscriptionAsync(Guid tenantId)
-        {
-            return await _context.tenantSubscriptions
-                .Include(s => s.CompanyPlan)
-                .ThenInclude(p => p.PlanProperties)
-                .FirstOrDefaultAsync(s => s.TenantId == tenantId && s.Status == SubscriptionStatus.Aktif);
-        }
 
         private async Task<int> GetUserCountAsync(Guid tenantId)
         {

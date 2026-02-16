@@ -24,6 +24,10 @@ namespace Tenant.Persistence.Data.TenantDb
             modelBuilder.Entity<TenantUsage>()
                 .HasIndex(t => t.TenantId)
                 .IsUnique();
+            modelBuilder.Entity<TenantSubscription>().HasOne(ts => ts.TenantUsage)
+                .WithOne()
+                .HasForeignKey<TenantSubscription>(ts => ts.TenantUsageId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -17,8 +17,7 @@ namespace Tenant.Persistence.Data.TenantDb
         public DbSet<PlanProperties> planProperties { get; set; }
         public DbSet<TenantSubscription> tenantSubscriptions { get; set; }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Groups> Groups { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Identity.Domain.Entities;
 using Tenant.Domain.Entities;
 
 namespace Tenant.Persistence.Data.TenantDb
@@ -22,16 +21,9 @@ namespace Tenant.Persistence.Data.TenantDb
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Tenant");
-            
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.ToTable("AspNetUsers", "Identity");
-            });
-
-            modelBuilder.Entity<Groups>(entity =>
-            {
-                entity.ToTable("Groups", "Identity");
-            });
+            modelBuilder.Entity<TenantUsage>()
+                .HasIndex(t => t.TenantId)
+                .IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

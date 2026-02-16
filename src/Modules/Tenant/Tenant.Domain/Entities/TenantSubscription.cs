@@ -1,4 +1,5 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+﻿using System.ComponentModel.DataAnnotations;
+using TaskFlow.BuildingBlocks.Common;
 using TaskFlow.BuildingBlocks.Enums;
 
 namespace Tenant.Domain.Entities
@@ -17,5 +18,7 @@ namespace Tenant.Domain.Entities
         public DateTime StartDate { get; private set; }
         public DateTime NextBillingDate { get; private set; }
         public DateTime? CanceledAt { get; private set; }
+        [Timestamp]
+        public byte[] RowVersion { get; private set; }
     }
 }

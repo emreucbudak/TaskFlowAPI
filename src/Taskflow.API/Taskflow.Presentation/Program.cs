@@ -20,8 +20,9 @@ using Stats.Persistence.Extensions;
 using TaskFlow.BuildingBlocks.Extensions;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
-using TaskFlow.BuildingBlocks.Enums;
 using Tenant.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Taskflow.Presentation.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
@@ -51,6 +52,7 @@ builder.Services.AddFlashMediator(typeof(Program).Assembly);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt =>
 {
+    
     opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -66,35 +68,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.AddAuthorization(options =>
 {
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = builder.Configuration.GetConnectionString("Redis");
-        options.InstanceName = "Taskflow_";
-    });
-    builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
-    builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
-    {
-        opt.Password.RequireDigit = true;
-        opt.Password.RequireLowercase = true;
-        opt.Password.RequireUppercase = true;
-        opt.Password.RequireNonAlphanumeric = false;
-        opt.Password.RequiredLength = 8;
-        opt.User.RequireUniqueEmail = true;
-    })
-        .AddEntityFrameworkStores<IdentityManagementDbContext>()
-        .AddDefaultTokenProviders();
-    var app = builder.Build();
-
-    if (app.Environment.IsDevelopment())
-    {
-        app.MapOpenApi();
-    }
-
-    app.UseHttpsRedirection();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-    app.MapHub<ChatHubs>("/chatHub");
-
-    app.Run();
+    options.AddPolicy("SubscriptionCheck", policy => policy.Requirements.Add(new SubscriptionRequirement()));
 });
+
+builder.Services.AddScoped<IAuthorizationHandler, SubscriptionHandler>();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Taskflow_";
+});
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
+builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
+{
+    opt.Password.RequireDigit = true;
+    opt.Password.RequireLowercase = true;
+    opt.Password.RequireUppercase = true;
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.Password.RequiredLength = 8;
+    opt.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<IdentityManagementDbContext>()
+    .AddDefaultTokenProviders();
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapHub<ChatHubs>("/chatHub");
+
+app.Run();

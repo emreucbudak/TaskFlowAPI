@@ -30,6 +30,7 @@ namespace TaskFlow.BuildingBlocks.Extensions
                 });
                 options.DefaultGroupName = groupName;
             });
+     
             return services;
         }
     }

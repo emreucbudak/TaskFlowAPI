@@ -1,16 +1,13 @@
 ﻿using FlashMediator;
+using TaskFlow.BuildingBlocks.Enums;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Groups.Command.Add
 {
-    public record AddGroupsCommandRequest : IRequest
+    public record AddGroupsCommandRequest(string Name, Guid companyId) : IRequest, ILimitedQueryable
     {
-        public string Name { get; init; }
-        public Guid companyId { get; init; }
+        public Guid TenantId => companyId;
 
-        public AddGroupsCommandRequest(string name, Guid companyId)
-        {
-            Name = name;
-            this.companyId = companyId;
-        }
+        public LimitType limitType => LimitType.TeamLimit;
     }
 }

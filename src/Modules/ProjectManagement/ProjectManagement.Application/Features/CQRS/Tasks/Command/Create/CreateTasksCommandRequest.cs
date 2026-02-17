@@ -1,11 +1,11 @@
 ﻿using FlashMediator;
+using TaskFlow.BuildingBlocks.Enums;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
 {
-    public record CreateTasksCommandRequest : IRequest
+    public record CreateTasksCommandRequest(string TaskName , string Description, DateTime DeadlineTime ) : IRequest
     {
-        public string TaskName { get; init; }
-        public string Description { get; init; }
-        public DateTime DeadlineTime { get; init; }
+
     }
 }

@@ -1,6 +1,20 @@
 using FlashMediator;
+using TaskFlow.BuildingBlocks.Enums;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create
 {
-    public record CreateIndividualTaskCommandRequest(Guid AssignedUserId, string TaskTitle, string Description, DateOnly Deadline) : IRequest;
+    public record CreateIndividualTaskCommandRequest(
+        Guid AssignedUserId,
+        string TaskTitle,
+        string Description,
+        DateOnly Deadline,
+        Guid CompanyId)
+        : IRequest, ILimitedQueryable
+    {
+        public Guid TenantId => CompanyId;
+        public LimitType LimitType => LimitType.IndividualTask;
+
+        public LimitType limitType => LimitType.IndividualTask;
+    }
 }

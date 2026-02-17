@@ -10,9 +10,8 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
 
 - **Free Plan**
   - Temel görev yönetimi  
-  - Bireysel Sohbet
+  - Sohbet
   - Kullanıcı ve takım limiti
-  - Bireysel / Grup Sohbet
   - Departman Yönetimi  
 
 - **Standard Plan**
@@ -37,7 +36,7 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
 - **Backend:** .NET 10, C# 14  
 - **Veri Tabanı:** PostgreSQL, Entity Framework Core  
 - **Gerçek Zamanlı Bildirim:** SignalR  
-- **Mesaj Kuyruğu / Asenkron İşlem:** RabbitMQ  
+- **Mesaj Kuyruğu / Asenkron İşlem:** RabbitMQ, DotNetCore.CAP
 - **Cache / Hızlandırma:** Redis  
 - **Containerization:** Docker  
 - **SaaS Mantığı:** Plan bazlı feature toggle ve CompanyPlan yapısı  

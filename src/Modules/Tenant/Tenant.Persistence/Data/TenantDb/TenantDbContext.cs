@@ -27,6 +27,9 @@ namespace Tenant.Persistence.Data.TenantDb
             modelBuilder.Entity<TenantUsage>()
                 .HasIndex(t => t.TenantId)
                 .IsUnique();
+            modelBuilder.Entity<TenantUsage>()
+                .Property(t => t.RowVersion)
+                .IsConcurrencyToken();
             modelBuilder.Entity<TenantSubscription>().HasOne(ts => ts.TenantUsage)
                 .WithOne()
                 .HasForeignKey<TenantSubscription>(ts => ts.TenantUsageId)

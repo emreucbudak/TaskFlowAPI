@@ -23,7 +23,7 @@ namespace Tenant.Domain.Entities
         public int GroupTaskLimit { get; private set; }
         public int IndividualTaskLimit { get; private set; }
         public bool IsInternalReportingEnabled { get; private set; }
-        public int GetIndividualTaskLimit() { return IndividualTaskLimit; }
+
 
 
 

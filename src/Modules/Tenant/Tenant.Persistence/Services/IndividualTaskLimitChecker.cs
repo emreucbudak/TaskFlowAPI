@@ -20,13 +20,9 @@ namespace Tenant.Persistence.Services
         public async Task CheckLimitAsync(Guid companyId)
         {
             var individualTasks = await _context.tenantSubscriptions.Where(t => t.TenantId == companyId).Include(x=> x.TenantUsage).Include(x=> x.CompanyPlan).ThenInclude(x=> x.PlanProperties).FirstOrDefaultAsync();
-            ArgumentNullException.ThrowIfNull(individualTasks,"Şirket için tanımlı hak bulunamadı!");
-            ArgumentNullException.ThrowIfNull(individualTasks.CompanyPlan,
-    "Şirkete ait plan bulunamadı.");
-            ArgumentNullException.ThrowIfNull(individualTasks.TenantUsage,
-                "Kullanım kaydı bulunamadı.");
-            int companyRight = individualTasks.CompanyPlan.PlanProperties.GetIndividualTaskLimit();
-            int currentUsage = individualTasks.TenantUsage.GetCurrentIndividualTaskCount();
+            ArgumentNullException.ThrowIfNull(individualTasks,"Şirketinize ait bir abonelik bulunamadı!");
+            int companyRight = individualTasks.CompanyPlan.PlanProperties.IndividualTaskLimit;
+            int currentUsage = individualTasks.TenantUsage.CurrentIndividualTaskCount;
 
             if (currentUsage >= companyRight)
             {

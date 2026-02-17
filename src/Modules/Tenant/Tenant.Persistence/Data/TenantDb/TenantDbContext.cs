@@ -15,6 +15,9 @@ namespace Tenant.Persistence.Data.TenantDb
         public DbSet<CompanyPlan> companyPlans { get; set; }
         public DbSet<PlanProperties> planProperties { get; set; }
         public DbSet<TenantSubscription> tenantSubscriptions { get; set; }
+        public DbSet<TenantUsage> tenantUsages { get; set; }
+        public DbSet<PaymentTransaction> paymentTransactions { get; set; }
+       
 
 
 

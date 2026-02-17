@@ -1,60 +1,84 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using TaskFlow.BuildingBlocks.Common;
 
-namespace Tenant.Domain.Entities
+namespace Tenant.Domain.Entities;
+
+public class TenantUsage : BaseEntity
 {
-    public class TenantUsage : BaseEntity
+    public TenantUsage(Guid tenantId)
     {
-        public TenantUsage(Guid tenantId)
-        {
-            TenantId = tenantId;
-            CurrentUserCount = 0;
-            CurrentTaskCount = 0;
-            CurrentGroupCount = 0;
-            CurrentIndividualTaskCount = 0;
-        }
+        TenantId = tenantId;
+        CurrentUserCount = 0;
+        CurrentTaskCount = 0;
+        CurrentGroupCount = 0;
+        CurrentIndividualTaskCount = 0;
+        RowVersion = CreateNextVersion();
+    }
 
-        public Guid TenantId { get; private set; }
-        public int CurrentUserCount { get; private set; }
-        public int CurrentTaskCount { get; private set; }
-        public int CurrentGroupCount { get; private set; }
-        public int CurrentIndividualTaskCount { get; private set; }
+    public Guid TenantId { get; private set; }
+    public int CurrentUserCount { get; private set; }
+    public int CurrentTaskCount { get; private set; }
+    public int CurrentGroupCount { get; private set; }
+    public int CurrentIndividualTaskCount { get; private set; }
 
-        [Timestamp]
-        public byte[] RowVersion { get;  private set; }
-        public void IncrementUserCount()
-        {
-            CurrentUserCount++;
-        }
-        public void DecrementUserCount()
-        {
-            CurrentUserCount--;
-        }
-        public void IncrementTaskCount()
-        {
-            CurrentTaskCount++;
-        }
-        public void DecrementTaskCount()
-        {
-            CurrentTaskCount--;
-        }
-        public void IncrementGroupCount()
-        {
-            CurrentGroupCount++;
-        }
-        public void DecrementGroupCount()
-        {
-            CurrentGroupCount--;
-        }
-        public void IncrementIndividualTaskCount()
-        {
-            CurrentIndividualTaskCount++;
-        }
-        public void DecrementIndividualTaskCount()
-        {
-            CurrentIndividualTaskCount--;
-        }
+    [Timestamp]
+    public byte[] RowVersion { get; private set; }
 
+    public void IncrementUserCount()
+    {
+        CurrentUserCount++;
+        TouchVersion();
+    }
 
+    public void DecrementUserCount()
+    {
+        CurrentUserCount--;
+        TouchVersion();
+    }
+
+    public void IncrementTaskCount()
+    {
+        CurrentTaskCount++;
+        TouchVersion();
+    }
+
+    public void DecrementTaskCount()
+    {
+        CurrentTaskCount--;
+        TouchVersion();
+    }
+
+    public void IncrementGroupCount()
+    {
+        CurrentGroupCount++;
+        TouchVersion();
+    }
+
+    public void DecrementGroupCount()
+    {
+        CurrentGroupCount--;
+        TouchVersion();
+    }
+
+    public void IncrementIndividualTaskCount()
+    {
+        CurrentIndividualTaskCount++;
+        TouchVersion();
+    }
+
+    public void DecrementIndividualTaskCount()
+    {
+        CurrentIndividualTaskCount--;
+        TouchVersion();
+    }
+
+    private void TouchVersion()
+    {
+        RowVersion = CreateNextVersion();
+    }
+
+    private static byte[] CreateNextVersion()
+    {
+        return Guid.NewGuid().ToByteArray();
     }
 }

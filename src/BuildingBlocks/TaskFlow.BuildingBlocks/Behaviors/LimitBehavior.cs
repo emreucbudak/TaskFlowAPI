@@ -18,7 +18,7 @@ namespace TaskFlow.BuildingBlocks.Behaviors
                 var checker = _checkers
                     .FirstOrDefault(c => c.LimitType == request.limitType)
                     ?? throw new NotSupportedException(
-                        $"No checker for {request.limitType}");
+                        $"{request.limitType} Limit Tipi İçin Kontrolcü bulunamadı!");
 
                 await checker.CheckLimitAsync(request.TenantId);
 

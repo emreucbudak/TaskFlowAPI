@@ -17,7 +17,8 @@ namespace Identity.Persistence.Extensions
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(IdentityManagementDbContext).Assembly.FullName)));
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICapUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICapUnitOfWork>());
             
             services.AddScoped(typeof(IReadRepository<,>), typeof(ReadRepository<,>));
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));

@@ -1,4 +1,4 @@
-namespace ProjectManagement.Application.IntegrationEvents;
+namespace Tenant.Infrastructure.Messaging.IntegrationEvents;
 
 public sealed record IndividualTaskCreatedIntegrationEvent(
     Guid TaskId,

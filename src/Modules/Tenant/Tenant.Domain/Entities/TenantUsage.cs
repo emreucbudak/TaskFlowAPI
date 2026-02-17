@@ -54,22 +54,7 @@ namespace Tenant.Domain.Entities
         {
             CurrentIndividualTaskCount--;
         }
-        public int GetCurrentIndividualTaskCount()
-        {
-            return CurrentIndividualTaskCount;
-        }
-        public int GetCurrentUserCount()
-        {
-            return CurrentUserCount;
-        }
-        public int GetCurrentTaskCount()
-        {
-            return CurrentTaskCount;
-        }
-        public int GetCurrentGroupCount()
-        {
-            return CurrentGroupCount;
-        }
+
 
     }
 }

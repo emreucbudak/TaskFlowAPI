@@ -1,9 +1,11 @@
+using TaskFlow.BuildingBlocks.Enums;
+
 namespace TaskFlow.BuildingBlocks.Interfaces
 {
     public interface ISubscriptionLimitCheckerService
     {
-        Task CheckUserLimitAsync(Guid tenantId);
-        Task CheckProjectLimitAsync(Guid tenantId);
-        Task CheckStorageLimitAsync(Guid tenantId, long fileSizeInBytes);
+        LimitType LimitType { get; }
+        Task CheckLimitAsync(Guid companyId);
+
     }
 }

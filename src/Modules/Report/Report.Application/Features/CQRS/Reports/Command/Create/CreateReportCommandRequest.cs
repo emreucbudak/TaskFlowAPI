@@ -1,14 +1,13 @@
 using FlashMediator;
+using TaskFlow.BuildingBlocks.Enums;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Report.Application.Features.CQRS.Reports.Command.Create
 {
-    public record CreateReportCommandRequest : IRequest
+    public record CreateReportCommandRequest(int ReportTopicId, string Description, Guid UserId, int ReportStatusId, string Title, Guid NotifiedDepartmentId, Guid CompanyId) : IRequest, ILimitedQueryable
     {
-        public int ReportTopicId { get; init; }
-        public string Description { get; init; }
-        public Guid UserId { get; init; }
-        public int ReportStatusId { get; init; }
-        public string Title { get; init; }
-        public Guid NotifiedDepartmantId { get; init; }
+        public Guid TenantId => CompanyId;
+
+        public LimitType limitType => LimitType.IsIncludeReporting;
     }
 }

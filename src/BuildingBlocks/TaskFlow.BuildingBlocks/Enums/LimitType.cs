@@ -4,8 +4,7 @@ namespace TaskFlow.BuildingBlocks.Enums
 {
     public enum LimitType
     {
-        IndividualTask, 
-        GroupTask,        
+        IndividualTask,       
         PeopleAdded,
         TeamLimit,
         IsIncludeReporting

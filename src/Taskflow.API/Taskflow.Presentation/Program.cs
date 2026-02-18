@@ -28,6 +28,38 @@ using Taskflow.Presentation.Authorization;
 using Taskflow.Presentation.ExceptionHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
+
+var postgresHost = builder.Configuration["Postgres:Host"] ?? "localhost";
+var postgresPort = builder.Configuration["Postgres:Port"] ?? "5432";
+var postgresDatabase = builder.Configuration["Postgres:Database"] ?? "TaskFlowDb";
+var postgresUser = builder.Configuration["postgres_user"];
+var postgresPassword = builder.Configuration["postgres_password"];
+if (!string.IsNullOrWhiteSpace(postgresUser) && !string.IsNullOrWhiteSpace(postgresPassword))
+{
+    builder.Configuration["ConnectionStrings:DefaultConnection"] =
+        $"Host={postgresHost};Port={postgresPort};Database={postgresDatabase};Username={postgresUser};Password={postgresPassword}";
+}
+
+var redisHost = builder.Configuration["Redis:Host"] ?? "localhost";
+var redisPort = builder.Configuration["Redis:Port"] ?? "6379";
+var redisPassword = builder.Configuration["redis_password"];
+builder.Configuration["ConnectionStrings:Redis"] =
+    string.IsNullOrWhiteSpace(redisPassword)
+        ? $"{redisHost}:{redisPort}"
+        : $"{redisHost}:{redisPort},password={redisPassword}";
+
+var rabbitMqUser = builder.Configuration["rabbitmq_user"];
+var rabbitMqPassword = builder.Configuration["rabbitmq_password"];
+if (!string.IsNullOrWhiteSpace(rabbitMqUser))
+{
+    builder.Configuration["RabbitMQ:UserName"] = rabbitMqUser;
+}
+if (!string.IsNullOrWhiteSpace(rabbitMqPassword))
+{
+    builder.Configuration["RabbitMQ:Password"] = rabbitMqPassword;
+}
+
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("/logs/logs.txt", rollingInterval: RollingInterval.Day)

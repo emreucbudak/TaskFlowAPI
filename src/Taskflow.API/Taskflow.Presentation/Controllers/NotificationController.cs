@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Taskflow.Presentation.Controllers;
@@ -7,6 +8,7 @@ namespace Taskflow.Presentation.Controllers;
 [Route("api/[controller]")]
 public sealed class NotificationController(IMediator mediator) : ControllerBase
 {
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("CreateNotificationCommandRequest")]
     public async Task<IActionResult> CreateNotificationCommand([FromBody] Notification.Application.Features.CQRS.Notification.Command.Create.CreateNotificationCommandRequest request)
     {
@@ -14,6 +16,7 @@ public sealed class NotificationController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("DeleteNotificationCommandRequest")]
     public async Task<IActionResult> DeleteNotificationCommand([FromBody] Notification.Application.Features.CQRS.Notification.Command.Delete.DeleteNotificationCommandRequest request)
     {
@@ -21,6 +24,7 @@ public sealed class NotificationController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetUserAllNotificationsQueriesRequest")]
     public async Task<IActionResult> GetUserAllNotificationsQueries([FromBody] Notification.Application.Features.CQRS.Notification.Queries.GetAllNotifications.GetUserAllNotificationsQueriesRequest request)
     {

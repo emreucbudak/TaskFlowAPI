@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Taskflow.Presentation.Controllers;
@@ -7,6 +8,7 @@ namespace Taskflow.Presentation.Controllers;
 [Route("api/[controller]")]
 public sealed class ChatController(IMediator mediator) : ControllerBase
 {
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("CreateMessageCommandRequest")]
     public async Task<IActionResult> CreateMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Create.CreateMessageCommandRequest request)
     {
@@ -14,6 +16,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("DeleteMessageCommandRequest")]
     public async Task<IActionResult> DeleteMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Delete.DeleteMessageCommandRequest request)
     {
@@ -21,6 +24,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetMessagesBetweenUsersQueryRequest")]
     public async Task<IActionResult> GetMessagesBetweenUsersQuery([FromBody] Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers.GetMessagesBetweenUsersQueryRequest request)
     {
@@ -28,6 +32,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetMessagesByGroupIdQueryRequest")]
     public async Task<IActionResult> GetMessagesByGroupIdQuery([FromBody] Chat.Application.Features.CQRS.Message.Queries.GetMessagesByGroupId.GetMessagesByGroupIdQueryRequest request)
     {
@@ -35,6 +40,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetMessagesByUserIdQueryRequest")]
     public async Task<IActionResult> GetMessagesByUserIdQuery([FromBody] Chat.Application.Features.CQRS.Message.Queries.GetMessagesByUserId.GetMessagesByUserIdQueryRequest request)
     {
@@ -42,6 +48,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetUnreadMessageCountQueryRequest")]
     public async Task<IActionResult> GetUnreadMessageCountQuery([FromBody] Chat.Application.Features.CQRS.Message.Queries.GetUnreadMessageCount.GetUnreadMessageCountQueryRequest request)
     {
@@ -49,6 +56,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("MarkAsDeliveredCommandRequest")]
     public async Task<IActionResult> MarkAsDeliveredCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.MarkAsDelivered.MarkAsDeliveredCommandRequest request)
     {
@@ -56,6 +64,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("SearchMessagesQueryRequest")]
     public async Task<IActionResult> SearchMessagesQuery([FromBody] Chat.Application.Features.CQRS.Message.Queries.SearchMessages.SearchMessagesQueryRequest request)
     {
@@ -63,6 +72,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("UpdateMessageCommandRequest")]
     public async Task<IActionResult> UpdateMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Update.UpdateMessageCommandRequest request)
     {

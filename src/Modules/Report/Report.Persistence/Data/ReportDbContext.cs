@@ -13,6 +13,7 @@ namespace Report.Persistence.Data
 
         public DbSet<Domain.Entities.Report> Reports { get; set; }
         public DbSet<ReportTopic> ReportTopics { get; set; }
+        public DbSet<ReportStatus> ReportStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

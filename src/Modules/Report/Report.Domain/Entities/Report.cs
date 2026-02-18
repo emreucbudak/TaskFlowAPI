@@ -4,11 +4,11 @@ namespace Report.Domain.Entities
 {
     public class Report : BaseEntity
     {
-        public Report(int reportTopicId, string description, Guid userId, int reportStatusId, string title, Guid notifiedDepartmantId)
+        public Report(int reportTopicId, string description, Guid ReportingUserId, int reportStatusId, string title, Guid notifiedDepartmantId)
         {
             ReportTopicId = reportTopicId;
             Description = description;
-            ReportingUserId = userId;
+            ReportingUserId = ReportingUserId;
             CreatedAt = DateTime.UtcNow;
             ReportStatusId = reportStatusId;
             Title = title;

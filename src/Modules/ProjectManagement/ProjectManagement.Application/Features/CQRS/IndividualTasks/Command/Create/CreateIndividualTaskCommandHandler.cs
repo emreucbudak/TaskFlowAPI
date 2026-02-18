@@ -19,6 +19,14 @@ public sealed class CreateIndividualTaskCommandHandler(
             request.TaskTitle,
             request.Description,
             request.Deadline);
+        var delayTime = request.Deadline
+            .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+            .AddDays(-1) - DateTime.UtcNow;
+
+        if (delayTime < TimeSpan.Zero)
+        {
+            delayTime = TimeSpan.Zero;
+        }
 
         // CAP outbox row and IndividualTask row are part of one EF transaction.
         // If publish/save/commit fails, the transaction is rolled back and neither side is persisted.
@@ -36,6 +44,18 @@ public sealed class CreateIndividualTaskCommandHandler(
                     task.Description,
                     task.Deadline,
                     request.CompanyId));
+
+            await capPublisher.PublishDelayAsync(
+                delayTime,
+                "IndividualTaskCreated",
+                new IndividualTaskCreatedIntegrationEvent(
+                    task.Id,
+                    task.AssignedUserId,
+                    task.TaskTitle,
+                    task.Description,
+                    task.Deadline,
+                    request.CompanyId),
+                cancellationToken: cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

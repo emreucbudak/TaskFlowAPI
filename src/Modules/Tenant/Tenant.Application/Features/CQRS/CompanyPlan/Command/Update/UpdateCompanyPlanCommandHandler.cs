@@ -24,10 +24,8 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Update
             var newProperties = new Domain.Entities.PlanProperties(
                 request.PeopleAddedLimit,
                 request.TeamLimit,
-                request.IsDailyPlannerEnabled,
-                request.IsIncludeTaskPriorityCategory,
-                request.IsDeadlineNotificationEnabled,
-                request.IsIncludeAddTaskNotifications
+                request.IndividualTaskLimit,
+                request.IsIncludeReporting
             );
             companyPlan.UpdateProperties(newProperties);
             await unitOfWork.SaveChangesAsync(cancellationToken);

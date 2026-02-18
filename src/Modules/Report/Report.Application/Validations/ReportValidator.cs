@@ -13,7 +13,7 @@ namespace Report.Application.Validations
             RuleFor(r => r.ReportTopicId)
                 .GreaterThan(0).WithMessage("Geçerli bir rapor konusu seçilmelidir.");
 
-            RuleFor(r => r.UserId)
+            RuleFor(r => r.ReportingUserId)
                 .NotEmpty().WithMessage("Kullanıcı ID'si boş olamaz.");
         }
     }

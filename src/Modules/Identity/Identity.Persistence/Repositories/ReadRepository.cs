@@ -89,13 +89,13 @@ namespace Identity.Persistence.Repositories
             }
         }
 
-        public async Task<Guid?> GetDepartmentLeaderIdAsync(Guid departmentId)
+        public async Task<Guid> GetDepartmentLeaderIdAsync(Guid departmentId)
         {
              var leader = await context.Set<DepartmentMember>()
                  .AsNoTracking()
                  .FirstOrDefaultAsync(x => x.DepartmentId == departmentId && x.DepartmentRoleId == 1);
                  
-             return leader?.UserId;
+             return leader.UserId;
         }
 
         public async Task<T> GetByIdAsync(

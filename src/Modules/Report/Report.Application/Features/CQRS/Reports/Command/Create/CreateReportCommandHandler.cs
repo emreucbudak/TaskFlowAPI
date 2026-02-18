@@ -27,7 +27,7 @@ namespace Report.Application.Features.CQRS.Reports.Command.Create
                 request.UserId, 
                 request.ReportStatusId, 
                 request.Title, 
-                request.NotifiedDepartmantId
+                request.NotifiedDepartmentId
             );
 
             await _writeRepository.AddAsync(report);

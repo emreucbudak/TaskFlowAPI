@@ -11,6 +11,6 @@ namespace Identity.Application.Repositories
             bool trackChanges = false,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null);
 
-        Task<Guid?> GetDepartmentLeaderIdAsync(Guid departmentId);
+        Task<Guid> GetDepartmentLeaderIdAsync(Guid departmentId);
     }
 }

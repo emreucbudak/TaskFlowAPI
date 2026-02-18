@@ -23,6 +23,7 @@ using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 using Tenant.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Taskflow.Presentation.Authorization;
+using Taskflow.Presentation.ExceptionHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 var logger = new LoggerConfiguration()
@@ -34,6 +35,11 @@ builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
 builder.Services.AddScoped<IGroupValidationService, GroupValidationService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<AuthExceptionHandler>();
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
+builder.Services.AddExceptionHandler<SubscriptionLimitExceededExceptionHandler>();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 builder.Services.AddConfigureTenant(builder.Configuration);
@@ -98,6 +104,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

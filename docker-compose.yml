@@ -7,15 +7,21 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=TaskFlowDb;Username=postgres;Password=postgres
-      - ConnectionStrings__Redis=redis:6379
+      - Postgres__Host=postgres
+      - Postgres__Port=5432
+      - Postgres__Database=TaskFlowDb
+      - Redis__Host=redis
+      - Redis__Port=6379
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
-      - RabbitMQ__UserName=guest
-      - RabbitMQ__Password=guest
       - RabbitMQ__VirtualHost=/
       - RabbitMQ__ExchangeName=taskflow.exchange
+    secrets:
+      - postgres_user
+      - postgres_password
+      - rabbitmq_user
+      - rabbitmq_password
+      - redis_password
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,21 +31,23 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-      - "8081:8081"
     restart: unless-stopped
 
   postgres:
     image: postgres:18-alpine
     environment:
       - POSTGRES_DB=TaskFlowDb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_user
+      - postgres_password
     ports:
       - "5432:5432"
     volumes:
       - taskflow-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d TaskFlowDb"]
+      test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/postgres_user) -d TaskFlowDb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,15 +59,26 @@ services:
       - "6379:6379"
     volumes:
       - taskflow-redis-data:/data
-    command: ["redis-server", "--appendonly", "yes"]
+    secrets:
+      - redis_password
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$(cat /run/secrets/redis_password)\""]
     restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:4.2.4-alpine
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-      - RABBITMQ_DEFAULT_VHOST=/
+    secrets:
+      - rabbitmq_user
+      - rabbitmq_password
+    command:
+      - sh
+      - -ec
+      - |
+          cat > /etc/rabbitmq/rabbitmq.conf <<EOF
+          default_user = $(cat /run/secrets/rabbitmq_user)
+          default_pass = $(cat /run/secrets/rabbitmq_password)
+          default_vhost = /
+          EOF
+          exec rabbitmq-server
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -76,3 +95,15 @@ volumes:
   taskflow-postgres-data:
   taskflow-redis-data:
   taskflow-rabbitmq-data:
+
+secrets:
+  postgres_user:
+    environment: TF_POSTGRES_USER
+  postgres_password:
+    environment: TF_POSTGRES_PASSWORD
+  rabbitmq_user:
+    environment: TF_RABBITMQ_USER
+  rabbitmq_password:
+    environment: TF_RABBITMQ_PASSWORD
+  redis_password:
+    environment: TF_REDIS_PASSWORD

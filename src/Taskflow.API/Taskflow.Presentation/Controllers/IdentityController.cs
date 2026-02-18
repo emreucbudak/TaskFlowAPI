@@ -1,4 +1,5 @@
 ﻿using FlashMediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Taskflow.Presentation.Controllers;
@@ -7,6 +8,7 @@ namespace Taskflow.Presentation.Controllers;
 [Route("api/[controller]")]
 public sealed class IdentityController(IMediator mediator) : ControllerBase
 {
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("AddDepartmentCommandRequest")]
     public async Task<IActionResult> AddDepartmentCommand([FromBody] Identity.Application.Features.CQRS.Department.Command.Add.AddDepartmentCommandRequest request)
     {
@@ -14,6 +16,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("AddGroupsCommandRequest")]
     public async Task<IActionResult> AddGroupsCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.Add.AddGroupsCommandRequest request)
     {
@@ -21,6 +24,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("AddGroupsMemberCommandRequest")]
     public async Task<IActionResult> AddGroupsMemberCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.AddGroupsMember.AddGroupsMemberCommandRequest request)
     {
@@ -28,6 +32,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("AddUserToDepartmentCommandRequest")]
     public async Task<IActionResult> AddUserToDepartmentCommand([FromBody] Identity.Application.Features.CQRS.Department.Command.AddUserToDepartment.AddUserToDepartmentCommandRequest request)
     {
@@ -35,6 +40,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [AllowAnonymous]
     [HttpPost("CreateCompanyCommandRequest")]
     public async Task<IActionResult> CreateCompanyCommand([FromBody] Identity.Application.Features.CQRS.Company.Command.Create.CreateCompanyCommandRequest request)
     {
@@ -42,6 +48,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "AdminOrCompanyPolicy")]
     [HttpPost("DeleteCompanyCommandRequest")]
     public async Task<IActionResult> DeleteCompanyCommand([FromBody] Identity.Application.Features.CQRS.Company.Command.Delete.DeleteCompanyCommandRequest request)
     {
@@ -49,6 +56,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("DeleteDepartmentCommandRequest")]
     public async Task<IActionResult> DeleteDepartmentCommand([FromBody] Identity.Application.Features.CQRS.Department.Command.Delete.DeleteDepartmentCommandRequest request)
     {
@@ -56,6 +64,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("DeleteGroupsCommandRequest")]
     public async Task<IActionResult> DeleteGroupsCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.Delete.DeleteGroupsCommandRequest request)
     {
@@ -63,6 +72,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("DeleteGroupsMemberCommandRequest")]
     public async Task<IActionResult> DeleteGroupsMemberCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.DeleteGroupsMember.DeleteGroupsMemberCommandRequest request)
     {
@@ -70,6 +80,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("DeleteUserFromDepartmentCommandRequest")]
     public async Task<IActionResult> DeleteUserFromDepartmentCommand([FromBody] Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDepartment.DeleteUserFromDepartmentCommandRequest request)
     {
@@ -77,6 +88,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "AdminPolicy")]
     [HttpPost("GetAllCompaniesQueriesRequest")]
     public async Task<IActionResult> GetAllCompaniesQueries([FromBody] Identity.Application.Features.CQRS.Company.Queries.GetAll.GetAllCompaniesQueriesRequest request)
     {
@@ -84,6 +96,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetAllCompanyGroupsQueriesRequest")]
     public async Task<IActionResult> GetAllCompanyGroupsQueries([FromBody] Identity.Application.Features.CQRS.Groups.Queries.GetAll.GetAllCompanyGroupsQueriesRequest request)
     {
@@ -91,6 +104,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetDepartmentLeaderQueryRequest")]
     public async Task<IActionResult> GetDepartmentLeaderQuery([FromBody] Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader.GetDepartmentLeaderQueryRequest request)
     {
@@ -98,6 +112,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpPost("LoginCommandRequest")]
     public async Task<IActionResult> LoginCommand([FromBody] Identity.Application.Features.CQRS.Auth.Login.LoginCommandRequest request)
     {
@@ -105,6 +120,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpPost("RegisterCommandRequest")]
     public async Task<IActionResult> RegisterCommand([FromBody] Identity.Application.Features.CQRS.Auth.Register.RegisterCommandRequest request)
     {
@@ -112,6 +128,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "AdminOrCompanyPolicy")]
     [HttpPost("UpdateCompanyCommandRequest")]
     public async Task<IActionResult> UpdateCompanyCommand([FromBody] Identity.Application.Features.CQRS.Company.Command.Update.UpdateCompanyCommandRequest request)
     {
@@ -119,6 +136,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("UpdateDepartmentCommandRequest")]
     public async Task<IActionResult> UpdateDepartmentCommand([FromBody] Identity.Application.Features.CQRS.Department.Command.Update.UpdateDepartmentCommandRequest request)
     {
@@ -126,6 +144,7 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("UpdateGroupsCommandRequest")]
     public async Task<IActionResult> UpdateGroupsCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.Update.UpdateGroupsCommandRequest request)
     {

@@ -132,7 +132,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("CompanyPolicy", policy => policy.RequireRole("Company"));
+    options.AddPolicy("WorkerPolicy", policy => policy.RequireRole("Worker"));
+    options.AddPolicy("CompanyOrWorkerPolicy", policy => policy.RequireRole("Company", "Worker"));
+    options.AddPolicy("AdminOrCompanyPolicy", policy => policy.RequireRole("Admin", "Company"));
     options.AddPolicy("SubscriptionCheck", policy => policy.Requirements.Add(new SubscriptionRequirement()));
+    options.AddPolicy("SubscribedCompanyPolicy", policy =>
+    {
+        policy.RequireRole("Company");
+        policy.Requirements.Add(new SubscriptionRequirement());
+    });
+    options.AddPolicy("SubscribedWorkerPolicy", policy =>
+    {
+        policy.RequireRole("Worker");
+        policy.Requirements.Add(new SubscriptionRequirement());
+    });
+    options.AddPolicy("SubscribedCompanyOrWorkerPolicy", policy =>
+    {
+        policy.RequireRole("Company", "Worker");
+        policy.Requirements.Add(new SubscriptionRequirement());
+    });
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, SubscriptionHandler>();

@@ -1,0 +1,38 @@
+﻿using FlashMediator;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Taskflow.Presentation.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public sealed class TenantController(IMediator mediator) : ControllerBase
+{
+    [HttpPost("CreateCompanyPlanCommandRequest")]
+    public async Task<IActionResult> CreateCompanyPlanCommand([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Command.Create.CreateCompanyPlanCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [HttpPost("DeleteCompanyPlanCommandRequest")]
+    public async Task<IActionResult> DeleteCompanyPlanCommand([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Command.Delete.DeleteCompanyPlanCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [HttpPost("GetAllCompanyPlanQueriesRequest")]
+    public async Task<IActionResult> GetAllCompanyPlanQueries([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [HttpPost("UpdateCompanyPlanCommandRequest")]
+    public async Task<IActionResult> UpdateCompanyPlanCommand([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Command.Update.UpdateCompanyPlanCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+}
+

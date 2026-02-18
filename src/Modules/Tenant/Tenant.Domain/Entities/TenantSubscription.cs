@@ -8,7 +8,7 @@ namespace Tenant.Domain.Entities
     {
         public Guid TenantId { get; private set; }
 
-        public int CompanyPlanId { get; private set; }
+        public Guid CompanyPlanId { get; private set; }
         public  CompanyPlan CompanyPlan { get; private set; }
 
         public string PaymentProviderSubscriptionId { get; private set; }

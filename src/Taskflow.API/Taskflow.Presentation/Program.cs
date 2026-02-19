@@ -61,6 +61,21 @@ if (!string.IsNullOrWhiteSpace(rabbitMqPassword))
     builder.Configuration["RabbitMQ:Password"] = rabbitMqPassword;
 }
 
+var jwtSecretKey =
+    builder.Configuration["jwt_secret_key"]
+    ?? Environment.GetEnvironmentVariable("TF_JWT_SECRET_KEY");
+jwtSecretKey = jwtSecretKey?.Trim();
+if (!string.IsNullOrWhiteSpace(jwtSecretKey))
+{
+    builder.Configuration["JWTSecretKey:SecretKey"] = jwtSecretKey;
+}
+
+var resolvedJwtSecretKey = builder.Configuration["JWTSecretKey:SecretKey"]?.Trim();
+if (string.IsNullOrWhiteSpace(resolvedJwtSecretKey))
+{
+    throw new InvalidOperationException("JWT secret key tanimlanmamis. Docker secret 'jwt_secret_key' veya 'JWTSecretKey:SecretKey' gerekli.");
+}
+
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("/logs/logs.txt", rollingInterval: RollingInterval.Day)
@@ -129,7 +144,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWTSecretKey:SecretKey"])),
+            System.Text.Encoding.UTF8.GetBytes(resolvedJwtSecretKey)),
         ClockSkew = TimeSpan.Zero
     };  
 });

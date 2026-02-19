@@ -23,6 +23,7 @@ services:
       - rabbitmq_password
       - redis_password
       - stripe_secret_key
+      - jwt_secret_key
     depends_on:
       postgres:
         condition: service_healthy
@@ -110,3 +111,5 @@ secrets:
     environment: TF_REDIS_PASSWORD
   stripe_secret_key:
     environment: TF_STRIPE_SECRET_KEY
+  jwt_secret_key:
+    environment: TF_JWT_SECRET_KEY

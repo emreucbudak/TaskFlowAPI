@@ -1,6 +1,6 @@
 ﻿using FlashMediator;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 
 
@@ -9,9 +9,9 @@ namespace Identity.Application.Features.CQRS.Company.Command.Create
     public class CreateCompanyCommandHandler : IRequestHandler<CreateCompanyCommandRequest, Guid>
     {
         private readonly IWriteRepository<Domain.Entities.Company> _companyWriteRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
 
-        public CreateCompanyCommandHandler(IWriteRepository<Domain.Entities.Company> companyWriteRepository, IUnitOfWork unitOfWork)
+        public CreateCompanyCommandHandler(IWriteRepository<Domain.Entities.Company> companyWriteRepository, IIdentityCapUnitOfWork unitOfWork)
         {
             _companyWriteRepository = companyWriteRepository;
             _unitOfWork = unitOfWork;

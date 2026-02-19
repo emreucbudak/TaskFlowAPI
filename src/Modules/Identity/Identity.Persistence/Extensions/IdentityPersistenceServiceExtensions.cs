@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using Identity.Persistence.Data.IdentityDb;
 using Identity.Persistence.Data.UnitOfWork;
 using Identity.Persistence.Repositories;
@@ -17,8 +18,9 @@ namespace Identity.Persistence.Extensions
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(IdentityManagementDbContext).Assembly.FullName)));
 
-            services.AddScoped<ICapUnitOfWork, UnitOfWork>();
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICapUnitOfWork>());
+            services.AddScoped<IIdentityCapUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICapUnitOfWork>(sp => sp.GetRequiredService<IIdentityCapUnitOfWork>());
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IIdentityCapUnitOfWork>());
             
             services.AddScoped(typeof(IReadRepository<,>), typeof(ReadRepository<,>));
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));

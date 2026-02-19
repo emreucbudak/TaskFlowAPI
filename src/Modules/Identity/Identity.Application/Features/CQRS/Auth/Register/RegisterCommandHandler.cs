@@ -4,10 +4,10 @@ using Identity.Application.Features.CQRS.Auth.Exceptions;
 using Identity.Application.Features.CQRS.Company.Exceptions;
 using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using TaskFlow.BuildingBlocks.Contracts.IntegrationEvents;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Auth.Register;
 
@@ -15,7 +15,7 @@ public sealed class RegisterUserCommandHandler(
     UserManager<User> userManager,
     IReadRepository<Domain.Entities.Company, Guid> companyReadRepository,
     RoleManager<Roles> roleManager,
-    ICapUnitOfWork unitOfWork,
+    IIdentityCapUnitOfWork unitOfWork,
     ICapPublisher capPublisher) : IRequestHandler<RegisterCommandRequest>
 {
     public async Task Handle(RegisterCommandRequest request, CancellationToken cancellationToken)

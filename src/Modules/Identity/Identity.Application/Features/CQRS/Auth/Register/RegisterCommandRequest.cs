@@ -1,10 +1,8 @@
 ﻿using FlashMediator;
-using TaskFlow.BuildingBlocks.Enums;
-using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Auth.Register
 {
-    public record RegisterCommandRequest : IRequest , ILimitedQueryable
+    public record RegisterCommandRequest : IRequest
     {
         public RegisterCommandRequest(string name, string email, string password, Guid companyId, string role)
         {
@@ -21,8 +19,5 @@ namespace Identity.Application.Features.CQRS.Auth.Register
         public Guid CompanyId { get; init; }
         public string Role { get; init; }
 
-        public Guid TenantId => CompanyId;
-
-        public LimitType limitType => LimitType.PeopleAdded;
     }
 }

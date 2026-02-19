@@ -8,22 +8,30 @@ using Identity.Domain.Entities;
 using Identity.Infrastructure.Extensions;
 using Identity.Infrastructure.Services;
 using Identity.Persistence.Data.IdentityDb;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Notification.Infrastructure.Extensions;
 using Notification.Infrastructure.Hubs;
+using Notification.Infrastructure.Data.NotificationDb;
 using Notification.Persistence.Extensions;
+using Npgsql;
+using ProjectManagement.Persistence.Data.ProjectManagementDb;
 using ProjectManagement.Infrastructure.Extensions;
 using Report.Infrastructure.Extensions;
+using Report.Persistence.Data;
 using Report.Persistence.Extensions;
 using Serilog;
+using Stats.Persistence.Data;
 using Stats.Persistence.Extensions;
 using System.Threading.RateLimiting;
 using TaskFlow.BuildingBlocks.Extensions;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
+using Tenant.Persistence.Data.TenantDb;
 using Tenant.Infrastructure.Extensions;
+using Chat.Persistence.Data.ChatDb;
 using Microsoft.AspNetCore.Authorization;
 using Taskflow.Presentation.Authorization;
 using Taskflow.Presentation.ExceptionHandlers;
@@ -31,16 +39,86 @@ using Taskflow.Presentation.ExceptionHandlers;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
 
-var postgresHost = builder.Configuration["Postgres:Host"] ?? "localhost";
-var postgresPort = builder.Configuration["Postgres:Port"] ?? "5432";
-var postgresDatabase = builder.Configuration["Postgres:Database"] ?? "TaskFlowDb";
-var postgresUser = builder.Configuration["postgres_user"];
-var postgresPassword = builder.Configuration["postgres_password"];
-if (!string.IsNullOrWhiteSpace(postgresUser) && !string.IsNullOrWhiteSpace(postgresPassword))
+static string? FirstNonEmpty(params string?[] values)
 {
-    builder.Configuration["ConnectionStrings:DefaultConnection"] =
-        $"Host={postgresHost};Port={postgresPort};Database={postgresDatabase};Username={postgresUser};Password={postgresPassword}";
+    foreach (var value in values)
+    {
+        var trimmed = value?.Trim();
+        if (!string.IsNullOrWhiteSpace(trimmed))
+        {
+            return trimmed;
+        }
+    }
+
+    return null;
 }
+
+static string GetSecret(string secretName, params string[] envVarAliases)
+{
+    var dockerSecretPath = $"/run/secrets/{secretName}";
+    if (File.Exists(dockerSecretPath))
+    {
+        return File.ReadAllText(dockerSecretPath).Trim();
+    }
+
+    var localSecretPath = Path.GetFullPath(Path.Combine("..", "..", "secrets", secretName));
+    if (File.Exists(localSecretPath))
+    {
+        return File.ReadAllText(localSecretPath).Trim();
+    }
+
+    var secretFromEnv = Environment.GetEnvironmentVariable(secretName);
+    if (!string.IsNullOrWhiteSpace(secretFromEnv))
+    {
+        return secretFromEnv.Trim();
+    }
+
+    foreach (var envVarAlias in envVarAliases)
+    {
+        var envAliasValue = Environment.GetEnvironmentVariable(envVarAlias);
+        if (!string.IsNullOrWhiteSpace(envAliasValue))
+        {
+            return envAliasValue.Trim();
+        }
+    }
+
+    Console.WriteLine($"[UYARI] Secret '{secretName}' bulunamadi! (Docker: {dockerSecretPath}, Local: {localSecretPath})");
+    return string.Empty;
+}
+
+var postgresHost = FirstNonEmpty(
+    builder.Configuration["Postgres:Host"],
+    Environment.GetEnvironmentVariable("TF_POSTGRES_HOST"))
+    ?? "localhost";
+
+var postgresPortText = FirstNonEmpty(
+    builder.Configuration["Postgres:Port"],
+    Environment.GetEnvironmentVariable("TF_POSTGRES_PORT"))
+    ?? "5432";
+
+var postgresDatabase = FirstNonEmpty(
+    builder.Configuration["Postgres:Database"],
+    Environment.GetEnvironmentVariable("TF_POSTGRES_DATABASE"))
+    ?? "TaskFlowDb";
+
+var postgresUser = GetSecret("postgres_user", "TF_POSTGRES_USER", "POSTGRES_USER");
+var postgresPassword = GetSecret("postgres_password", "TF_POSTGRES_PASSWORD", "POSTGRES_PASSWORD");
+
+if (string.IsNullOrWhiteSpace(postgresUser) || string.IsNullOrWhiteSpace(postgresPassword))
+{
+    throw new InvalidOperationException("PostgreSQL secret degerleri eksik: 'postgres_user' ve 'postgres_password' zorunlu.");
+}
+
+var postgresPort = int.TryParse(postgresPortText, out var parsedPostgresPort) ? parsedPostgresPort : 5432;
+var defaultConnectionBuilder = new NpgsqlConnectionStringBuilder
+{
+    Host = postgresHost,
+    Port = postgresPort,
+    Database = postgresDatabase,
+    Username = postgresUser,
+    Password = postgresPassword
+};
+builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionBuilder.ConnectionString;
 
 var redisHost = builder.Configuration["Redis:Host"] ?? "localhost";
 var redisPort = builder.Configuration["Redis:Port"] ?? "6379";
@@ -59,6 +137,21 @@ if (!string.IsNullOrWhiteSpace(rabbitMqUser))
 if (!string.IsNullOrWhiteSpace(rabbitMqPassword))
 {
     builder.Configuration["RabbitMQ:Password"] = rabbitMqPassword;
+}
+
+var jwtSecretKey =
+    builder.Configuration["jwt_secret_key"]
+    ?? Environment.GetEnvironmentVariable("TF_JWT_SECRET_KEY");
+jwtSecretKey = jwtSecretKey?.Trim();
+if (!string.IsNullOrWhiteSpace(jwtSecretKey))
+{
+    builder.Configuration["JWTSecretKey:SecretKey"] = jwtSecretKey;
+}
+
+var resolvedJwtSecretKey = builder.Configuration["JWTSecretKey:SecretKey"]?.Trim();
+if (string.IsNullOrWhiteSpace(resolvedJwtSecretKey))
+{
+    throw new InvalidOperationException("JWT secret key tanimlanmamis. Docker secret 'jwt_secret_key' veya 'JWTSecretKey:SecretKey' gerekli.");
 }
 
 var logger = new LoggerConfiguration()
@@ -115,7 +208,8 @@ builder.Services.AddStatsModule(builder.Configuration);
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddFlashMediator(
     typeof(Program).Assembly,
-    typeof(Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesHandler).Assembly);
+    typeof(Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesHandler).Assembly,
+    typeof(Identity.Application.Features.CQRS.Auth.Login.LoginCommandHandler).Assembly);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt =>
 {
@@ -129,7 +223,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWTSecretKey:SecretKey"])),
+            System.Text.Encoding.UTF8.GetBytes(resolvedJwtSecretKey)),
         ClockSkew = TimeSpan.Zero
     };  
 });
@@ -179,6 +273,17 @@ builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
     .AddEntityFrameworkStores<IdentityManagementDbContext>()
     .AddDefaultTokenProviders();
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<TenantDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<ChatDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<NotificationDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<ReportDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<ProjectManagementDbContext>().Database.Migrate();
+    scope.ServiceProvider.GetRequiredService<StatsDbContext>().Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

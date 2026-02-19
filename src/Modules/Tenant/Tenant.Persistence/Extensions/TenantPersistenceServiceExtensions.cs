@@ -27,6 +27,10 @@ namespace Tenant.Persistence.Extensions
             services.AddScoped<ITenantReadRepository, TenantReadRepository>();
             services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
             services.AddScoped<ISubscriptionChecker, SubscriptionChecker>();
+            services.AddScoped<ISubscriptionLimitCheckerService, WorkerAddedLimitChecker>();
+            services.AddScoped<ISubscriptionLimitCheckerService, TeamLimitChecker>();
+            services.AddScoped<ISubscriptionLimitCheckerService, IndividualTaskLimitChecker>();
+            services.AddScoped<ISubscriptionLimitCheckerService, IsInternalReportingEnabledChecker>();
 
             return services;
         }

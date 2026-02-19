@@ -1,4 +1,5 @@
 using DotNetCore.CAP;
+using Identity.Application.UnitOfWork;
 using Identity.Persistence.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -6,7 +7,7 @@ using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Persistence.Data.UnitOfWork
 {
-    public class UnitOfWork(IdentityManagementDbContext context) : ICapUnitOfWork
+    public class UnitOfWork(IdentityManagementDbContext context) : IIdentityCapUnitOfWork
     {
         private IDbContextTransaction? _currentTransaction;
 

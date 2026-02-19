@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Notification.Infrastructure.Extensions;
+using Notification.Infrastructure.Hubs;
 using Notification.Persistence.Extensions;
 using ProjectManagement.Infrastructure.Extensions;
 using Report.Infrastructure.Extensions;
@@ -190,5 +191,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHubs>("/chatHub");
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

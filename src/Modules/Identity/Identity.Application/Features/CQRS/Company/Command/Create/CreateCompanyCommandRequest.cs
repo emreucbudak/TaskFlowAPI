@@ -2,7 +2,7 @@
 
 namespace Identity.Application.Features.CQRS.Company.Command.Create
 {
-    public record CreateCompanyCommandRequest : IRequest
+    public record CreateCompanyCommandRequest : IRequest<Guid>
     {
         public string CompanyName { get; init; }
 

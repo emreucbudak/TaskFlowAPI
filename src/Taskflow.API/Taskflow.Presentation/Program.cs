@@ -113,7 +113,9 @@ builder.Services.AddReportInfrastructure(builder.Configuration);
 builder.Services.RegisterCapExtensions(builder.Configuration,"taskflow.host");
 builder.Services.AddStatsModule(builder.Configuration);
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-builder.Services.AddFlashMediator(typeof(Program).Assembly);
+builder.Services.AddFlashMediator(
+    typeof(Program).Assembly,
+    typeof(Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesHandler).Assembly);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt =>
 {

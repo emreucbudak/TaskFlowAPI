@@ -6,7 +6,7 @@ using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Company.Command.Create
 {
-    public class CreateCompanyCommandHandler : IRequestHandler<CreateCompanyCommandRequest>
+    public class CreateCompanyCommandHandler : IRequestHandler<CreateCompanyCommandRequest, Guid>
     {
         private readonly IWriteRepository<Domain.Entities.Company> _companyWriteRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -17,11 +17,12 @@ namespace Identity.Application.Features.CQRS.Company.Command.Create
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(CreateCompanyCommandRequest request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreateCompanyCommandRequest request, CancellationToken cancellationToken)
         {
             var company = new Domain.Entities.Company(request.CompanyName);
             await _companyWriteRepository.AddAsync(company);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return company.Id;
         }
     }
 }

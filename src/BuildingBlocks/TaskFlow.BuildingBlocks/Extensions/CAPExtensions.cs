@@ -21,12 +21,15 @@ namespace TaskFlow.BuildingBlocks.Extensions
                 options.ConsumerThreadCount = 5;
                 options.UseRabbitMQ(options =>
                 {
-                    options.HostName = configuration["RabbitMQ:HostName"];
-                    options.Port = int.Parse(configuration["RabbitMQ:Port"]);
-                    options.UserName = configuration["RabbitMQ:UserName"];
-                    options.Password = configuration["RabbitMQ:Password"];
-                    options.VirtualHost = configuration["RabbitMQ:VirtualHost"];
-                    options.ExchangeName = configuration["RabbitMQ:ExchangeName"];
+                    var rabbitMqPortValue = configuration["RabbitMQ:Port"];
+                    var rabbitMqPort = int.TryParse(rabbitMqPortValue, out var parsedPort) ? parsedPort : 5672;
+
+                    options.HostName = configuration["RabbitMQ:HostName"] ?? "localhost";
+                    options.Port = rabbitMqPort;
+                    options.UserName = configuration["RabbitMQ:UserName"] ?? "guest";
+                    options.Password = configuration["RabbitMQ:Password"] ?? "guest";
+                    options.VirtualHost = configuration["RabbitMQ:VirtualHost"] ?? "/";
+                    options.ExchangeName = configuration["RabbitMQ:ExchangeName"] ?? "taskflow.exchange";
                 });
                 options.DefaultGroupName = groupName;
             });

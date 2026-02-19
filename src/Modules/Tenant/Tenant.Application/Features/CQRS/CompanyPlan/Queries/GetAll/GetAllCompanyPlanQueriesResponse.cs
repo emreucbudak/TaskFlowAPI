@@ -5,6 +5,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll
     public record GetAllCompanyPlanQueriesResponse 
     {
         public string PlanName { get; init; }
+        public int PlanPrice { get; init; }
         public PlanProperties PlanProperties { get; init; }
     }
 }

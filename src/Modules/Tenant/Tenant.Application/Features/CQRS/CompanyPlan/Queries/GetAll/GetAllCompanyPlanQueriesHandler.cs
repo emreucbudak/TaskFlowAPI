@@ -21,6 +21,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll
             var response = companyPlans.Select(plan => new GetAllCompanyPlanQueriesResponse
             {
                 PlanName = plan.PlanName,
+                PlanPrice = plan.PlanPrice,
                 PlanProperties = plan.PlanProperties
             }).ToList();
             return response;

@@ -62,10 +62,10 @@ public sealed class TenantController(IMediator mediator, IConfiguration configur
         }
 
         var stripeSecretKey =
-            configuration["Stripe:SecretKey"]
-            ?? configuration["stripe_secret_key"]
+            configuration["stripe_secret_key"]
             ?? Environment.GetEnvironmentVariable("TF_STRIPE_SECRET_KEY")
-            ?? Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+            ?? Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+            ?? configuration["Stripe:SecretKey"];
         stripeSecretKey = stripeSecretKey?.Trim();
 
         if (string.IsNullOrWhiteSpace(stripeSecretKey))

@@ -13,16 +13,15 @@ namespace Tenant.Persistence.Data.SeedData
                 {
                     Id = Guid.Parse("018da123-abcd-7000-9000-000000000001"),
                     PlanName = "Start-up",
-                    PlanPrice = 0,
+                    PlanPrice = 500,
                     isActive = true,
-                    // PlanProperties tablosundaki ilgili ID'yi direkt buraya yapıştırıyoruz:
                     PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000001")
                 },
                 new
                 {
                     Id = Guid.Parse("018da123-abcd-7000-9000-000000000002"),
                     PlanName = "Business",
-                    PlanPrice = 499,
+                    PlanPrice = 1000,
                     isActive = true,
                     PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000002")
                 },
@@ -30,7 +29,7 @@ namespace Tenant.Persistence.Data.SeedData
                 {
                     Id = Guid.Parse("018da123-abcd-7000-9000-000000000003"),
                     PlanName = "Enterprise",
-                    PlanPrice = 1499,
+                    PlanPrice = 1500,
                     isActive = true,
                     PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000003")
                 }

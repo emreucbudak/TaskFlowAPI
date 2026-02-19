@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tenant.Persistence.Data.TenantDb;
@@ -11,9 +12,11 @@ using Tenant.Persistence.Data.TenantDb;
 namespace Tenant.Persistence.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    partial class TenantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219073855_Tntlss")]
+    partial class Tntlss
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace Tenant.Persistence.Migrations
                         {
                             Id = new Guid("018da123-abcd-7000-9000-000000000001"),
                             PlanName = "Start-up",
-                            PlanPrice = 500,
+                            PlanPrice = 0,
                             PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000001"),
                             isActive = true
                         },
@@ -61,7 +64,7 @@ namespace Tenant.Persistence.Migrations
                         {
                             Id = new Guid("018da123-abcd-7000-9000-000000000002"),
                             PlanName = "Business",
-                            PlanPrice = 1000,
+                            PlanPrice = 499,
                             PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000002"),
                             isActive = true
                         },
@@ -69,7 +72,7 @@ namespace Tenant.Persistence.Migrations
                         {
                             Id = new Guid("018da123-abcd-7000-9000-000000000003"),
                             PlanName = "Enterprise",
-                            PlanPrice = 1500,
+                            PlanPrice = 1499,
                             PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000003"),
                             isActive = true
                         });

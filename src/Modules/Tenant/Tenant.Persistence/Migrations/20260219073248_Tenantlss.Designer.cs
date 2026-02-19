@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tenant.Persistence.Data.TenantDb;
@@ -11,9 +12,11 @@ using Tenant.Persistence.Data.TenantDb;
 namespace Tenant.Persistence.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    partial class TenantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219073248_Tenantlss")]
+    partial class Tenantlss
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,32 +50,6 @@ namespace Tenant.Persistence.Migrations
                     b.HasIndex("PlanPropertiesId");
 
                     b.ToTable("companyPlans", "Tenant");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("018da123-abcd-7000-9000-000000000001"),
-                            PlanName = "Start-up",
-                            PlanPrice = 500,
-                            PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000001"),
-                            isActive = true
-                        },
-                        new
-                        {
-                            Id = new Guid("018da123-abcd-7000-9000-000000000002"),
-                            PlanName = "Business",
-                            PlanPrice = 1000,
-                            PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000002"),
-                            isActive = true
-                        },
-                        new
-                        {
-                            Id = new Guid("018da123-abcd-7000-9000-000000000003"),
-                            PlanName = "Enterprise",
-                            PlanPrice = 1500,
-                            PlanPropertiesId = new Guid("018da123-4567-7000-8000-000000000003"),
-                            isActive = true
-                        });
                 });
 
             modelBuilder.Entity("Tenant.Domain.Entities.PaymentTransaction", b =>
@@ -133,32 +110,6 @@ namespace Tenant.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("planProperties", "Tenant");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("018da123-4567-7000-8000-000000000001"),
-                            IndividualTaskLimit = 100,
-                            IsInternalReportingEnabled = false,
-                            PeopleAddedLimit = 5,
-                            TeamLimit = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("018da123-4567-7000-8000-000000000002"),
-                            IndividualTaskLimit = 1000,
-                            IsInternalReportingEnabled = false,
-                            PeopleAddedLimit = 25,
-                            TeamLimit = 5
-                        },
-                        new
-                        {
-                            Id = new Guid("018da123-4567-7000-8000-000000000003"),
-                            IndividualTaskLimit = 10000,
-                            IsInternalReportingEnabled = true,
-                            PeopleAddedLimit = 1000,
-                            TeamLimit = 50
-                        });
                 });
 
             modelBuilder.Entity("Tenant.Domain.Entities.TenantSubscription", b =>
@@ -189,10 +140,8 @@ namespace Tenant.Persistence.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");

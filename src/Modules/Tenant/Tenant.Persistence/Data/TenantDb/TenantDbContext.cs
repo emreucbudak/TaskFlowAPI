@@ -34,6 +34,7 @@ namespace Tenant.Persistence.Data.TenantDb
                 .WithOne()
                 .HasForeignKey<TenantSubscription>(ts => ts.TenantUsageId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -24,6 +24,7 @@ namespace Tenant.Persistence.Extensions
             });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ITenantReadRepository, TenantReadRepository>();
             services.AddScoped<ITenantWriteRepository, TenantWriteRepository>();
             services.AddScoped<ISubscriptionChecker, SubscriptionChecker>();
 

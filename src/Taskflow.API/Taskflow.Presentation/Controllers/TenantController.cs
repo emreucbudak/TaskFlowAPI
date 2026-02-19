@@ -53,6 +53,7 @@ public sealed class TenantController(IMediator mediator, IConfiguration configur
 
     [AllowAnonymous]
     [HttpPost("CreateStripeCheckoutSession")]
+    [HttpPost("CreateStripeCheckoutSessionRequest")]
     public async Task<IActionResult> CreateStripeCheckoutSession([FromBody] CreateStripeCheckoutSessionRequest request, CancellationToken cancellationToken)
     {
         if (request is null || (string.IsNullOrWhiteSpace(request.PlanSlug) && string.IsNullOrWhiteSpace(request.PlanName)))
@@ -62,11 +63,19 @@ public sealed class TenantController(IMediator mediator, IConfiguration configur
 
         var stripeSecretKey =
             configuration["Stripe:SecretKey"]
-            ?? configuration["stripe_secret_key"];
+            ?? configuration["stripe_secret_key"]
+            ?? Environment.GetEnvironmentVariable("TF_STRIPE_SECRET_KEY")
+            ?? Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+        stripeSecretKey = stripeSecretKey?.Trim();
 
         if (string.IsNullOrWhiteSpace(stripeSecretKey))
         {
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Stripe secret key tanimlanmamis." });
+        }
+
+        if (!stripeSecretKey.StartsWith("sk_", StringComparison.OrdinalIgnoreCase))
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Stripe secret key gecersiz. Secret key 'sk_' ile baslamali." });
         }
 
         var plans = await mediator.Send(new Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesRequest(), cancellationToken);

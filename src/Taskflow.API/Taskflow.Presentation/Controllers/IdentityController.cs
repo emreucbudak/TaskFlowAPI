@@ -44,8 +44,8 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
     [HttpPost("CreateCompanyCommandRequest")]
     public async Task<IActionResult> CreateCompanyCommand([FromBody] Identity.Application.Features.CQRS.Company.Command.Create.CreateCompanyCommandRequest request)
     {
-        await mediator.Send(request);
-        return Ok();
+        var companyId = await mediator.Send(request);
+        return Ok(new { companyId, request.CompanyName });
     }
 
     [Authorize(Policy = "AdminOrCompanyPolicy")]

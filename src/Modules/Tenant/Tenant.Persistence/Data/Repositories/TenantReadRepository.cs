@@ -25,7 +25,8 @@ namespace Tenant.Persistence.Data.Repositories
                 trackChanges);
             try
             {
-                IQueryable<CompanyPlan> query = _context.companyPlans;
+                IQueryable<CompanyPlan> query = _context.companyPlans
+                    .Include(p => p.PlanProperties);
 
                 if (!trackChanges)
                     query = query.AsNoTracking();

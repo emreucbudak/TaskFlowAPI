@@ -8,6 +8,14 @@ namespace Taskflow.Presentation.Controllers;
 [Route("api/[controller]")]
 public sealed class TenantController(IMediator mediator) : ControllerBase
 {
+    [AllowAnonymous]
+    [HttpGet("CompanyPlans")]
+    public async Task<IActionResult> GetCompanyPlans()
+    {
+        var result = await mediator.Send(new Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesRequest());
+        return Ok(result);
+    }
+
     [Authorize(Policy = "AdminPolicy")]
     [HttpPost("CreateCompanyPlanCommandRequest")]
     public async Task<IActionResult> CreateCompanyPlanCommand([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Command.Create.CreateCompanyPlanCommandRequest request)

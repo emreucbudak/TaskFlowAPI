@@ -16,7 +16,7 @@ namespace Tenant.Persistence.Data.SeedData
                     PeopleAddedLimit = 5,
                     TeamLimit = 1,
                     IndividualTaskLimit = 100,
-                    IsInternalReportingEnabled = false
+                    IsInternalReportingEnabled = true
                 },
 
        
@@ -26,7 +26,7 @@ namespace Tenant.Persistence.Data.SeedData
                     PeopleAddedLimit = 25,
                     TeamLimit = 5,
                     IndividualTaskLimit = 1000,
-                    IsInternalReportingEnabled = false
+                    IsInternalReportingEnabled = true
                 },
 
                 new

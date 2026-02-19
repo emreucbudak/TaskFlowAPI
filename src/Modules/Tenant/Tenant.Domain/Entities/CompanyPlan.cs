@@ -3,6 +3,7 @@
     public class CompanyPlan : TaskFlow.BuildingBlocks.Common.BaseEntity
     {
         public string PlanName { get; private set; }
+        public Guid PlanPropertiesId { get; private set; }
         public PlanProperties PlanProperties { get; private set; }
         public int PlanPrice { get; private set; }
         public bool isActive { get; private set; }

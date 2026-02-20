@@ -27,7 +27,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
                 throw new UserNotFoundExceptions(request.Email);
             }
             bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
-            if (checkPassword)
+            if (!checkPassword)
             {
                 throw new WrongPasswordExceptions();
             }

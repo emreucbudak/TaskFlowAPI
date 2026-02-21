@@ -367,3 +367,6 @@ FodyWeavers.xsd
 .env.local
 .env.*.local
 secrets/
+chat_message_encryption_key
+src/Taskflow.API/Taskflow.Presentation/chat_message_encryption_key
+src/Modules/Chat/Chat.Infrastructure/Services/chat_message_encryption_key

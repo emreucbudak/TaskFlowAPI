@@ -115,5 +115,4 @@ secrets:
   jwt_secret_key:
     file: ./secrets/jwt_secret_key
   chat_message_encryption_key:
-    external: true
-    name: chat_message_encryption_key
+    file: ./src/Modules/Chat/Chat.Infrastructure/Services/chat_message_encryption_key

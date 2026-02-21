@@ -100,16 +100,16 @@ volumes:
 
 secrets:
   postgres_user:
-    environment: TF_POSTGRES_USER
+    file: ./secrets/postgres_user
   postgres_password:
-    environment: TF_POSTGRES_PASSWORD
+    file: ./secrets/postgres_password
   rabbitmq_user:
-    environment: TF_RABBITMQ_USER
+    file: ./secrets/rabbitmq_user
   rabbitmq_password:
-    environment: TF_RABBITMQ_PASSWORD
+    file: ./secrets/rabbitmq_password
   redis_password:
-    environment: TF_REDIS_PASSWORD
+    file: ./secrets/redis_password
   stripe_secret_key:
-    environment: TF_STRIPE_SECRET_KEY
+    file: ./secrets/stripe_secret_key
   jwt_secret_key:
-    environment: TF_JWT_SECRET_KEY
+    file: ./secrets/jwt_secret_key

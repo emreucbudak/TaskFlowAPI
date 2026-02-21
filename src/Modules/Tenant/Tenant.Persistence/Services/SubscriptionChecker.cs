@@ -16,15 +16,8 @@ namespace Tenant.Persistence.Services
 
         public async Task<bool> CheckSubscriptionStatusAsync(Guid tenantId)
         {
-            var subscription = await _context.tenantSubscriptions
-                .FirstOrDefaultAsync(x => x.TenantId == tenantId);
-
-            if (subscription == null)
-            {
-                return false; 
-            }
-
-            return subscription.Status == SubscriptionStatus.Aktif;
+            return await _context.tenantSubscriptions
+                .AnyAsync(x => x.TenantId == tenantId && x.Status == SubscriptionStatus.Aktif);
         }
     }
 }

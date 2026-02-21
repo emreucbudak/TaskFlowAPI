@@ -27,6 +27,8 @@ using Stats.Persistence.Data;
 using Stats.Persistence.Extensions;
 using System.Threading.RateLimiting;
 using TaskFlow.BuildingBlocks.Extensions;
+using TaskFlow.BuildingBlocks.Contracts.Redis;
+using TaskFlow.BuildingBlocks.Interfaces;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
 using Tenant.Persistence.Data.TenantDb;
@@ -235,24 +237,12 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddFlashMediator(
     typeof(Program).Assembly,
     typeof(Tenant.Application.Features.CQRS.CompanyPlan.Queries.GetAll.GetAllCompanyPlanQueriesHandler).Assembly,
-    typeof(Identity.Application.Features.CQRS.Auth.Login.LoginCommandHandler).Assembly);
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(opt =>
-{
-    
-    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = resolvedJwtIssuer,
-        ValidAudience = resolvedJwtAudience,
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(resolvedJwtSecretKey)),
-        ClockSkew = TimeSpan.Zero
-    };  
-});
+    typeof(Identity.Application.Features.CQRS.Auth.Login.LoginCommandHandler).Assembly,
+    typeof(Chat.Application.Features.CQRS.Message.Queries.GetUnreadMessageCount.GetUnreadMessageCountQueryHandler).Assembly,
+    typeof(Notification.Application.Features.CQRS.Notification.Queries.GetAllNotifications.GetUserAllNotificationsQueriesHandler).Assembly,
+    typeof(ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.GetByUserId.GetIndividualTasksByUserIdQueryHandler).Assembly,
+    typeof(Report.Application.Features.CQRS.Reports.Query.GetAll.GetAllReportsQueryHandler).Assembly,
+    typeof(Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod.GetWorkerStatsByUserAndPeriodQueryHandler).Assembly);
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -285,6 +275,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "Taskflow_";
 });
+builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.RedisCacheBehavior<,>));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TaskFlow.BuildingBlocks.Behaviors.LimitBehavior<,>));
 builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
@@ -298,6 +289,28 @@ builder.Services.AddIdentity<User, Identity.Domain.Entities.Roles>(opt =>
 })
     .AddEntityFrameworkStores<IdentityManagementDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = resolvedJwtIssuer,
+        ValidAudience = resolvedJwtAudience,
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(resolvedJwtSecretKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

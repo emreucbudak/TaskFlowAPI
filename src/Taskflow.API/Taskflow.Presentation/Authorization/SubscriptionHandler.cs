@@ -11,7 +11,9 @@ namespace Taskflow.Presentation.Authorization
         private readonly ISubscriptionChecker _subscriptionChecker;
         private readonly UserManager<User> _userManager;
 
-        public SubscriptionHandler(ISubscriptionChecker subscriptionChecker, UserManager<User> userManager)
+        public SubscriptionHandler(
+            ISubscriptionChecker subscriptionChecker,
+            UserManager<User> userManager)
         {
             _subscriptionChecker = subscriptionChecker;
             _userManager = userManager;

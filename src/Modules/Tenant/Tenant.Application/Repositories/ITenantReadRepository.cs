@@ -7,5 +7,6 @@ namespace Tenant.Application.Repositories
     {
         Task<CompanyPlan> GetPlan(Guid id, bool trackChanges);
         Task<List<CompanyPlan>> GetAllPlans(bool trackChanges);
+        Task<CompanyPlan?> GetActivePlanByKey(string? planSlug, string? planName, CancellationToken cancellationToken);
     }
 }

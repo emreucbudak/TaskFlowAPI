@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Tenant.Application.Repositories;
 using Tenant.Domain.Entities;
@@ -10,6 +10,7 @@ namespace Tenant.Persistence.Data.Repositories
     {
         private readonly TenantDbContext _context;
         private readonly ILogger<TenantReadRepository> _logger;
+
         public TenantReadRepository(
             TenantDbContext context,
             ILogger<TenantReadRepository> logger)
@@ -20,79 +21,94 @@ namespace Tenant.Persistence.Data.Repositories
 
         public async Task<List<CompanyPlan>> GetAllPlans(bool trackChanges)
         {
-            _logger.LogInformation(
-                "Tüm þirket planlarý getiriliyor - Deðiþiklik Ýzleme: {TrackChanges}",
-                trackChanges);
+            _logger.LogInformation("Loading all company plans. TrackChanges={TrackChanges}", trackChanges);
             try
             {
-                IQueryable<CompanyPlan> query = _context.companyPlans
-                    .Include(p => p.PlanProperties);
+                IQueryable<CompanyPlan> query = _context.companyPlans.Include(p => p.PlanProperties);
 
                 if (!trackChanges)
+                {
                     query = query.AsNoTracking();
+                }
 
                 query = query
-                    .Where(p=> p.isActive == true)
+                    .Where(p => p.isActive)
                     .OrderBy(p => p.PlanPrice)
                     .ThenBy(p => p.PlanName);
 
-                _logger.LogInformation(
-                    "{Count} adet þirket planý getirildi",
-                    query.Count());
                 return await query.ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Planlar getirilirken hata oluþtu.");
+                _logger.LogError(ex, "Failed to load company plans.");
                 throw;
             }
         }
+
+        public async Task<CompanyPlan?> GetActivePlanByKey(string? planSlug, string? planName, CancellationToken cancellationToken)
+        {
+            var plans = await _context.companyPlans
+                .AsNoTracking()
+                .Where(x => x.isActive)
+                .ToListAsync(cancellationToken);
+
+            return plans.FirstOrDefault(plan => MatchesPlan(plan.PlanName, planSlug, planName));
+        }
+
         public async Task<CompanyPlan> GetPlan(Guid id, bool trackChanges)
         {
             ValidateId(id);
-            _logger.LogInformation(
-                "Þirket planý getiriliyor - Id: {PlanId}, Deðiþiklik Ýzleme: {TrackChanges}",
-                id, trackChanges);
+            _logger.LogInformation("Loading company plan. PlanId={PlanId}, TrackChanges={TrackChanges}", id, trackChanges);
+
             try
             {
                 IQueryable<CompanyPlan> query = _context.companyPlans;
 
                 if (!trackChanges)
+                {
                     query = query.AsNoTracking();
+                }
 
                 var plan = await query.FirstOrDefaultAsync(p => p.Id == id);
-                if (plan is null)
-                {
-                    _logger.LogWarning(
-                        "Þirket planý bulunamadý - Id: {PlanId}",
-                        id);
-                }
-                else
-                {
-                    _logger.LogDebug(
-                        "Þirket planý bulundu - Id: {PlanId}",
-                        id);
-                }
-                return plan;
+                return plan!;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Plan getirilirken hata oluþtu - Id: {PlanId}",
-                    id);
+                _logger.LogError(ex, "Failed to load company plan. PlanId={PlanId}", id);
                 throw;
             }
         }
+
         private static void ValidateId(Guid id)
         {
             if (id == Guid.Empty)
             {
-                throw new ArgumentException("Plan ID'si boþ olamaz", nameof(id));
+                throw new ArgumentException("Plan id cannot be empty.", nameof(id));
             }
         }
 
+        private static bool MatchesPlan(string planName, string? planSlug, string? rawPlanName)
+        {
+            var normalizedPlanName = NormalizePlanKey(planName);
 
+            var slugMatch = !string.IsNullOrWhiteSpace(planSlug)
+                && normalizedPlanName == NormalizePlanKey(planSlug);
 
+            var nameMatch = !string.IsNullOrWhiteSpace(rawPlanName)
+                && normalizedPlanName == NormalizePlanKey(rawPlanName);
+
+            return slugMatch || nameMatch;
+        }
+
+        private static string NormalizePlanKey(string value)
+        {
+            var chars = value
+                .Trim()
+                .ToLowerInvariant()
+                .Where(char.IsLetterOrDigit)
+                .ToArray();
+
+            return new string(chars);
+        }
     }
 }

@@ -154,6 +154,32 @@ if (string.IsNullOrWhiteSpace(resolvedJwtSecretKey))
     throw new InvalidOperationException("JWT secret key tanimlanmamis. Docker secret 'jwt_secret_key' veya 'JWTSecretKey:SecretKey' gerekli.");
 }
 
+var resolvedJwtIssuer =
+    builder.Configuration["JWTSecretKey:Issuer"]?.Trim()
+    ?? builder.Configuration["TokenSettings:Issuer"]?.Trim()
+    ?? "TaskflowAPI";
+
+var resolvedJwtAudience =
+    builder.Configuration["JWTSecretKey:Audience"]?.Trim()
+    ?? builder.Configuration["TokenSettings:Audience"]?.Trim()
+    ?? "TaskflowClient";
+
+var resolvedAccessTokenExpiryMinutesRaw =
+    builder.Configuration["TokenSettings:AccessTokenExpiryMinutes"]?.Trim()
+    ?? builder.Configuration["JWTSecretKey:ExpiryInMinutes"]?.Trim()
+    ?? "60";
+
+if (!int.TryParse(resolvedAccessTokenExpiryMinutesRaw, out var resolvedAccessTokenExpiryMinutes) || resolvedAccessTokenExpiryMinutes <= 0)
+{
+    resolvedAccessTokenExpiryMinutes = 60;
+}
+
+// Normalize legacy/new config keys into a single section consumed by TokenService.
+builder.Configuration["TokenSettings:SecretKey"] = resolvedJwtSecretKey;
+builder.Configuration["TokenSettings:Issuer"] = resolvedJwtIssuer;
+builder.Configuration["TokenSettings:Audience"] = resolvedJwtAudience;
+builder.Configuration["TokenSettings:AccessTokenExpiryMinutes"] = resolvedAccessTokenExpiryMinutes.ToString();
+
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("/logs/logs.txt", rollingInterval: RollingInterval.Day)
@@ -220,8 +246,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        ValidIssuer = resolvedJwtIssuer,
+        ValidAudience = resolvedJwtAudience,
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(resolvedJwtSecretKey)),
         ClockSkew = TimeSpan.Zero

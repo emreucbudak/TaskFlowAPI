@@ -150,6 +150,13 @@ if (!string.IsNullOrWhiteSpace(jwtSecretKey))
     builder.Configuration["JWTSecretKey:SecretKey"] = jwtSecretKey;
 }
 
+var chatMessageEncryptionKey = builder.Configuration["chat_message_encryption_key"]?.Trim();
+if (string.IsNullOrWhiteSpace(chatMessageEncryptionKey))
+{
+    throw new InvalidOperationException("Chat message encryption key tanimlanmamis. Docker secret 'chat_message_encryption_key' zorunlu.");
+}
+builder.Configuration["ChatEncryption:Key"] = chatMessageEncryptionKey;
+
 var resolvedJwtSecretKey = builder.Configuration["JWTSecretKey:SecretKey"]?.Trim();
 if (string.IsNullOrWhiteSpace(resolvedJwtSecretKey))
 {
@@ -327,6 +334,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+else
+{
+    app.UseHsts();
 }
 
 app.UseExceptionHandler();

@@ -27,7 +27,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
                 throw new UserNotFoundExceptions(request.Email);
             }
             bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
-            if (checkPassword)
+            if (!checkPassword)
             {
                 throw new WrongPasswordExceptions();
             }
@@ -38,7 +38,10 @@ namespace Identity.Application.Features.CQRS.Auth.Login
             return new LoginCommandResponse
             {
                 AccessToken = token,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                UserId = user.Id,
+                CompanyId = user.CompanyId,
+                Role = roles.FirstOrDefault() ?? string.Empty
             };
       
         }

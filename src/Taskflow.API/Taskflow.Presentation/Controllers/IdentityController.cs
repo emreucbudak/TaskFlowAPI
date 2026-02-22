@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Identity.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+
 namespace Taskflow.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class IdentityController(IMediator mediator) : ControllerBase
+public sealed class IdentityController(IMediator mediator, UserManager<User> userManager) : ControllerBase
 {
     [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("AddDepartmentCommandRequest")]
@@ -118,6 +121,25 @@ public sealed class IdentityController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(request);
         return Ok(result);
+    }
+
+    [Authorize(Policy = "CompanyOrWorkerPolicy")]
+    [HttpGet("GetCurrentUserContext")]
+    public async Task<IActionResult> GetCurrentUserContext()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var roles = await userManager.GetRolesAsync(user);
+        return Ok(new
+        {
+            UserId = user.Id,
+            CompanyId = user.CompanyId,
+            Role = roles.FirstOrDefault() ?? string.Empty
+        });
     }
 
     [AllowAnonymous]

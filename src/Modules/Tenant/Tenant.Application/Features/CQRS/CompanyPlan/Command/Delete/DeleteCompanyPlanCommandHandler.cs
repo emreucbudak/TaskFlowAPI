@@ -1,18 +1,15 @@
 ﻿using FlashMediator;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Application.Repositories;
 
 namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Delete
 {
     public class DeleteCompanyPlanCommandHandler : IRequestHandler<DeleteCompanyPlanCommandRequest>
     {
-        private readonly IUnitOfWork unitOfWork;    
         private readonly ITenantReadRepository tenantReadRepository;
         private readonly ITenantWriteRepository tenantWriteRepository;
 
-        public DeleteCompanyPlanCommandHandler(IUnitOfWork unitOfWork, ITenantReadRepository tenantReadRepository, ITenantWriteRepository tenantWriteRepository)
+        public DeleteCompanyPlanCommandHandler(ITenantReadRepository tenantReadRepository, ITenantWriteRepository tenantWriteRepository)
         {
-            this.unitOfWork = unitOfWork;
             this.tenantReadRepository = tenantReadRepository;
             this.tenantWriteRepository = tenantWriteRepository;
         }
@@ -21,7 +18,6 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Delete
         {
             var companyPlan = await tenantReadRepository.GetPlan(request.CompanyPlanId,false);
             await tenantWriteRepository.DeletePlan(companyPlan);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }

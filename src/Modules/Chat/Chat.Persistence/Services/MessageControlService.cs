@@ -50,7 +50,7 @@ namespace Chat.Application.Services
             await _messageWriteRepository.AddAsync(message);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await SendNotificationsAsync(message);
+            await SendNotificationsAsync(message, request.Content);
         }
 
         private void ValidateUserAuthentication(Guid senderId)
@@ -108,12 +108,12 @@ namespace Chat.Application.Services
             }
         }
 
-        private async Task SendNotificationsAsync(Chat.Domain.Entities.Message message)
+        private async Task SendNotificationsAsync(Chat.Domain.Entities.Message message, string plainContent)
         {
             var notificationData = new
             {
                 message.Id,
-                message.Content,
+                Content = plainContent,
                 message.SenderId,
                 message.SendTime,
                 message.ReceiverId,

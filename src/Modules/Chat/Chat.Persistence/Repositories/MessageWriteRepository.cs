@@ -1,4 +1,5 @@
 using Chat.Application.Repositories;
+using Chat.Application.Services;
 using Chat.Domain.Entities;
 using Chat.Persistence.Data.ChatDb;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,14 @@ namespace Chat.Persistence.Repositories
 {
     public sealed class MessageWriteRepository(
         ChatDbContext context,
+        IChatMessageEncryptionService messageEncryptionService,
         ILogger<MessageWriteRepository> logger) : IMessageWriteRepository
     {
         public async Task<Message> AddAsync(Message message)
         {
             try
             {
+                message.UpdateContent(messageEncryptionService.Encrypt(message.Content));
                 await context.Messages.AddAsync(message);
                 await context.SaveChangesAsync();
                 return message;
@@ -80,7 +83,7 @@ namespace Chat.Persistence.Repositories
                 var message = await context.Messages.FindAsync(id);
                 if (message == null) return false;
 
-                message.UpdateContent(newContent);
+                message.UpdateContent(messageEncryptionService.Encrypt(newContent));
                 message.MarkAsEdited();
                 
                 var result = await context.SaveChangesAsync();

@@ -45,3 +45,24 @@ TaskFlow, bireysel ve takım görev yönetimi için geliştirilmiş bir **SaaS M
 
 ## 🔹 Notlar
 - Premium özellikler ve SaaS mantığı simüle edilmiştir
+
+---
+
+## Local Docker Compose Secrets
+
+This project no longer uses a root `.env` file for runtime secrets.
+Create the following files under `secrets/` before running Docker Compose:
+
+- `secrets/postgres_user`
+- `secrets/postgres_password`
+- `secrets/rabbitmq_user`
+- `secrets/rabbitmq_password`
+- `secrets/redis_password`
+- `secrets/stripe_secret_key`
+- `secrets/jwt_secret_key`
+
+Then start services:
+
+```bash
+docker compose up --build
+```

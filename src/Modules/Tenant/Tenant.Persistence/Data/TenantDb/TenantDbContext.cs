@@ -31,6 +31,10 @@ namespace Tenant.Persistence.Data.TenantDb
                 .Property(t => t.RowVersion)
                 .IsConcurrencyToken()
                 .ValueGeneratedNever();
+            modelBuilder.Entity<TenantSubscription>()
+                .Property(t => t.RowVersion)
+                .IsConcurrencyToken()
+                .ValueGeneratedNever();
             modelBuilder.Entity<TenantSubscription>().HasOne(ts => ts.TenantUsage)
                 .WithOne()
                 .HasForeignKey<TenantSubscription>(ts => ts.TenantUsageId)

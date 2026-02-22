@@ -1,5 +1,4 @@
 ﻿using FlashMediator;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 using Tenant.Application.Repositories;
 
 
@@ -8,13 +7,11 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Update
     internal class UpdateCompanyPlanCommandHandler : IRequestHandler<UpdateCompanyPlanCommandRequest>
     {
         private readonly ITenantWriteRepository tenantWriteRepository;
-        private readonly IUnitOfWork unitOfWork;
         private readonly ITenantReadRepository tenantReadRepository;
 
-        public UpdateCompanyPlanCommandHandler(ITenantWriteRepository tenantWriteRepository, IUnitOfWork unitOfWork, ITenantReadRepository tenantReadRepository)
+        public UpdateCompanyPlanCommandHandler(ITenantWriteRepository tenantWriteRepository, ITenantReadRepository tenantReadRepository)
         {
             this.tenantWriteRepository = tenantWriteRepository;
-            this.unitOfWork = unitOfWork;
             this.tenantReadRepository = tenantReadRepository;
         }
 
@@ -28,7 +25,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Update
                 request.IsIncludeReporting
             );
             companyPlan.UpdateProperties(newProperties);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await tenantWriteRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

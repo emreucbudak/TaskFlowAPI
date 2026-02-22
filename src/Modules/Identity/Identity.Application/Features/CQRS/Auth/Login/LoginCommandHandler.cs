@@ -38,7 +38,10 @@ namespace Identity.Application.Features.CQRS.Auth.Login
             return new LoginCommandResponse
             {
                 AccessToken = token,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                UserId = user.Id,
+                CompanyId = user.CompanyId,
+                Role = roles.FirstOrDefault() ?? string.Empty
             };
       
         }

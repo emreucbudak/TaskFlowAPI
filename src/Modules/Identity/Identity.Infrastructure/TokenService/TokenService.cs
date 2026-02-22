@@ -34,6 +34,9 @@ namespace Identity.Infrastructure.TokenService
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.Name,user.Name),
                 new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim("companyId", user.CompanyId.ToString()),
+                new Claim("tenantId", user.CompanyId.ToString()),
+                new Claim(ClaimTypes.Sid, user.CompanyId.ToString()),
             };
             foreach (var role in roles)
             {

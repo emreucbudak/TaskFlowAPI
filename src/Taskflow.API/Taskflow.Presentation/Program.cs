@@ -25,16 +25,20 @@ using Report.Persistence.Extensions;
 using Serilog;
 using Stats.Persistence.Data;
 using Stats.Persistence.Extensions;
+using System.Linq;
 using System.Threading.RateLimiting;
 using TaskFlow.BuildingBlocks.Extensions;
 using TaskFlow.BuildingBlocks.Contracts.Redis;
 using TaskFlow.BuildingBlocks.Interfaces;
 using TaskFlow.BuildingBlocks.RabbitMQ.Contracts;
 using TaskFlow.BuildingBlocks.RabbitMQ.Interface;
+using Tenant.Domain.Entities;
 using Tenant.Persistence.Data.TenantDb;
 using Tenant.Infrastructure.Extensions;
 using Chat.Persistence.Data.ChatDb;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Taskflow.Presentation.Authorization;
 using Taskflow.Presentation.ExceptionHandlers;
 
@@ -334,6 +338,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await EnsureSeedDemoAccountAsync(app.Services);
+}
+else
+{
+    app.UseHsts();
 }
 else
 {
@@ -351,3 +360,93 @@ app.MapHub<ChatHubs>("/chatHub");
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
+
+static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
+{
+    const string defaultCompanyName = "TaskFlow Demo Company";
+    const string defaultEmail = "demo@taskflow.dev";
+    const string defaultPassword = "TaskFlow!23";
+    const string defaultRole = "Company";
+
+    using var scope = services.CreateScope();
+    var scopedServices = scope.ServiceProvider;
+    var logger = scopedServices.GetRequiredService<ILogger<Program>>();
+    var identityContext = scopedServices.GetRequiredService<IdentityManagementDbContext>();
+    var userManager = scopedServices.GetRequiredService<UserManager<User>>();
+    var roleManager = scopedServices.GetRequiredService<RoleManager<Roles>>();
+    var tenantContext = scopedServices.GetRequiredService<TenantDbContext>();
+
+    if (!await identityContext.Companies.AnyAsync())
+    {
+        identityContext.Companies.Add(new Company(defaultCompanyName));
+        await identityContext.SaveChangesAsync();
+        logger.LogInformation("Varsayilan sirket '{Company}' olusturuldu.", defaultCompanyName);
+    }
+
+    var company = await identityContext.Companies.OrderBy(c => c.Id).FirstAsync();
+
+    if (await userManager.FindByEmailAsync(defaultEmail) is not null)
+    {
+        return;
+    }
+
+    if (!await roleManager.RoleExistsAsync(defaultRole))
+    {
+        var role = new Roles { Name = defaultRole };
+        var createRoleResult = await roleManager.CreateAsync(role);
+        if (!createRoleResult.Succeeded)
+        {
+            logger.LogWarning(
+                "Varsayilan rol '{Role}' olusturulamadi: {Errors}",
+                defaultRole,
+                string.Join(", ", createRoleResult.Errors.Select(x => x.Description)));
+
+            return;
+        }
+    }
+
+    var demoUser = User.Create("Demo Kullanici", defaultEmail, company.Id);
+    var createResult = await userManager.CreateAsync(demoUser, defaultPassword);
+    if (!createResult.Succeeded)
+    {
+        logger.LogWarning(
+            "Demo kullanici olusturulamadi: {Errors}",
+            string.Join(", ", createResult.Errors.Select(x => x.Description)));
+
+        return;
+    }
+
+    var addRoleResult = await userManager.AddToRoleAsync(demoUser, defaultRole);
+    if (!addRoleResult.Succeeded)
+    {
+        logger.LogWarning(
+            "Demo kullaniciya rol atanamadi: {Errors}",
+            string.Join(", ", addRoleResult.Errors.Select(x => x.Description)));
+    }
+
+    logger.LogInformation("Demo kullanici {Email} olusturuldu.", defaultEmail);
+
+    var defaultPlanId = Guid.Parse("018da123-abcd-7000-9000-000000000001");
+    if (!await tenantContext.tenantSubscriptions.AnyAsync(sub => sub.TenantId == company.Id))
+    {
+        var plan = await tenantContext.companyPlans.FindAsync(defaultPlanId);
+        if (plan is null)
+        {
+            logger.LogWarning("Demo abonelik olusturulamadi: varsayilan plan bulunamadi ({PlanId}).", defaultPlanId);
+            return;
+        }
+
+        var usage = new TenantUsage(company.Id);
+        var subscription = TenantSubscription.CreateActive(
+            company.Id,
+            defaultPlanId,
+            usage.Id,
+            "demo-subscription",
+            DateTime.UtcNow);
+
+        tenantContext.tenantUsages.Add(usage);
+        tenantContext.tenantSubscriptions.Add(subscription);
+        await tenantContext.SaveChangesAsync();
+        logger.LogInformation("Demo abonelik kaydi olusturuldu.");
+    }
+}

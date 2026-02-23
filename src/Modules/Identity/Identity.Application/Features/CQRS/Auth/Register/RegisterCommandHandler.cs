@@ -2,6 +2,7 @@ using DotNetCore.CAP;
 using FlashMediator;
 using Identity.Application.Features.CQRS.Auth.Exceptions;
 using Identity.Application.Features.CQRS.Company.Exceptions;
+using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
@@ -14,10 +15,13 @@ namespace Identity.Application.Features.CQRS.Auth.Register;
 public sealed class RegisterUserCommandHandler(
     UserManager<User> userManager,
     IReadRepository<Domain.Entities.Company, Guid> companyReadRepository,
+    IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
     RoleManager<Roles> roleManager,
     IIdentityCapUnitOfWork unitOfWork,
     ICapPublisher capPublisher) : IRequestHandler<RegisterCommandRequest>
 {
+    private const int WorkerDepartmentRoleId = 3;
+
     public async Task Handle(RegisterCommandRequest request, CancellationToken cancellationToken)
     {
         var existingUser = await userManager.FindByEmailAsync(request.Email);
@@ -44,6 +48,21 @@ public sealed class RegisterUserCommandHandler(
             throw new RoleNotFoundExceptions();
         }
 
+        Domain.Entities.Department? department = null;
+        if (request.DepartmentId.HasValue)
+        {
+            if (!string.Equals(request.Role, "Worker", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDepartmentAssignmentException();
+            }
+
+            department = await departmentReadRepository.GetByIdAsync(true, request.DepartmentId.Value);
+            if (department is null || department.CompanyId != request.CompanyId)
+            {
+                throw new DepartmentNotFoundExceptions();
+            }
+        }
+
         var newUser = User.Create(request.Name, request.Email, request.CompanyId);
 
         // CAP writes its outbox row in the same EF transaction below.
@@ -61,6 +80,12 @@ public sealed class RegisterUserCommandHandler(
             if (!addRoleResult.Succeeded)
             {
                 throw new RegisterNotSuccessfullyExceptions();
+            }
+
+            if (department is not null)
+            {
+                department.AddUser(newUser.Id, WorkerDepartmentRoleId);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
             await capPublisher.PublishAsync(

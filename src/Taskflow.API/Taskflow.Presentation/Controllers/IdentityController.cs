@@ -115,6 +115,22 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok(result);
     }
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetAllCompanyUsersQueriesRequest")]
+    public async Task<IActionResult> GetAllCompanyUsersQueries([FromBody] Identity.Application.Features.CQRS.Auth.Queries.GetAllCompanyUsers.GetAllCompanyUsersQueriesRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetAllCompanyDepartmentsQueriesRequest")]
+    public async Task<IActionResult> GetAllCompanyDepartmentsQueries([FromBody] Identity.Application.Features.CQRS.Department.Query.GetAll.GetAllCompanyDepartmentsQueriesRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
     [AllowAnonymous]
     [HttpPost("LoginCommandRequest")]
     public async Task<IActionResult> LoginCommand([FromBody] Identity.Application.Features.CQRS.Auth.Login.LoginCommandRequest request)

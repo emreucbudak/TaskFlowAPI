@@ -25,6 +25,7 @@ using Report.Persistence.Extensions;
 using Serilog;
 using Stats.Persistence.Data;
 using Stats.Persistence.Extensions;
+using System.Net.Sockets;
 using System.Linq;
 using System.Threading.RateLimiting;
 using TaskFlow.BuildingBlocks.Extensions;
@@ -324,25 +325,19 @@ builder.Services.AddAuthentication(options =>
 });
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    scope.ServiceProvider.GetRequiredService<IdentityManagementDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<TenantDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<ChatDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<NotificationDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<ReportDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<ProjectManagementDbContext>().Database.Migrate();
-    scope.ServiceProvider.GetRequiredService<StatsDbContext>().Database.Migrate();
-}
+var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("StartupMigrations");
+await ApplyMigrationsWithRetryAsync<IdentityManagementDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<TenantDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<ChatDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<NotificationDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<ReportDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<ProjectManagementDbContext>(app.Services, startupLogger);
+await ApplyMigrationsWithRetryAsync<StatsDbContext>(app.Services, startupLogger);
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     await EnsureSeedDemoAccountAsync(app.Services);
-}
-else
-{
-    app.UseHsts();
 }
 else
 {
@@ -360,6 +355,51 @@ app.MapHub<ChatHubs>("/chatHub");
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
+
+static async Task ApplyMigrationsWithRetryAsync<TContext>(
+    IServiceProvider services,
+    Microsoft.Extensions.Logging.ILogger logger,
+    CancellationToken cancellationToken = default)
+    where TContext : DbContext
+{
+    const int maxAttempts = 8;
+    var delay = TimeSpan.FromSeconds(2);
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            using var scope = services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
+            await dbContext.Database.MigrateAsync(cancellationToken);
+            logger.LogInformation("{Context} migration completed.", typeof(TContext).Name);
+            return;
+        }
+        catch (Exception ex) when (attempt < maxAttempts && IsTransientStartupException(ex))
+        {
+            logger.LogWarning(
+                ex,
+                "{Context} migration attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelaySeconds} seconds.",
+                typeof(TContext).Name,
+                attempt,
+                maxAttempts,
+                delay.TotalSeconds);
+
+            await Task.Delay(delay, cancellationToken);
+            delay = TimeSpan.FromSeconds(Math.Min(delay.TotalSeconds * 2, 15));
+        }
+    }
+}
+
+static bool IsTransientStartupException(Exception exception)
+{
+    if (exception is NpgsqlException or SocketException or TimeoutException)
+    {
+        return true;
+    }
+
+    return exception.InnerException is not null && IsTransientStartupException(exception.InnerException);
+}
 
 static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
 {

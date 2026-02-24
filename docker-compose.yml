@@ -45,8 +45,6 @@ services:
     secrets:
       - postgres_user
       - postgres_password
-    ports:
-      - "5432:5432"
     volumes:
       - taskflow-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -58,8 +56,6 @@ services:
 
   redis:
     image: redis:8.6-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - taskflow-redis-data:/data
     secrets:
@@ -82,9 +78,6 @@ services:
           default_vhost = /
           EOF
           exec rabbitmq-server
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     volumes:
       - taskflow-rabbitmq-data:/var/lib/rabbitmq
     healthcheck:

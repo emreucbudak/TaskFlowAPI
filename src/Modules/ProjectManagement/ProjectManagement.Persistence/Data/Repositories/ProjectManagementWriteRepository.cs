@@ -45,6 +45,17 @@ namespace ProjectManagement.Persistence.Data.Repositories
             }
         }
 
+        public async System.Threading.Tasks.Task AddSubTask(Domain.Entities.Subtask entity, CancellationToken cancellationToken = default)
+        {
+            if (entity == null)
+            {
+                logger.LogError("Eklenmeye çalışılan Subtask null");
+                throw new ArgumentNullException(nameof(entity), "Entity null olamaz");
+            }
+
+            await context.Subtasks.AddAsync(entity, cancellationToken);
+        }
+
         public async System.Threading.Tasks.Task DeleteTask(Task task)
         {
             if (task == null)

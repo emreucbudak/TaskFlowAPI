@@ -45,7 +45,7 @@ namespace ProjectManagement.Domain.Entities
         {
             this.TaskStatusId = taskStatusId;
         }
-        public void AddSubTask (string description,Guid AssignedUserId,string Title,Guid taskId)
+        public Subtask AddSubTask (string description,Guid AssignedUserId,string Title,Guid taskId)
         {
             if (TaskStatusId == 2)
             {
@@ -53,6 +53,7 @@ namespace ProjectManagement.Domain.Entities
             }
             var subtask = new Subtask(description,AssignedUserId,1,Title,taskId);
             _subtask.Add(subtask);
+            return subtask;
         }
         public void RemoveSubTask (Guid taskId)
         {

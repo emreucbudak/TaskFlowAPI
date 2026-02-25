@@ -9,15 +9,18 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
     public class CreateSubTasksCommandHandler : IRequestHandler<CreateSubTasksCommandRequest>
     {
         private readonly IProjectManagementReadRepository _readRepository;
+        private readonly IProjectManagementWriteRepository _writeRepository;
         private readonly ICapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public CreateSubTasksCommandHandler(
             IProjectManagementReadRepository readRepository,
+            IProjectManagementWriteRepository writeRepository,
             ICapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _readRepository = readRepository;
+            _writeRepository = writeRepository;
             _unitOfWork = unitOfWork;
             _capPublisher = capPublisher;
         }
@@ -34,13 +37,14 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
                     throw new Exception("Task bulunamadı.");
                 }
 
-                task.AddSubTask(
+                var subTask = task.AddSubTask(
                     description: request.Description,
                     AssignedUserId: request.AssignedUserId,
                     Title: request.TaskTitle,
                     taskId: request.TaskId
                 );
 
+                await _writeRepository.AddSubTask(subTask, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 await _capPublisher.PublishAsync("SubTaskCreated", new SubTaskCreatedIntegrationEvent(

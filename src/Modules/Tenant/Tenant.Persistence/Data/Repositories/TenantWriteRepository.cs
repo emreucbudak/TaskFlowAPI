@@ -12,10 +12,10 @@ namespace Tenant.Persistence.Data.Repositories
         private const int MaxConcurrencyRetryCount = 5;
         private readonly TenantDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-        public async Task AddPlan(CompanyPlan plan)
+        public void AddPlan(CompanyPlan plan)
         {
             ArgumentNullException.ThrowIfNull(plan);
-            await _context.companyPlans.AddAsync(plan);
+            _context.companyPlans.Add(plan);
         }
 
         public async Task DeletePlan(CompanyPlan plan)
@@ -166,17 +166,14 @@ namespace Tenant.Persistence.Data.Repositories
                 $"Failed to release reserved limit slot after {MaxConcurrencyRetryCount} retries. TenantId={tenantId}, LimitType={limitType}");
         }
 
-        public async Task<TenantSubscription?> GetTenantSubscription(Guid tenantId, CancellationToken cancellationToken)
-        {
-            return await _context.tenantSubscriptions
+        public Task<TenantSubscription?> GetTenantSubscription(Guid tenantId, CancellationToken cancellationToken)
+            => _context.tenantSubscriptions
                 .FirstOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
-        }
 
-        public Task AddTenantSubscription(TenantSubscription tenantSubscription, CancellationToken cancellationToken)
+        public void AddTenantSubscription(TenantSubscription tenantSubscription)
         {
             ArgumentNullException.ThrowIfNull(tenantSubscription);
             _context.tenantSubscriptions.Add(tenantSubscription);
-            return Task.CompletedTask;
         }
 
         public async Task UpdateTenantSubscription(

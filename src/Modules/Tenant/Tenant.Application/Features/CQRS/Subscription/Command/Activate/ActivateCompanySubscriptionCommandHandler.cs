@@ -51,7 +51,7 @@ namespace Tenant.Application.Features.CQRS.Subscription.Command.Activate
                     paymentProviderSubscriptionId,
                     utcNow);
 
-                await _tenantWriteRepository.AddTenantSubscription(newSubscription, cancellationToken);
+                _tenantWriteRepository.AddTenantSubscription(newSubscription);
             }
             else
             {

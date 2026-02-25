@@ -30,7 +30,6 @@ namespace Tenant.Persistence.Extensions
             services.AddScoped<ISubscriptionLimitCheckerService, WorkerAddedLimitChecker>();
             services.AddScoped<ISubscriptionLimitCheckerService, TeamLimitChecker>();
             services.AddScoped<ISubscriptionLimitCheckerService, IndividualTaskLimitChecker>();
-            services.AddScoped<ISubscriptionLimitCheckerService, IsInternalReportingEnabledChecker>();
 
             return services;
         }

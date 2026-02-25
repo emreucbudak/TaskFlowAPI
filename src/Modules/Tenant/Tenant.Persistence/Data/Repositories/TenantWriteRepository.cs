@@ -9,6 +9,7 @@ namespace Tenant.Persistence.Data.Repositories
 {
     public sealed class TenantWriteRepository(TenantDbContext context) : ITenantWriteRepository
     {
+        private const int MaxConcurrencyRetryCount = 5;
         private readonly TenantDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public async Task AddPlan(CompanyPlan plan)
@@ -87,6 +88,84 @@ namespace Tenant.Persistence.Data.Repositories
             return tenantUsage;
         }
 
+        public async Task<bool> TryReserveLimitSlot(Guid tenantId, LimitType limitType, int limit, CancellationToken cancellationToken)
+        {
+            if (tenantId == Guid.Empty)
+            {
+                throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
+            }
+
+            if (limit < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(limit), "Limit cannot be negative.");
+            }
+
+            for (var attempt = 1; attempt <= MaxConcurrencyRetryCount; attempt++)
+            {
+                var tenantUsage = await GetOrCreateTenantUsage(tenantId, cancellationToken);
+                var currentUsage = GetCurrentUsage(tenantUsage, limitType);
+
+                if (currentUsage >= limit)
+                {
+                    return false;
+                }
+
+                IncrementUsage(tenantUsage, limitType);
+
+                try
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                    return true;
+                }
+                catch (DbUpdateConcurrencyException) when (attempt < MaxConcurrencyRetryCount)
+                {
+                    _context.ChangeTracker.Clear();
+                }
+            }
+
+            throw new DbUpdateConcurrencyException(
+                $"Failed to reserve limit slot after {MaxConcurrencyRetryCount} retries. TenantId={tenantId}, LimitType={limitType}");
+        }
+
+        public async Task ReleaseReservedLimitSlot(Guid tenantId, LimitType limitType, CancellationToken cancellationToken)
+        {
+            if (tenantId == Guid.Empty)
+            {
+                throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
+            }
+
+            for (var attempt = 1; attempt <= MaxConcurrencyRetryCount; attempt++)
+            {
+                var tenantUsage = await _context.tenantUsages
+                    .SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
+
+                if (tenantUsage is null)
+                {
+                    return;
+                }
+
+                if (GetCurrentUsage(tenantUsage, limitType) <= 0)
+                {
+                    return;
+                }
+
+                DecrementUsage(tenantUsage, limitType);
+
+                try
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                    return;
+                }
+                catch (DbUpdateConcurrencyException) when (attempt < MaxConcurrencyRetryCount)
+                {
+                    _context.ChangeTracker.Clear();
+                }
+            }
+
+            throw new DbUpdateConcurrencyException(
+                $"Failed to release reserved limit slot after {MaxConcurrencyRetryCount} retries. TenantId={tenantId}, LimitType={limitType}");
+        }
+
         public async Task<TenantSubscription?> GetTenantSubscription(Guid tenantId, CancellationToken cancellationToken)
         {
             return await _context.tenantSubscriptions
@@ -130,6 +209,53 @@ namespace Tenant.Persistence.Data.Repositories
             return exception.InnerException is PostgresException postgresException
                 && postgresException.SqlState == PostgresErrorCodes.UniqueViolation
                 && string.Equals(postgresException.ConstraintName, "IX_tenantUsages_TenantId", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static int GetCurrentUsage(TenantUsage tenantUsage, LimitType limitType)
+        {
+            return limitType switch
+            {
+                LimitType.PeopleAdded => tenantUsage.CurrentUserCount,
+                LimitType.TeamLimit => tenantUsage.CurrentGroupCount,
+                LimitType.IndividualTask => tenantUsage.CurrentIndividualTaskCount,
+                _ => throw new NotSupportedException($"Unsupported limit type: {limitType}")
+            };
+        }
+
+        private static void IncrementUsage(TenantUsage tenantUsage, LimitType limitType)
+        {
+            switch (limitType)
+            {
+                case LimitType.PeopleAdded:
+                    tenantUsage.IncrementUserCount();
+                    break;
+                case LimitType.TeamLimit:
+                    tenantUsage.IncrementGroupCount();
+                    break;
+                case LimitType.IndividualTask:
+                    tenantUsage.IncrementIndividualTaskCount();
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported limit type: {limitType}");
+            }
+        }
+
+        private static void DecrementUsage(TenantUsage tenantUsage, LimitType limitType)
+        {
+            switch (limitType)
+            {
+                case LimitType.PeopleAdded:
+                    tenantUsage.DecrementUserCount();
+                    break;
+                case LimitType.TeamLimit:
+                    tenantUsage.DecrementGroupCount();
+                    break;
+                case LimitType.IndividualTask:
+                    tenantUsage.DecrementIndividualTaskCount();
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported limit type: {limitType}");
+            }
         }
     }
 }

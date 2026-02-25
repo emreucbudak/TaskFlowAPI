@@ -3,9 +3,10 @@ using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDepartment
 {
@@ -13,19 +14,22 @@ namespace Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDe
     {
         private readonly IReadRepository<Domain.Entities.Department, Guid> _departmentReadRepository;
         private readonly UserManager<User> _userManager;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
+        private readonly ICacheService _cacheService;
 
         public DeleteUserFromDepartmentCommandHandler(
             IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
             UserManager<User> userManager,
-            ICapUnitOfWork unitOfWork,
-            ICapPublisher capPublisher)
+            IIdentityCapUnitOfWork unitOfWork,
+            ICapPublisher capPublisher,
+            ICacheService cacheService)
         {
             _departmentReadRepository = departmentReadRepository;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _capPublisher = capPublisher;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(DeleteUserFromDepartmentCommandRequest request, CancellationToken cancellationToken)
@@ -54,6 +58,7 @@ namespace Identity.Application.Features.CQRS.Department.Command.DeleteUserFromDe
                 ));
 
                 await transaction.CommitAsync(cancellationToken);
+                await _cacheService.RemoveAsync($"getallcompanygroups:{user.CompanyId}");
             }
         }
     }

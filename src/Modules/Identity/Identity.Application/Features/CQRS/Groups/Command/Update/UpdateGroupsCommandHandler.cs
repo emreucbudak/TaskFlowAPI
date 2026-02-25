@@ -1,16 +1,18 @@
 ﻿using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Groups.Command.Update
 {
     public class UpdateGroupsCommandHandler : IRequestHandler<UpdateGroupsCommandRequest>
     {
         private readonly IReadRepository<Domain.Entities.Groups,Guid> _groupReadRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IIdentityCapUnitOfWork unitOfWork;
 
-        public UpdateGroupsCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> groupReadRepository, IUnitOfWork unitOfWork)
+        public UpdateGroupsCommandHandler(
+            IReadRepository<Domain.Entities.Groups, Guid> groupReadRepository,
+            IIdentityCapUnitOfWork unitOfWork)
         {
             _groupReadRepository = groupReadRepository;
             this.unitOfWork = unitOfWork;

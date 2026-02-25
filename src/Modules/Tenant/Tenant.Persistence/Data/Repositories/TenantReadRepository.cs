@@ -79,6 +79,32 @@ namespace Tenant.Persistence.Data.Repositories
             }
         }
 
+        public async Task<TenantSubscription?> GetTenantSubscriptionForLimits(Guid tenantId, CancellationToken cancellationToken)
+        {
+            if (tenantId == Guid.Empty)
+            {
+                throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
+            }
+
+            _logger.LogInformation("Loading tenant subscription limit snapshot. TenantId={TenantId}", tenantId);
+
+            try
+            {
+                return await _context.tenantSubscriptions
+                    .AsNoTracking()
+                    .Where(item => item.TenantId == tenantId)
+                    .Include(item => item.TenantUsage)
+                    .Include(item => item.CompanyPlan)
+                    .ThenInclude(item => item.PlanProperties)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load tenant subscription limit snapshot. TenantId={TenantId}", tenantId);
+                throw;
+            }
+        }
+
         private static void ValidateId(Guid id)
         {
             if (id == Guid.Empty)

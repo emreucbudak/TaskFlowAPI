@@ -1,8 +1,8 @@
 ﻿using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Groups.Command.Delete
 {
@@ -10,9 +10,12 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
     {
         private readonly IReadRepository<Domain.Entities.Groups,Guid> _readRepository;
         private readonly IWriteRepository<Domain.Entities.Groups> _writeRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
 
-        public DeleteGroupsCommandHandler(IReadRepository<Domain.Entities.Groups, Guid> readRepository, IWriteRepository<Domain.Entities.Groups> writeRepository, IUnitOfWork unitOfWork)
+        public DeleteGroupsCommandHandler(
+            IReadRepository<Domain.Entities.Groups, Guid> readRepository,
+            IWriteRepository<Domain.Entities.Groups> writeRepository,
+            IIdentityCapUnitOfWork unitOfWork)
         {
             _readRepository = readRepository;
             _writeRepository = writeRepository;

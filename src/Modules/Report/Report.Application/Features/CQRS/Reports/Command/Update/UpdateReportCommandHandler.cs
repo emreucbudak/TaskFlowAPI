@@ -1,7 +1,7 @@
 using FlashMediator;
 using Report.Application.Features.CQRS.Reports.Exceptions;
 using Report.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Report.Application.UnitOfWork;
 
 namespace Report.Application.Features.CQRS.Reports.Command.Update
 {
@@ -9,9 +9,9 @@ namespace Report.Application.Features.CQRS.Reports.Command.Update
     {
         private readonly IReportReadRepository _readRepository;
         private readonly IReportWriteRepository _writeRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IReportUnitOfWork _unitOfWork;
 
-        public UpdateReportCommandHandler(IReportReadRepository readRepository, IReportWriteRepository writeRepository, IUnitOfWork unitOfWork)
+        public UpdateReportCommandHandler(IReportReadRepository readRepository, IReportWriteRepository writeRepository, IReportUnitOfWork unitOfWork)
         {
             _readRepository = readRepository;
             _writeRepository = writeRepository;

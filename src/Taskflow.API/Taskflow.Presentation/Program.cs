@@ -333,6 +333,7 @@ await ApplyMigrationsWithRetryAsync<NotificationDbContext>(app.Services, startup
 await ApplyMigrationsWithRetryAsync<ReportDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<ProjectManagementDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<StatsDbContext>(app.Services, startupLogger);
+await EnsureReportStatusesSeededAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
@@ -489,4 +490,23 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
         await tenantContext.SaveChangesAsync();
         logger.LogInformation("Demo abonelik kaydi olusturuldu.");
     }
+}
+
+static async Task EnsureReportStatusesSeededAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var reportContext = scope.ServiceProvider.GetRequiredService<ReportDbContext>();
+
+    if (await reportContext.ReportStatuses.AnyAsync())
+    {
+        return;
+    }
+
+    reportContext.ReportStatuses.AddRange(
+        new Report.Domain.Entities.ReportStatus { Id = 1, Name = "Bildirildi" },
+        new Report.Domain.Entities.ReportStatus { Id = 2, Name = "Isleme Alindi" },
+        new Report.Domain.Entities.ReportStatus { Id = 3, Name = "Cozuldu" },
+        new Report.Domain.Entities.ReportStatus { Id = 4, Name = "Reddedildi" });
+
+    await reportContext.SaveChangesAsync();
 }

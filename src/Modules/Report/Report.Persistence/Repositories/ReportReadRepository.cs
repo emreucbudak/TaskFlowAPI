@@ -34,8 +34,11 @@ namespace Report.Persistence.Repositories
                 }
 
                 var totalCount = await query.CountAsync();
+                var orderedQuery = query
+                    .OrderByDescending(item => item.CreatedAt)
+                    .ThenByDescending(item => item.Id);
                 
-                var items = await query
+                var items = await orderedQuery
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();

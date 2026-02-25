@@ -13,8 +13,6 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Cr
         : IRequest, ILimitedQueryable
     {
         public Guid TenantId => CompanyId;
-        public LimitType LimitType => LimitType.IndividualTask;
-
         public LimitType limitType => LimitType.IndividualTask;
     }
 }

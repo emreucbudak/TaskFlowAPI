@@ -1,33 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
 using TaskFlow.BuildingBlocks.Enums;
 using TaskFlow.BuildingBlocks.Exceptions;
 using TaskFlow.BuildingBlocks.Interfaces;
-using Tenant.Persistence.Data.TenantDb;
+using Tenant.Application.Repositories;
 
 namespace Tenant.Persistence.Services
 {
-    public class TeamLimitChecker : ISubscriptionLimitCheckerService
+    public sealed class TeamLimitChecker : ISubscriptionLimitCheckerService
     {
-        private readonly TenantDbContext _context;
+        private readonly ITenantReadRepository _tenantReadRepository;
+        private readonly ITenantWriteRepository _tenantWriteRepository;
 
-        public TeamLimitChecker(TenantDbContext context)
+        public TeamLimitChecker(
+            ITenantReadRepository tenantReadRepository,
+            ITenantWriteRepository tenantWriteRepository)
         {
-            _context = context;
+            _tenantReadRepository = tenantReadRepository;
+            _tenantWriteRepository = tenantWriteRepository;
         }
 
         public LimitType LimitType => LimitType.TeamLimit;
 
         public async Task CheckLimitAsync(Guid companyId)
         {
-           var tenantSubscription = _context.tenantSubscriptions.Where(t => t.TenantId == companyId).Include(x => x.TenantUsage).Include(x => x.CompanyPlan).ThenInclude(x => x.PlanProperties).FirstOrDefault();
-            ArgumentNullException.ThrowIfNull(tenantSubscription, "Şirketinize ait bir abonelik bulunamadı!");
-            int currentTeamCount = tenantSubscription.TenantUsage.CurrentGroupCount;
-            int teamLimit = tenantSubscription.CompanyPlan.PlanProperties.TeamLimit;
-            if (currentTeamCount >= teamLimit)
-            {
-                throw new SubscriptionLimitExceededException($"Takım limiti aşıldı! Mevcut takım sayısı: {currentTeamCount}, Takım limiti: {teamLimit}");
-            }
+            var subscription = await _tenantReadRepository.GetTenantSubscriptionForLimits(companyId, CancellationToken.None);
+            ArgumentNullException.ThrowIfNull(subscription, "Sirketinize ait bir abonelik bulunamadi!");
 
+            var teamLimit = subscription.CompanyPlan.PlanProperties.TeamLimit;
+            var isReserved = await _tenantWriteRepository.TryReserveLimitSlot(
+                companyId,
+                LimitType.TeamLimit,
+                teamLimit,
+                CancellationToken.None);
+
+            if (!isReserved)
+            {
+                throw new SubscriptionLimitExceededException("Takim limiti asildi!");
+            }
+        }
+
+        public Task ReleaseLimitAsync(Guid companyId)
+        {
+            return _tenantWriteRepository.ReleaseReservedLimitSlot(companyId, LimitType.TeamLimit, CancellationToken.None);
         }
     }
 }

@@ -2,7 +2,6 @@ using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.Contracts.IntegrationEvents;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create;
@@ -34,16 +33,6 @@ public sealed class CreateIndividualTaskCommandHandler(
         try
         {
             await writeRepository.AddIndividualTask(task);
-
-            await capPublisher.PublishAsync(
-                TenantUsageCapTopics.IndividualTaskCreated,
-                new IndividualTaskCreatedIntegrationEvent(
-                    task.Id,
-                    task.AssignedUserId,
-                    task.TaskTitle,
-                    task.Description,
-                    task.Deadline,
-                    request.CompanyId));
 
             await capPublisher.PublishDelayAsync(
                 delayTime,

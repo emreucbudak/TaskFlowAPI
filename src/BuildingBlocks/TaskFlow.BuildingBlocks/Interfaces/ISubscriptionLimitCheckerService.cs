@@ -6,6 +6,6 @@ namespace TaskFlow.BuildingBlocks.Interfaces
     {
         LimitType LimitType { get; }
         Task CheckLimitAsync(Guid companyId);
-
+        Task ReleaseLimitAsync(Guid companyId);
     }
 }

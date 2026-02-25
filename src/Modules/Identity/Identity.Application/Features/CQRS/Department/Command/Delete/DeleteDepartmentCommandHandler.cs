@@ -1,8 +1,8 @@
 ﻿using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using System.Net;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Department.Command.Delete
 {
@@ -10,12 +10,16 @@ namespace Identity.Application.Features.CQRS.Department.Command.Delete
     {
         private readonly IWriteRepository<Identity.Domain.Entities.Department> _writeRepository;
         private readonly IReadRepository<Identity.Domain.Entities.Department,Guid> _readRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
 
 
-        public DeleteDepartmentCommandHandler(IWriteRepository<Domain.Entities.Department> writeRepository, IUnitOfWork unitOfWork)
+        public DeleteDepartmentCommandHandler(
+            IWriteRepository<Domain.Entities.Department> writeRepository,
+            IReadRepository<Domain.Entities.Department, Guid> readRepository,
+            IIdentityCapUnitOfWork unitOfWork)
         {
             _writeRepository = writeRepository;
+            _readRepository = readRepository;
             _unitOfWork = unitOfWork;
         }
 

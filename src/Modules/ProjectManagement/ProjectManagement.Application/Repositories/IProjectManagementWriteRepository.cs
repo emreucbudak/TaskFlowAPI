@@ -5,6 +5,7 @@ namespace ProjectManagement.Application.Repositories
     public interface IProjectManagementWriteRepository
     {
         System.Threading.Tasks.Task AddTask (Task entity);
+        System.Threading.Tasks.Task AddSubTask(Domain.Entities.Subtask entity, CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task DeleteTask (Task task);
         System.Threading.Tasks.Task UpdateTask (Task task);
         System.Threading.Tasks.Task AddIndividualTask(Domain.Entities.IndividualTasks entity);

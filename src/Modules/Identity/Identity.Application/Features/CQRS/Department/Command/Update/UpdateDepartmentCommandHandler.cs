@@ -1,16 +1,18 @@
 ﻿using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Department.Command.Update
 {
     public class UpdateDepartmentCommandHandler : IRequestHandler<UpdateDepartmentCommandRequest>
     {
         private readonly IReadRepository<Identity.Domain.Entities.Department, Guid> _readRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IIdentityCapUnitOfWork unitOfWork;
 
-        public UpdateDepartmentCommandHandler(IReadRepository<Domain.Entities.Department, Guid> readRepository, IUnitOfWork unitOfWork)
+        public UpdateDepartmentCommandHandler(
+            IReadRepository<Domain.Entities.Department, Guid> readRepository,
+            IIdentityCapUnitOfWork unitOfWork)
         {
             _readRepository = readRepository;
             this.unitOfWork = unitOfWork;

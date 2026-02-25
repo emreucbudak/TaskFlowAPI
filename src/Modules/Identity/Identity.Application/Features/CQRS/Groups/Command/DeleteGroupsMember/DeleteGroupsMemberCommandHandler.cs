@@ -3,19 +3,19 @@ using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
 using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Groups.Command.DeleteGroupsMember
 {
     public class DeleteGroupsMemberCommandHandler : IRequestHandler<DeleteGroupsMemberCommandRequest>
     {
         private readonly IReadRepository<Domain.Entities.Groups, Guid> _groupsReadRepository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public DeleteGroupsMemberCommandHandler(
             IReadRepository<Domain.Entities.Groups, Guid> groupsReadRepository,
-            ICapUnitOfWork unitOfWork,
+            IIdentityCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _groupsReadRepository = groupsReadRepository;

@@ -1,6 +1,6 @@
 ﻿using FlashMediator;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Company.Command.Update
 {
@@ -8,9 +8,12 @@ namespace Identity.Application.Features.CQRS.Company.Command.Update
     {
         private readonly IWriteRepository<Domain.Entities.Company> _companyWriteRepository;
         private readonly IReadRepository<Domain.Entities.Company, Guid> _companyReadRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
 
-        public UpdateCompanyCommandHandler(IWriteRepository<Domain.Entities.Company> companyWriteRepository, IReadRepository<Domain.Entities.Company, Guid> companyReadRepository, IUnitOfWork unitOfWork)
+        public UpdateCompanyCommandHandler(
+            IWriteRepository<Domain.Entities.Company> companyWriteRepository,
+            IReadRepository<Domain.Entities.Company, Guid> companyReadRepository,
+            IIdentityCapUnitOfWork unitOfWork)
         {
             _companyWriteRepository = companyWriteRepository;
             _companyReadRepository = companyReadRepository;

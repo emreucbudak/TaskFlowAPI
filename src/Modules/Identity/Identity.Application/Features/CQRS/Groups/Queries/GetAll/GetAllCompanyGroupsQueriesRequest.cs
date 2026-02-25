@@ -7,7 +7,7 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
     {
         public Guid CompanyId { get; init; }
 
-        public string CacheKey => "getallcompanygroups";
+        public string CacheKey => $"getallcompanygroups:{CompanyId}";
 
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(15);
     }

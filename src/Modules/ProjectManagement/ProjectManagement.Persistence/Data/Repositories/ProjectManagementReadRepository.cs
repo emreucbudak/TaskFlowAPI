@@ -42,6 +42,8 @@ namespace ProjectManagement.Persistence.Data.Repositories
 
                 var query = context.Tasks
                     .Include(t => t.subtask)
+                    .Include(t => t.TaskStatus)
+                    .Include(t => t.TaskPriority)
                     .AsQueryable();
 
                 if (!trackChanges)
@@ -84,6 +86,8 @@ namespace ProjectManagement.Persistence.Data.Repositories
 
                 var query = context.Tasks
                     .Include(t => t.subtask)
+                    .Include(t => t.TaskStatus)
+                    .Include(t => t.TaskPriority)
                     .AsQueryable();
 
                 if (!trackChanges)

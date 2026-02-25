@@ -22,9 +22,9 @@ public sealed class CreateIndividualTaskCommandHandler(
             .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
             .AddDays(-1) - DateTime.UtcNow;
 
-        if (delayTime < TimeSpan.Zero)
+        if (delayTime <= TimeSpan.Zero)
         {
-            delayTime = TimeSpan.Zero;
+            delayTime = TimeSpan.FromSeconds(1);
         }
 
         // CAP outbox row and IndividualTask row are part of one EF transaction.

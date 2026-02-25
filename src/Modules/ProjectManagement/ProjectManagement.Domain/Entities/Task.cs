@@ -106,11 +106,11 @@ namespace ProjectManagement.Domain.Entities
         }
         public string GetTaskStatus()
         {
-            return TaskStatus.StatusName;
+            return TaskStatus?.StatusName ?? string.Empty;
         }
         public string GetTaskPriorityCategory()
         {
-            return TaskPriority.CategoryName;
+            return TaskPriority?.CategoryName ?? string.Empty;
         }
   
 

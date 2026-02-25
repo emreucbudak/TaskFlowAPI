@@ -1,31 +1,24 @@
 using DotNetCore.CAP;
 using FlashMediator;
-using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
-using TaskFlow.BuildingBlocks.Contracts.IntegrationEvents;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Identity.Application.UnitOfWork;
 
 namespace Identity.Application.Features.CQRS.Groups.Command.Add;
 
 public sealed class CreateGroupCommandHandler(
     IWriteRepository<Domain.Entities.Groups> writeRepository,
-    ICapUnitOfWork unitOfWork,
+    IIdentityCapUnitOfWork unitOfWork,
     ICapPublisher capPublisher) : IRequestHandler<AddGroupsCommandRequest>
 {
     public async Task Handle(AddGroupsCommandRequest request, CancellationToken cancellationToken)
     {
         var group = new Domain.Entities.Groups(request.Name, request.companyId);
 
-        // Domain write and CAP outbox publish share the same local transaction.
-        // Commit persists both together; any exception rolls both back.
+        // Group write is transactional; any exception rolls it back.
         await using var transaction = unitOfWork.BeginTransaction(capPublisher, autoCommit: false);
         try
         {
             await writeRepository.AddAsync(group);
-
-            await capPublisher.PublishAsync(
-                TenantUsageCapTopics.GroupChatCreated,
-                new GroupChatCreatedIntegrationEvent(group.Id, group.Name, request.companyId));
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

@@ -3,12 +3,12 @@ using FlashMediator;
 using Identity.Application.Features.CQRS.Auth.Exceptions;
 using Identity.Application.Features.CQRS.Company.Exceptions;
 using Identity.Application.Features.CQRS.Department.Exceptions;
-using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using TaskFlow.BuildingBlocks.Contracts.IntegrationEvents;
+using TaskFlow.BuildingBlocks.Enums;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Auth.Register;
 
@@ -18,7 +18,9 @@ public sealed class RegisterUserCommandHandler(
     IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
     RoleManager<Roles> roleManager,
     IIdentityCapUnitOfWork unitOfWork,
-    ICapPublisher capPublisher) : IRequestHandler<RegisterCommandRequest>
+    ICapPublisher capPublisher,
+    ICacheService cacheService,
+    IEnumerable<ISubscriptionLimitCheckerService> limitCheckers) : IRequestHandler<RegisterCommandRequest>
 {
     private const int WorkerDepartmentRoleId = 3;
 
@@ -63,10 +65,24 @@ public sealed class RegisterUserCommandHandler(
             }
         }
 
+        ISubscriptionLimitCheckerService? workerLimitChecker = null;
+        var workerSlotReserved = false;
+
+        if (string.Equals(request.Role, "Worker", StringComparison.OrdinalIgnoreCase))
+        {
+            workerLimitChecker = limitCheckers
+                .FirstOrDefault(item => item.LimitType == LimitType.PeopleAdded)
+                ?? throw new InvalidOperationException(
+                    $"{LimitType.PeopleAdded} limiti icin kontrolcu bulunamadi.");
+
+            await workerLimitChecker.CheckLimitAsync(request.CompanyId);
+            workerSlotReserved = true;
+        }
+
         var newUser = User.Create(request.Name, request.Email, request.CompanyId);
 
-        // CAP writes its outbox row in the same EF transaction below.
-        // If create-role-publish fails at any point, commit never happens and both DB + message are rolled back.
+        // User creation and role assignment run in one transaction.
+        // If any step fails, the transaction is rolled back.
         await using var transaction = unitOfWork.BeginTransaction(capPublisher, autoCommit: false);
         try
         {
@@ -88,16 +104,21 @@ public sealed class RegisterUserCommandHandler(
                 await unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
-            await capPublisher.PublishAsync(
-                TenantUsageCapTopics.UserRegistered,
-                new UserRegisteredIntegrationEvent(newUser.Id, newUser.Email!, newUser.Name, request.CompanyId));
-
             await transaction.CommitAsync(cancellationToken);
         }
         catch
         {
             await transaction.RollbackAsync(cancellationToken);
+
+            if (workerSlotReserved && workerLimitChecker is not null)
+            {
+                await workerLimitChecker.ReleaseLimitAsync(request.CompanyId);
+            }
+
             throw;
         }
+
+        await cacheService.RemoveAsync($"getallcompanyusers:{request.CompanyId}");
+        await cacheService.RemoveAsync($"getallcompanygroups:{request.CompanyId}");
     }
 }

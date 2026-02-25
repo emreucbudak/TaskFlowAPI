@@ -3,9 +3,11 @@ using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.IntegrationEvents;
 using Identity.Application.Repositories;
+using Identity.Application.UnitOfWork;
 using Identity.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartment
 {
@@ -13,19 +15,22 @@ namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartm
     {
         private readonly IReadRepository<Domain.Entities.Department, Guid> _departmentReadRepository;
         private readonly UserManager<User> _userManager;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IIdentityCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _identityProducer;
+        private readonly ICacheService _cacheService;
 
         public AddUserToDepartmentCommandHandler(
             IReadRepository<Domain.Entities.Department, Guid> departmentReadRepository,
             UserManager<User> userManager,
-            ICapUnitOfWork unitOfWork,
-            ICapPublisher identityProducer)
+            IIdentityCapUnitOfWork unitOfWork,
+            ICapPublisher identityProducer,
+            ICacheService cacheService)
         {
             _departmentReadRepository = departmentReadRepository;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _identityProducer = identityProducer;
+            _cacheService = cacheService;
         }
 
         public async Task Handle(AddUserToDepartmentCommandRequest request, CancellationToken cancellationToken)
@@ -38,22 +43,56 @@ namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartm
                     throw new UserNotFoundExceptions();
                 }
 
-                var department = await _departmentReadRepository.GetByIdAsync(true, request.DepartmentId);
-                if (department is null)
+                var targetDepartment = await _departmentReadRepository.GetByIdAsync(
+                    true,
+                    request.DepartmentId,
+                    query => query.Include(item => item.DepartmentMembers));
+
+                if (targetDepartment is null || targetDepartment.CompanyId != user.CompanyId)
                 {
                     throw new DepartmentNotFoundExceptions();
                 }
 
-                department.AddUser(user.Id, request.RoleId);
+                var currentDepartmentIds = await _userManager.Users
+                    .Where(item => item.Id == user.Id)
+                    .SelectMany(item => item.DepartmentMembers.Select(member => member.DepartmentId))
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                foreach (var currentDepartmentId in currentDepartmentIds.Where(item => item != request.DepartmentId))
+                {
+                    var currentDepartment = await _departmentReadRepository.GetByIdAsync(
+                        true,
+                        currentDepartmentId,
+                        query => query.Include(item => item.DepartmentMembers));
+
+                    if (currentDepartment is null ||
+                        !currentDepartment.DepartmentMembers.Any(member => member.UserId == user.Id))
+                    {
+                        continue;
+                    }
+
+                    currentDepartment.RemoveUser(user.Id);
+
+                    await _identityProducer.PublishAsync(
+                        "UserRemovedFromDepartment",
+                        new UserRemovedFromDepartmentIntegrationEvent(user.Id, currentDepartment.Id));
+                }
+
+                if (!targetDepartment.DepartmentMembers.Any(member => member.UserId == user.Id))
+                {
+                    targetDepartment.AddUser(user.Id, request.RoleId);
+
+                    await _identityProducer.PublishAsync(
+                        "UserAddedToDepartment",
+                        new UserAddedToDepartmentIntegrationEvent(user.Id, targetDepartment.Id));
+                }
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                await _identityProducer.PublishAsync("UserAddedToDepartment", new UserAddedToDepartmentIntegrationEvent(
-                    user.Id,
-                    department.Id
-                ));
-
                 await transaction.CommitAsync(cancellationToken);
+                await _cacheService.RemoveAsync($"getallcompanygroups:{user.CompanyId}");
+                await _cacheService.RemoveAsync($"getallcompanyusers:{user.CompanyId}");
             }
         }
     }

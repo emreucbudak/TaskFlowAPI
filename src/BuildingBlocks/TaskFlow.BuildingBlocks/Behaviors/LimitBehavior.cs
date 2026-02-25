@@ -26,8 +26,15 @@ namespace TaskFlow.BuildingBlocks.Behaviors
 
             await checker.CheckLimitAsync(request.TenantId);
 
-
-            return await next();
+            try
+            {
+                return await next();
+            }
+            catch
+            {
+                await checker.ReleaseLimitAsync(request.TenantId);
+                throw;
+            }
         }
     }
 }

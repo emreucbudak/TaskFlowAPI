@@ -15,7 +15,7 @@ namespace Tenant.Application.Features.CQRS.CompanyPlan.Command.Create
         public async Task Handle(CreateCompanyPlanCommandRequest request, CancellationToken cancellationToken)
         {
             var companyPlan = new Tenant.Domain.Entities.CompanyPlan(request.PlanName,request.PlanProperties,request.PlanPrice);
-            await _tenantWriteRepository.AddPlan(companyPlan);
+            _tenantWriteRepository.AddPlan(companyPlan);
             await _tenantWriteRepository.SaveChangesAsync(cancellationToken);
 
         }

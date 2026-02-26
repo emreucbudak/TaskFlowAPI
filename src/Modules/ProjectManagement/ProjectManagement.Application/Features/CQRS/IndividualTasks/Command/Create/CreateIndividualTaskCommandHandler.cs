@@ -17,7 +17,8 @@ public sealed class CreateIndividualTaskCommandHandler(
             request.AssignedUserId,
             request.TaskTitle,
             request.Description,
-            request.Deadline);
+            request.Deadline,
+            request.TaskPriorityCategoryId);
         var delayTime = request.Deadline
             .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
             .AddDays(-1) - DateTime.UtcNow;

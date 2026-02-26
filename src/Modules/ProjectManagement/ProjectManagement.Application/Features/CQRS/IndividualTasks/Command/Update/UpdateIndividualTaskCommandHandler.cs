@@ -37,7 +37,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Up
                     throw new IndividualTaskNotFoundException();
                 }
 
-                task.Update(request.TaskTitle, request.Description, request.Deadline);
+                task.Update(request.TaskTitle, request.Description, request.Deadline, request.TaskPriorityCategoryId);
 
                 await _writeRepository.UpdateIndividualTask(task);
 

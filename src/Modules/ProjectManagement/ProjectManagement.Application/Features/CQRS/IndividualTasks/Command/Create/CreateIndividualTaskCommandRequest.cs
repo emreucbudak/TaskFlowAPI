@@ -9,7 +9,8 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Cr
         string TaskTitle,
         string Description,
         DateOnly Deadline,
-        Guid CompanyId)
+        Guid CompanyId,
+        int? TaskPriorityCategoryId = null)
         : IRequest, ILimitedQueryable
     {
         public Guid TenantId => CompanyId;

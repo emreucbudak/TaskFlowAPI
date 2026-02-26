@@ -26,7 +26,10 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
                     Description = t.Description,
                     DeadlineTime = t.DeadlineTime,
                     StatusName = t.GetTaskStatus(),
-                    CategoryName = t.GetTaskPriorityCategory(),
+                    CategoryName = "Grup",
+                    TaskPriorityName = string.IsNullOrWhiteSpace(t.GetTaskPriorityCategory())
+                        ? "Belirtilmedi"
+                        : t.GetTaskPriorityCategory(),
                     SubTasks = t.GetAllSubTasks().Select(st => new SubTaskDTO
                     {
                         TaskTitle = st.TaskTitle,

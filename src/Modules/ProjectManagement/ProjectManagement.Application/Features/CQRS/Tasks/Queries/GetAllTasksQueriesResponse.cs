@@ -9,6 +9,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
         public DateOnly DeadlineTime { get; init; }
         public string StatusName { get; init; }
         public string CategoryName { get; init; }
+        public string TaskPriorityName { get; init; }
         public List<SubTaskDTO> SubTasks { get; init; }
 
     }

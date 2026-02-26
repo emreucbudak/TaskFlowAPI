@@ -99,6 +99,14 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
+    [HttpPost("ChangeUserPasswordCommandRequest")]
+    public async Task<IActionResult> ChangeUserPasswordCommand([FromBody] Identity.Application.Features.CQRS.Auth.Command.ChangeUserPassword.ChangeUserPasswordCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
     [Authorize(Policy = "AdminPolicy")]
     [HttpPost("GetAllCompaniesQueriesRequest")]
     public async Task<IActionResult> GetAllCompaniesQueries([FromBody] Identity.Application.Features.CQRS.Company.Queries.GetAll.GetAllCompaniesQueriesRequest request)

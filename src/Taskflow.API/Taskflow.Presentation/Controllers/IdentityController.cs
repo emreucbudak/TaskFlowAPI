@@ -91,6 +91,14 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedCompanyPolicy")]
+    [HttpPost("DeleteWorkerCommandRequest")]
+    public async Task<IActionResult> DeleteWorkerCommand([FromBody] Identity.Application.Features.CQRS.Auth.Command.DeleteWorker.DeleteWorkerCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
     [Authorize(Policy = "AdminPolicy")]
     [HttpPost("GetAllCompaniesQueriesRequest")]
     public async Task<IActionResult> GetAllCompaniesQueries([FromBody] Identity.Application.Features.CQRS.Company.Queries.GetAll.GetAllCompaniesQueriesRequest request)

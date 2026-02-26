@@ -19,7 +19,17 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
 
             return new PagedResult<GetIndividualTasksByUserIdQueryResponse>
             {
-                Items = tasks.Select(task => new GetIndividualTasksByUserIdQueryResponse(task.Id, task.AssignedUserId, task.TaskTitle, task.Description, task.Deadline)).ToList(),
+                Items = tasks.Select(task => new GetIndividualTasksByUserIdQueryResponse(
+                    task.Id,
+                    task.AssignedUserId,
+                    task.TaskTitle,
+                    task.Description,
+                    task.Deadline,
+                    "Açık",
+                    "Bireysel",
+                    string.IsNullOrWhiteSpace(task.TaskPriority?.CategoryName)
+                        ? "Belirtilmedi"
+                        : task.TaskPriority.CategoryName)).ToList(),
                 TotalCount = tasks.Count(),
                 Page = request.PageNumber,
                 PageSize = request.PageSize

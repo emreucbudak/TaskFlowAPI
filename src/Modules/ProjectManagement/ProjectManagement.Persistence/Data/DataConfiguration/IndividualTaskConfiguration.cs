@@ -22,6 +22,13 @@ namespace ProjectManagement.Persistence.Data.DataConfiguration
             
             builder.Property(t => t.Deadline)
                 .IsRequired();
+
+            builder.HasIndex(t => t.TaskPriorityCategoryId);
+
+            builder.HasOne(t => t.TaskPriority)
+                .WithMany()
+                .HasForeignKey(t => t.TaskPriorityCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

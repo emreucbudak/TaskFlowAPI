@@ -148,7 +148,9 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 logger.LogInformation("IndividualTask kayıtları getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
                      pageNumber, pageSize, trackChanges);
 
-                var query = context.IndividualTasks.AsQueryable();
+                var query = context.IndividualTasks
+                    .Include(it => it.TaskPriority)
+                    .AsQueryable();
 
                 if (!trackChanges)
                 {
@@ -187,7 +189,9 @@ namespace ProjectManagement.Persistence.Data.Repositories
             {
                 logger.LogInformation("IndividualTask kaydı getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
 
-                var query = context.IndividualTasks.AsQueryable();
+                var query = context.IndividualTasks
+                    .Include(it => it.TaskPriority)
+                    .AsQueryable();
 
                 if (!trackChanges)
                 {

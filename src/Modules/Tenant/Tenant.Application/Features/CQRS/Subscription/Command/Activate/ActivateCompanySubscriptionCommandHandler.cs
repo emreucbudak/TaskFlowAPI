@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Tenant.Application.Features.CQRS.Subscription.Exceptions;
 using Tenant.Application.Repositories;
+using Tenant.Application.Services;
 using Tenant.Domain.Entities;
 
 namespace Tenant.Application.Features.CQRS.Subscription.Command.Activate
@@ -11,13 +12,16 @@ namespace Tenant.Application.Features.CQRS.Subscription.Command.Activate
     {
         private readonly ITenantReadRepository _tenantReadRepository;
         private readonly ITenantWriteRepository _tenantWriteRepository;
+        private readonly ICompanyDataResetService _companyDataResetService;
 
         public ActivateCompanySubscriptionCommandHandler(
             ITenantReadRepository tenantReadRepository,
-            ITenantWriteRepository tenantWriteRepository)
+            ITenantWriteRepository tenantWriteRepository,
+            ICompanyDataResetService companyDataResetService)
         {
             _tenantReadRepository = tenantReadRepository;
             _tenantWriteRepository = tenantWriteRepository;
+            _companyDataResetService = companyDataResetService;
         }
 
         public async Task<ActivateCompanySubscriptionCommandResponse> Handle(ActivateCompanySubscriptionCommandRequest request, CancellationToken cancellationToken)
@@ -41,6 +45,17 @@ namespace Tenant.Application.Features.CQRS.Subscription.Command.Activate
                 : request.PaymentProviderSubscriptionId.Trim();
 
             var utcNow = DateTime.UtcNow;
+            var nextBillingDateUtc = utcNow.AddMonths(1);
+
+            if (request.DeleteExistingCompanyData)
+            {
+                await _companyDataResetService.ResetCompanyDataAsync(request.CompanyId, cancellationToken);
+            }
+
+            if (request.ResetTenantUsage)
+            {
+                await _tenantWriteRepository.ResetTenantUsageCounters(request.CompanyId, cancellationToken);
+            }
 
             if (existingSubscription is null)
             {
@@ -69,7 +84,9 @@ namespace Tenant.Application.Features.CQRS.Subscription.Command.Activate
             {
                 CompanyId = request.CompanyId,
                 PlanName = selectedPlan.PlanName,
-                Status = "Aktif"
+                Status = "Aktif",
+                StartDateUtc = utcNow,
+                NextBillingDateUtc = nextBillingDateUtc
             };
         }
     }

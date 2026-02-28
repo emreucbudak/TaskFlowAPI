@@ -104,7 +104,7 @@ secrets:
   redis_password:
     file: ./secrets/redis_password
   stripe_secret_key:
-    file: ./secrets/stripe_secret_key
+    environment: TF_STRIPE_SECRET_KEY
   jwt_secret_key:
     file: ./secrets/jwt_secret_key
   chat_message_encryption_key:

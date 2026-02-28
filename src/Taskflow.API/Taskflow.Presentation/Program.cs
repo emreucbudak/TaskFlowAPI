@@ -155,6 +155,13 @@ if (!string.IsNullOrWhiteSpace(jwtSecretKey))
     builder.Configuration["JWTSecretKey:SecretKey"] = jwtSecretKey;
 }
 
+var stripeSecretKey = GetSecret("stripe_secret_key", "TF_STRIPE_SECRET_KEY", "STRIPE_SECRET_KEY");
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+{
+    builder.Configuration["stripe_secret_key"] = stripeSecretKey;
+    builder.Configuration["Stripe:SecretKey"] = stripeSecretKey;
+}
+
 var chatMessageEncryptionKey = builder.Configuration["chat_message_encryption_key"]?.Trim();
 if (string.IsNullOrWhiteSpace(chatMessageEncryptionKey))
 {

@@ -4,6 +4,7 @@ namespace Tenant.Application.Features.CQRS.Subscription.Command.CreateStripeChec
 {
     public sealed class CreateStripeCheckoutSessionCommandRequest : IRequest<CreateStripeCheckoutSessionCommandResponse>
     {
+        public Guid CompanyId { get; init; }
         public string? PlanSlug { get; init; }
         public string? PlanName { get; init; }
         public string? SuccessUrl { get; init; }

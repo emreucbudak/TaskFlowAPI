@@ -201,6 +201,32 @@ namespace Tenant.Persistence.Data.Repositories
             }
         }
 
+        public async Task ResetTenantUsageCounters(Guid tenantId, CancellationToken cancellationToken)
+        {
+            if (tenantId == Guid.Empty)
+            {
+                throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
+            }
+
+            var affectedRows = await _context.tenantUsages
+                .Where(x => x.TenantId == tenantId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.CurrentUserCount, 0)
+                    .SetProperty(x => x.CurrentTaskCount, 0)
+                    .SetProperty(x => x.CurrentGroupCount, 0)
+                    .SetProperty(x => x.CurrentIndividualTaskCount, 0)
+                    .SetProperty(x => x.RowVersion, Guid.NewGuid().ToByteArray()),
+                    cancellationToken);
+
+            if (affectedRows > 0)
+            {
+                return;
+            }
+
+            _context.tenantUsages.Add(new TenantUsage(tenantId));
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         private static bool IsTenantUsageUniqueViolation(DbUpdateException exception)
         {
             return exception.InnerException is PostgresException postgresException

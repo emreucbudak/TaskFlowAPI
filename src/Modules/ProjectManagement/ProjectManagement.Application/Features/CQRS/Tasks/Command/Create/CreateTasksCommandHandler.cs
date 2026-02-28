@@ -25,6 +25,11 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
         public async Task Handle(CreateTasksCommandRequest request, CancellationToken cancellationToken)
         {
             var deadlineDate = DateOnly.FromDateTime(request.DeadlineTime);
+            if (deadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
+            {
+                throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
+            }
+
             var task = new Domain.Entities.Task(
                 request.TaskName,
                 request.Description,

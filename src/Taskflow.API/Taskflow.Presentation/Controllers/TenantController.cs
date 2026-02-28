@@ -69,4 +69,26 @@ public sealed class TenantController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(request, cancellationToken);
         return Ok(result);
     }
+
+    [AllowAnonymous]
+    [HttpPost("ConfirmStripePaymentAndActivate")]
+    [HttpPost("ConfirmStripePaymentAndActivateRequest")]
+    public async Task<IActionResult> ConfirmStripePaymentAndActivate(
+        [FromBody] Tenant.Application.Features.CQRS.Subscription.Command.ConfirmStripePaymentAndActivate.ConfirmStripePaymentAndActivateCommandRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "CompanyPolicy")]
+    [HttpPost("GetCompanySubscriptionSnapshot")]
+    [HttpPost("GetCompanySubscriptionSnapshotRequest")]
+    public async Task<IActionResult> GetCompanySubscriptionSnapshot(
+        [FromBody] Tenant.Application.Features.CQRS.Subscription.Queries.GetCompanySubscriptionSnapshot.GetCompanySubscriptionSnapshotQueryRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return Ok(result);
+    }
 }

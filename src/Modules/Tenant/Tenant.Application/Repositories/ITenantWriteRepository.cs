@@ -15,5 +15,6 @@ namespace Tenant.Application.Repositories
         Task<TenantSubscription?> GetTenantSubscription(Guid tenantId, CancellationToken cancellationToken);
         void AddTenantSubscription(TenantSubscription tenantSubscription);
         Task UpdateTenantSubscription(Guid tenantId, Guid companyPlanId, string paymentProviderSubscriptionId, DateTime utcNow, CancellationToken cancellationToken);
+        Task ResetTenantUsageCounters(Guid tenantId, CancellationToken cancellationToken);
     }
 }

@@ -10,10 +10,6 @@ namespace ProjectManagement.Domain.Entities
             {
                 throw new ArgumentException("Task Adı boş olamaz");
             }
-            if (deadlineTime < DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
-            }
             if (string.IsNullOrWhiteSpace(description))
             {
                 throw new ArgumentException("Açıklama boş olamaz");

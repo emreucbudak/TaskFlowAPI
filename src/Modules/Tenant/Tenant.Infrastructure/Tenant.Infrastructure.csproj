@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\TaskFlow.BuildingBlocks\TaskFlow.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\Chat\Chat.Persistence\Chat.Persistence.csproj" />
+    <ProjectReference Include="..\..\Identity\Identity.Persistence\Identity.Persistence.csproj" />
+    <ProjectReference Include="..\..\Notification\Notification.Persistence\Notification.Persistence.csproj" />
+    <ProjectReference Include="..\..\ProjectManagement\ProjectManagement.Persistence\ProjectManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Report\Report.Persistence\Report.Persistence.csproj" />
+    <ProjectReference Include="..\..\Stats\Stats.Persistence\Stats.Persistence.csproj" />
     <ProjectReference Include="..\Tenant.Application\Tenant.Application.csproj" />
     <ProjectReference Include="..\Tenant.Domain\Tenant.Domain.csproj" />
     <ProjectReference Include="..\Tenant.Persistence\Tenant.Persistence.csproj" />

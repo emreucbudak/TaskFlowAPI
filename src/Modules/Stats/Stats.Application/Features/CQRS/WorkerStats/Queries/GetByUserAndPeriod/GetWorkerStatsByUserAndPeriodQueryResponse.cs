@@ -1,4 +1,4 @@
-namespace Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod
+﻿namespace Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod
 {
     public record GetWorkerStatsByUserAndPeriodQueryResponse(
         Guid Id,
@@ -7,5 +7,6 @@ namespace Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod
         int TotalTasksAssigned,
         int TotalTasksCompleted,
         int TasksCompletedBeforeDeadline,
-        int OverdueIncompleteTasksCount);
+        int OverdueIncompleteTasksCount,
+        int TotalPoints);
 }

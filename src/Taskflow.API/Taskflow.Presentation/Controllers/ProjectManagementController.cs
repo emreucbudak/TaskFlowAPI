@@ -40,6 +40,14 @@ public sealed class ProjectManagementController(IMediator mediator) : Controller
         return Ok();
     }
 
+    [Authorize(Policy = "SubscribedWorkerPolicy")]
+    [HttpPost("CompleteIndividualTaskCommandRequest")]
+    public async Task<IActionResult> CompleteIndividualTaskCommand([FromBody] ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Complete.CompleteIndividualTaskCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
     [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("DeleteIndividualTaskCommandRequest")]
     public async Task<IActionResult> DeleteIndividualTaskCommand([FromBody] ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Delete.DeleteIndividualTaskCommandRequest request)
@@ -160,4 +168,3 @@ public sealed class ProjectManagementController(IMediator mediator) : Controller
         return Ok();
     }
 }
-

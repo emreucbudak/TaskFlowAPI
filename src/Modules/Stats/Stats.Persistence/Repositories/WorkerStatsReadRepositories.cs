@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Stats.Application.Repositories;
 using Stats.Domain.Entities;
@@ -22,8 +22,8 @@ namespace Stats.Persistence.Repositories
         {
             if (userId == Guid.Empty)
             {
-                _logger.LogError("Geçersiz UserId parametresi: {UserId}", userId);
-                throw new ArgumentException("UserId boş olamaz.", nameof(userId));
+                _logger.LogError("Gecersiz UserId parametresi: {UserId}", userId);
+                throw new ArgumentException("UserId bos olamaz.", nameof(userId));
             }
 
             try
@@ -34,8 +34,8 @@ namespace Stats.Persistence.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "UserId ve periyot ile WorkerStats getirilirken hata oluştu (UserId: {UserId}, {Month}/{Year})", userId, period.Month, period.Year);
-                throw new InvalidOperationException("İstatistik getirilirken bir hata oluştu.", ex);
+                _logger.LogError(ex, "UserId ve periyot ile WorkerStats getirilirken hata olustu (UserId: {UserId}, {Month}/{Year})", userId, period.Month, period.Year);
+                throw new InvalidOperationException("Istatistik getirilirken bir hata olustu.", ex);
             }
         }
 
@@ -43,17 +43,21 @@ namespace Stats.Persistence.Repositories
         {
             try
             {
-                _logger.LogInformation("Belirli bir periyot için tüm çalışan istatistikleri getiriliyor: {Month}/{Year}", period.Month, period.Year);
-                
+                _logger.LogInformation("Belirli bir periyot icin tum calisan istatistikleri getiriliyor: {Month}/{Year}", period.Month, period.Year);
+
                 var query = trackChanges ? _context.UserStats : _context.UserStats.AsNoTracking();
-                var filteredQuery = query.Where(x => x.Period.Year == period.Year && x.Period.Month == period.Month);
-                
+                var filteredQuery = query
+                    .Where(x => x.Period.Year == period.Year && x.Period.Month == period.Month)
+                    .OrderByDescending(x => x.TotalPoints)
+                    .ThenByDescending(x => x.TotalTasksCompleted)
+                    .ThenBy(x => x.UserId);
+
                 return await GetPagedResultAsync(filteredQuery, page, pageSize);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Periyot bazlı çalışan istatistikleri getirilirken hata oluştu (Period: {Month}/{Year})", period.Month, period.Year);
-                throw new InvalidOperationException("İstatistikler getirilirken bir hata oluştu.", ex);
+                _logger.LogError(ex, "Periyot bazli calisan istatistikleri getirilirken hata olustu (Period: {Month}/{Year})", period.Month, period.Year);
+                throw new InvalidOperationException("Istatistikler getirilirken bir hata olustu.", ex);
             }
         }
 

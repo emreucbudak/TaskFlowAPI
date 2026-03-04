@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Stats.Application.Repositories;
 using Stats.Persistence.Data;
+using Stats.Persistence.Messaging.Consumers;
 using Stats.Persistence.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -19,9 +20,10 @@ namespace Stats.Persistence.Extensions
             });
 
             services.AddScoped<IUnitOfWork, Data.UnitOfWork.UnitOfWork>();
-            
+
             services.AddScoped<IWorkerStatsReadRepositories, WorkerStatsReadRepositories>();
             services.AddScoped<IWorkerStatsWriteRepositories, WorkerStatsWriteRepositories>();
+            services.AddScoped<TaskCompletionStatsConsumer>();
 
             return services;
         }

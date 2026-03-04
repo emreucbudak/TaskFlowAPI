@@ -1,4 +1,4 @@
-using FlashMediator;
+﻿using FlashMediator;
 using Stats.Application.Repositories;
 using TaskFlow.BuildingBlocks.Common;
 
@@ -24,7 +24,8 @@ namespace Stats.Application.Features.CQRS.WorkerStats.Queries.GetAll
                 s.TotalTasksAssigned,
                 s.TotalTasksCompleted,
                 s.TasksCompletedBeforeDeadline,
-                s.OverdueIncompleteTasksCount)).ToList();
+                s.OverdueIncompleteTasksCount,
+                s.TotalPoints)).ToList();
 
             return new PagedResult<GetAllWorkersStatsByPeriodQueryResponse>
             {

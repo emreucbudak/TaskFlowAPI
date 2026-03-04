@@ -1,4 +1,4 @@
-using FlashMediator;
+﻿using FlashMediator;
 using Stats.Application.Features.CQRS.WorkerStats.Exceptions;
 using Stats.Application.Repositories;
 
@@ -29,7 +29,8 @@ namespace Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod
                 s.TotalTasksAssigned,
                 s.TotalTasksCompleted,
                 s.TasksCompletedBeforeDeadline,
-                s.OverdueIncompleteTasksCount);
+                s.OverdueIncompleteTasksCount,
+                s.TotalPoints);
         }
     }
 }

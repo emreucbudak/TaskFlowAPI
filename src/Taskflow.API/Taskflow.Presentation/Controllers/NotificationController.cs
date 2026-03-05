@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,5 +31,12 @@ public sealed class NotificationController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(request);
         return Ok(result);
     }
-}
 
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("MarkUserNotificationsAsReadCommandRequest")]
+    public async Task<IActionResult> MarkUserNotificationsAsReadCommand([FromBody] Notification.Application.Features.CQRS.Notification.Command.MarkAsRead.MarkUserNotificationsAsReadCommandRequest request)
+    {
+        var updatedCount = await mediator.Send(request);
+        return Ok(updatedCount);
+    }
+}

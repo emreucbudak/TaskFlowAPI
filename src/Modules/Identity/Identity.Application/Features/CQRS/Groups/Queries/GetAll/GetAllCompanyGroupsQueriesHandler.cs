@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Identity.Application.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,19 +15,32 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
 
         public async Task<List<GetAllCompanyGroupsQueriesResponse>> Handle(GetAllCompanyGroupsQueriesRequest request, CancellationToken cancellationToken)
         {
-            var groupsPage = await _readRepository.GetAllAsync(
-                pageSize: 100,
-                page: 1,
-                trackChanges: false,
-                inc: query => query
-                    .Include(group => group.Users)
-                    .ThenInclude(member => member.User)
-                    .ThenInclude(user => user.DepartmentMembers)
-                    .ThenInclude(departmentMember => departmentMember.Department));
+            const int pageSize = 100;
+            var page = 1;
+            var companyGroups = new List<Domain.Entities.Groups>();
 
-            var companyGroups = groupsPage.Items
-                .Where(group => group.CompanyId == request.CompanyId)
-                .ToList();
+            while (true)
+            {
+                var groupsPage = await _readRepository.GetAllAsync(
+                    pageSize: pageSize,
+                    page: page,
+                    trackChanges: false,
+                    inc: query => query
+                        .Include(group => group.Users)
+                        .ThenInclude(member => member.User)
+                        .ThenInclude(user => user.DepartmentMembers)
+                        .ThenInclude(departmentMember => departmentMember.Department),
+                    predicate: group => group.CompanyId == request.CompanyId);
+
+                companyGroups.AddRange(groupsPage.Items);
+
+                if (page * pageSize >= groupsPage.TotalCount)
+                {
+                    break;
+                }
+
+                page++;
+            }
 
             return companyGroups.Select(group => new GetAllCompanyGroupsQueriesResponse
             {

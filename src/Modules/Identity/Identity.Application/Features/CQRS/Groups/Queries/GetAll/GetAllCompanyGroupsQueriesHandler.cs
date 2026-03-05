@@ -44,7 +44,12 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
 
             return companyGroups.Select(group => new GetAllCompanyGroupsQueriesResponse
             {
+                GroupId = group.Id,
                 GroupName = group.Name,
+                WorkerUserIds = group.Users
+                    .Select(member => member.UserId)
+                    .Distinct()
+                    .ToList(),
                 WorkerName = group.Users
                     .Select(member => member.User?.Name)
                     .Where(name => !string.IsNullOrWhiteSpace(name))

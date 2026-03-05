@@ -1,4 +1,5 @@
-﻿using Identity.Application.Repositories;
+using System.Linq.Expressions;
+using Identity.Application.Repositories;
 using Identity.Domain.Entities;
 using Identity.Persistence.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,8 @@ namespace Identity.Persistence.Repositories
             int pageSize,
             int page = 1,
             bool trackChanges = false,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null)
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null,
+            Expression<Func<T, bool>>? predicate = null)
         {
             ValidatePagination(ref page, ref pageSize);
 
@@ -34,6 +36,11 @@ namespace Identity.Persistence.Repositories
             try
             {
                 var query = trackChanges ? db.AsTracking() : db.AsNoTracking();
+
+                if (predicate != null)
+                {
+                    query = query.Where(predicate);
+                }
 
                 if (inc != null)
                 {
@@ -239,3 +246,4 @@ namespace Identity.Persistence.Repositories
         }
     }
 }
+

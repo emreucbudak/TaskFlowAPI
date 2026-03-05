@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using TaskFlow.BuildingBlocks.Common;
 
@@ -10,6 +11,7 @@ namespace Identity.Application.Repositories
             int pageSize,
             int page = 1,
             bool trackChanges = false,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null);
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null,
+            Expression<Func<T, bool>>? predicate = null);
     }
 }

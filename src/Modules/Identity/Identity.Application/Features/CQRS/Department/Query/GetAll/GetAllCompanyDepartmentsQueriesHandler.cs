@@ -15,13 +15,29 @@ namespace Identity.Application.Features.CQRS.Department.Query.GetAll
 
         public async Task<List<GetAllCompanyDepartmentsQueriesResponse>> Handle(GetAllCompanyDepartmentsQueriesRequest request, CancellationToken cancellationToken)
         {
-            var departmentsPage = await _readRepository.GetAllAsync(
-                pageSize: 100,
-                page: 1,
-                trackChanges: false);
+            const int pageSize = 100;
+            var page = 1;
+            var departments = new List<Domain.Entities.Department>();
 
-            return departmentsPage.Items
-                .Where(item => item.CompanyId == request.CompanyId)
+            while (true)
+            {
+                var departmentsPage = await _readRepository.GetAllAsync(
+                    pageSize: pageSize,
+                    page: page,
+                    trackChanges: false,
+                    predicate: item => item.CompanyId == request.CompanyId);
+
+                departments.AddRange(departmentsPage.Items);
+
+                if (page * pageSize >= departmentsPage.TotalCount)
+                {
+                    break;
+                }
+
+                page++;
+            }
+
+            return departments
                 .OrderBy(item => item.Name)
                 .Select(item => new GetAllCompanyDepartmentsQueriesResponse
                 {

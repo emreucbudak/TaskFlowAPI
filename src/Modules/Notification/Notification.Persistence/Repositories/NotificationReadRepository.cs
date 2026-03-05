@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Notification.Application.Repositories;
 using Notification.Domain.Models;
@@ -11,7 +11,8 @@ namespace Notification.Persistence.Repositories
         NotificationDbContext context,
         ILogger<NotificationReadRepository> logger) : INotificationReadRepository
     {
-        private const int MaxPageSize = 200;
+        private const int MaxNotificationWindowSize = 100;
+        private const int MaxPageSize = MaxNotificationWindowSize;
         private const int DefaultPageSize = 20;
 
         public async Task<NotificationMessage?> GetByIdAsync(
@@ -23,28 +24,33 @@ namespace Notification.Persistence.Repositories
             ValidateNotificationId(notificationId);
 
             logger.LogInformation(
-                "Bildirim getiriliyor - Kullanıcı: {UserId}, Bildirim: {NotificationId}",
-                userId, notificationId);
+                "Bildirim getiriliyor - Kullanici: {UserId}, Bildirim: {NotificationId}",
+                userId,
+                notificationId);
 
             IQueryable<NotificationMessage> query = context.notificationMessages
                 .Where(x => x.Id == notificationId && x.ReceiverUserId == userId);
 
             if (!trackChanges)
+            {
                 query = query.AsNoTracking();
+            }
 
             var result = await query.FirstOrDefaultAsync();
 
             if (result == null)
             {
                 logger.LogWarning(
-                    "Bildirim bulunamadı veya yetkisiz erişim - Kullanıcı: {UserId}, Bildirim: {NotificationId}",
-                    userId, notificationId);
+                    "Bildirim bulunamadi veya yetkisiz erisim - Kullanici: {UserId}, Bildirim: {NotificationId}",
+                    userId,
+                    notificationId);
             }
             else
             {
                 logger.LogDebug(
-                    "Bildirim alındı - Kullanıcı: {UserId}, Bildirim: {NotificationId}",
-                    userId, notificationId);
+                    "Bildirim alindi - Kullanici: {UserId}, Bildirim: {NotificationId}",
+                    userId,
+                    notificationId);
             }
 
             return result;
@@ -60,15 +66,20 @@ namespace Notification.Persistence.Repositories
             ValidatePagination(ref page, ref pageSize);
 
             logger.LogInformation(
-                "Kullanıcı bildirimleri getiriliyor - Kullanıcı: {UserId}, Sayfa: {Page}, Sayfa Boyutu: {PageSize}",
-                userId, page, pageSize);
+                "Kullanici bildirimleri getiriliyor - Kullanici: {UserId}, Sayfa: {Page}, Sayfa Boyutu: {PageSize}",
+                userId,
+                page,
+                pageSize);
 
             IQueryable<NotificationMessage> query = context.notificationMessages
                 .Where(x => x.ReceiverUserId == userId)
-                .OrderByDescending(x => x.SendTime);
+                .OrderByDescending(x => x.SendTime)
+                .Take(MaxNotificationWindowSize);
 
             if (!trackChanges)
+            {
                 query = query.AsNoTracking();
+            }
 
             var totalCount = await query.CountAsync();
 
@@ -78,8 +89,12 @@ namespace Notification.Persistence.Repositories
                 .ToListAsync();
 
             logger.LogInformation(
-                "Kullanıcı {UserId} için {Count}/{TotalCount} bildirim getirildi (Sayfa: {Page})",
-                userId, notifications.Count, totalCount, page);
+                "Kullanici {UserId} icin son {WindowSize} kayittan {Count}/{TotalCount} bildirim getirildi (Sayfa: {Page})",
+                userId,
+                MaxNotificationWindowSize,
+                notifications.Count,
+                totalCount,
+                page);
 
             return new PagedResult<NotificationMessage>
             {
@@ -90,32 +105,55 @@ namespace Notification.Persistence.Repositories
             };
         }
 
+        public async Task<IReadOnlyList<NotificationMessage>> GetUnreadByUserIdAsync(
+            Guid userId,
+            int maxCount,
+            bool trackChanges = false)
+        {
+            ValidateUserId(userId);
+
+            var normalizedCount = NormalizeWindowCount(maxCount);
+
+            logger.LogInformation(
+                "Kullanici okunmamis bildirimleri getiriliyor - Kullanici: {UserId}, Limit: {Limit}",
+                userId,
+                normalizedCount);
+
+            IQueryable<NotificationMessage> query = context.notificationMessages
+                .Where(x => x.ReceiverUserId == userId && !x.IsRead)
+                .OrderByDescending(x => x.SendTime)
+                .Take(normalizedCount);
+
+            if (!trackChanges)
+            {
+                query = query.AsNoTracking();
+            }
+
+            var unreadNotifications = await query.ToListAsync();
+
+            logger.LogInformation(
+                "Kullanici {UserId} icin {Count} okunmamis bildirim bulundu (Limit: {Limit})",
+                userId,
+                unreadNotifications.Count,
+                normalizedCount);
+
+            return unreadNotifications;
+        }
+
         public async Task<int> GetUnreadCountAsync(Guid userId)
         {
             ValidateUserId(userId);
 
-            logger.LogInformation("Kullanıcı {UserId} için okunmamış bildirim sayısı hesaplanıyor", userId);
+            logger.LogInformation("Kullanici {UserId} icin okunmamis bildirim sayisi hesaplaniyor", userId);
 
             var count = await context.notificationMessages
                 .AsNoTracking()
                 .CountAsync(x => x.ReceiverUserId == userId && !x.IsRead);
 
             logger.LogInformation(
-                "Kullanıcı {UserId} için okunmamış bildirim sayısı: {Count}",
-                userId, count);
-
-            return count;
-        }
-
-        public async Task<int> GetTotalCountAsync(Guid userId)
-        {
-            ValidateUserId(userId);
-
-            logger.LogDebug("Kullanıcı {UserId} için toplam bildirim sayısı alınıyor", userId);
-
-            var count = await context.notificationMessages
-                .AsNoTracking()
-                .CountAsync(x => x.ReceiverUserId == userId);
+                "Kullanici {UserId} icin okunmamis bildirim sayisi: {Count}",
+                userId,
+                count);
 
             return count;
         }
@@ -124,7 +162,7 @@ namespace Notification.Persistence.Repositories
         {
             if (userId == Guid.Empty)
             {
-                throw new ArgumentException("Kullanıcı ID'si boş olamaz", nameof(userId));
+                throw new ArgumentException("Kullanici ID'si bos olamaz", nameof(userId));
             }
         }
 
@@ -132,8 +170,18 @@ namespace Notification.Persistence.Repositories
         {
             if (notificationId == Guid.Empty)
             {
-                throw new ArgumentException("Bildirim ID'si boş olamaz", nameof(notificationId));
+                throw new ArgumentException("Bildirim ID'si bos olamaz", nameof(notificationId));
             }
+        }
+
+        private static int NormalizeWindowCount(int maxCount)
+        {
+            if (maxCount < 1)
+            {
+                return MaxNotificationWindowSize;
+            }
+
+            return Math.Min(maxCount, MaxNotificationWindowSize);
         }
 
         private static void ValidatePagination(ref int page, ref int pageSize)
@@ -153,7 +201,5 @@ namespace Notification.Persistence.Repositories
                 pageSize = MaxPageSize;
             }
         }
-
-
     }
 }

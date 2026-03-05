@@ -1,4 +1,4 @@
-ï»¿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
@@ -26,18 +26,18 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
         {
             using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                var parentTask = await _repository.GetTask(request.TaskId, true);
+                var parentTask = await _repository.GetTask(request.TaskId, true, cancellationToken);
 
                 if (parentTask == null)
                 {
-                    throw new Exception("Ana gÃ¶rev bulunamadÄ±.");
+                    throw new Exception("Ana görev bulunamadý.");
                 }
 
                 var subTask = parentTask.GetSubtask(request.SubTasksId);
 
                 if (subTask == null)
                 {
-                    throw new Exception("Alt gÃ¶rev bulunamadÄ±.");
+                    throw new Exception("Alt görev bulunamadý.");
                 }
 
                 subTask.UpdateTaskTitle(request.TaskTitle);

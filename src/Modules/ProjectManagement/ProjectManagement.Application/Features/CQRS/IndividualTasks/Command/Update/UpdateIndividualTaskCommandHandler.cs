@@ -31,7 +31,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Up
         {
             using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                var task = await _readRepository.GetIndividualTask(request.Id, true);
+                var task = await _readRepository.GetIndividualTask(request.Id, true, cancellationToken);
                 if (task == null)
                 {
                     throw new IndividualTaskNotFoundException();
@@ -55,3 +55,4 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Up
         }
     }
 }
+

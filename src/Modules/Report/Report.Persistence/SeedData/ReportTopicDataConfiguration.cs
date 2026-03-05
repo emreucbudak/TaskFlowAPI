@@ -11,9 +11,9 @@ namespace Report.Persistence.SeedData
             builder.HasKey(e => e.Id);
 
             builder.HasData(
-                new ReportTopic { Id = 1, TopicName = "Hata Bildirimi" },
-                new ReportTopic { Id = 2, TopicName = "Geri Bildirim" },
-                new ReportTopic { Id = 3, TopicName = "Diğer" }
+                ReportTopic.CreateSeed(1, "Hata Bildirimi"),
+                ReportTopic.CreateSeed(2, "Geri Bildirim"),
+                ReportTopic.CreateSeed(3, "Diger")
             );
         }
     }

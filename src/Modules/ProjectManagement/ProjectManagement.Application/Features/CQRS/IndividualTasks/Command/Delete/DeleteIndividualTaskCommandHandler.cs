@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Exceptions;
 using ProjectManagement.Application.IntegrationEvents;
@@ -30,7 +30,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
         {
             using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                var task = await _readRepository.GetIndividualTask(request.Id, false);
+                var task = await _readRepository.GetIndividualTask(request.Id, false, cancellationToken);
                 if (task == null)
                 {
                     throw new IndividualTaskNotFoundException();
@@ -50,3 +50,4 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
         }
     }
 }
+

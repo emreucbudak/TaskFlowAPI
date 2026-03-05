@@ -18,13 +18,12 @@ namespace Chat.Persistence.Repositories
             {
                 message.UpdateContent(messageEncryptionService.Encrypt(message.Content));
                 await context.Messages.AddAsync(message);
-                await context.SaveChangesAsync();
                 return message;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Mesaj eklenirken hata oluştu. Gönderen: {SenderId}", message.SenderId);
-                throw new Exception("Mesaj gönderilemedi.", ex);
+                logger.LogError(ex, "Mesaj eklenirken hata olustu. Gonderen: {SenderId}", message.SenderId);
+                throw new Exception("Mesaj gonderilemedi.", ex);
             }
         }
 
@@ -35,18 +34,16 @@ namespace Chat.Persistence.Repositories
                 var message = await context.Messages.FindAsync(id);
                 if (message == null)
                 {
-                    logger.LogWarning("Silinecek mesaj bulunamadı. ID: {MessageId}", id);
+                    logger.LogWarning("Silinecek mesaj bulunamadi. ID: {MessageId}", id);
                     return false;
                 }
 
                 message.MarkAsDeleted();
-                
-                var result = await context.SaveChangesAsync();
-                return result > 0;
+                return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Mesaj silinirken hata oluştu. ID: {MessageId}", id);
+                logger.LogError(ex, "Mesaj silinirken hata olustu. ID: {MessageId}", id);
                 throw new Exception("Mesaj silinemedi.", ex);
             }
         }
@@ -59,19 +56,22 @@ namespace Chat.Persistence.Repositories
                     .Where(m => ids.Contains(m.Id))
                     .ToListAsync();
 
-                if (messages.Count == 0) return false;
+                if (messages.Count == 0)
+                {
+                    return false;
+                }
 
                 foreach (var message in messages)
                 {
                     message.MarkAsDeleted();
                 }
-                
+
                 var result = await context.SaveChangesAsync();
                 return result > 0;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Çoklu mesaj silme işlemi sırasında hata oluştu.");
+                logger.LogError(ex, "Coklu mesaj silme islemi sirasinda hata olustu.");
                 throw new Exception("Mesajlar silinemedi.", ex);
             }
         }
@@ -81,18 +81,19 @@ namespace Chat.Persistence.Repositories
             try
             {
                 var message = await context.Messages.FindAsync(id);
-                if (message == null) return false;
+                if (message == null)
+                {
+                    return false;
+                }
 
                 message.UpdateContent(messageEncryptionService.Encrypt(newContent));
                 message.MarkAsEdited();
-                
-                var result = await context.SaveChangesAsync();
-                return result > 0;
+                return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Mesaj içeriği güncellenirken hata oluştu. ID: {MessageId}", id);
-                throw new Exception("Mesaj güncellenemedi.", ex);
+                logger.LogError(ex, "Mesaj icerigi guncellenirken hata olustu. ID: {MessageId}", id);
+                throw new Exception("Mesaj guncellenemedi.", ex);
             }
         }
 
@@ -101,17 +102,18 @@ namespace Chat.Persistence.Repositories
             try
             {
                 var message = await context.Messages.FindAsync(messageId);
-                if (message == null) return false;
+                if (message == null)
+                {
+                    return false;
+                }
 
                 message.MarkAsDelivered();
-                
-                var result = await context.SaveChangesAsync();
-                return result > 0;
+                return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Mesaj iletildi olarak işaretlenirken hata oluştu. ID: {MessageId}", messageId);
-                throw new Exception("İşlem başarısız oldu.", ex);
+                logger.LogError(ex, "Mesaj iletildi olarak isaretlenirken hata olustu. ID: {MessageId}", messageId);
+                throw new Exception("Islem basarisiz oldu.", ex);
             }
         }
 
@@ -120,11 +122,14 @@ namespace Chat.Persistence.Repositories
             try
             {
                 var messages = await context.Messages
-                    .Where(m => (m.SenderId == userId1 && m.ReceiverId == userId2) || 
+                    .Where(m => (m.SenderId == userId1 && m.ReceiverId == userId2) ||
                                 (m.SenderId == userId2 && m.ReceiverId == userId1))
                     .ToListAsync();
 
-                if (messages.Count == 0) return false;
+                if (messages.Count == 0)
+                {
+                    return false;
+                }
 
                 foreach (var message in messages)
                 {
@@ -136,7 +141,7 @@ namespace Chat.Persistence.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "{UserId1} ve {UserId2} arasındaki sohbet silinirken hata oluştu.", userId1, userId2);
+                logger.LogError(ex, "{UserId1} ve {UserId2} arasindaki sohbet silinirken hata olustu.", userId1, userId2);
                 throw new Exception("Sohbet silinemedi.", ex);
             }
         }

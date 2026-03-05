@@ -1,14 +1,13 @@
 using FlashMediator;
 using Identity.Application.Repositories;
-using Identity.Domain.Entities;
 
 namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader
 {
     public class GetDepartmentLeaderQueryHandler : IRequestHandler<GetDepartmentLeaderQueryRequest, GetDepartmentLeaderQueryResponse>
     {
-        private readonly IReadRepository<DepartmentMember, int> _repository;
+        private readonly IDepartmentReadRepository _repository;
 
-        public GetDepartmentLeaderQueryHandler(IReadRepository<DepartmentMember, int> repository)
+        public GetDepartmentLeaderQueryHandler(IDepartmentReadRepository repository)
         {
             _repository = repository;
         }

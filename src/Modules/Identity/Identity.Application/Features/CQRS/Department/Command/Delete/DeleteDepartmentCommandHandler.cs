@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Identity.Application.Features.CQRS.Department.Exceptions;
 using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
@@ -30,10 +30,11 @@ namespace Identity.Application.Features.CQRS.Department.Command.Delete
             {
                 throw new DepartmentNotFoundExceptions();
             }
-             _writeRepository.DeleteAsync(department);
+             _writeRepository.Delete(department);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 
         }
     }
 }
+

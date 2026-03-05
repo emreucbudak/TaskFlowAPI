@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Identity.Application.Features.CQRS.Company.Exceptions;
 using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
@@ -28,9 +28,10 @@ namespace Identity.Application.Features.CQRS.Company.Command.Delete
             {
                 throw new CompanyNotFoundExceptions();
             }
-             _companyWriteRepository.DeleteAsync(company);
+             _companyWriteRepository.Delete(company);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         }
     }
 }
+

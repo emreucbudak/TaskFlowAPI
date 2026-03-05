@@ -51,7 +51,7 @@ namespace Identity.Persistence.Repositories
             }
         }
 
-        public void UpdateAsync(T entity)
+        public void Update(T entity)
         {
             ValidateEntity(entity);
             try
@@ -100,7 +100,7 @@ namespace Identity.Persistence.Repositories
         }
 
 
-        public void DeleteAsync(T entity)
+        public void Delete(T entity)
         {
             // Varlýk doðrulama
             ValidateEntity(entity);
@@ -155,3 +155,4 @@ namespace Identity.Persistence.Repositories
         }
     }
 }
+

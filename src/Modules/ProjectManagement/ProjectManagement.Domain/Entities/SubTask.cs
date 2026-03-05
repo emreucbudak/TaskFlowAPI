@@ -1,4 +1,5 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+using ProjectManagement.Domain.Exceptions;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Domain.Entities
 {
@@ -6,20 +7,21 @@ namespace ProjectManagement.Domain.Entities
     {
         public string TaskTitle { get; private set; }
         public string Description { get; private set; }
-        public Guid AssignedUserId {  get; private set; }
+        public Guid AssignedUserId { get; private set; }
         public int TaskStatusId { get; private set; }
         public TaskStatus TaskStatus { get; private set; }
         public Guid TaskId { get; private set; }
         public Task Task { get; private set; }
+
         public Subtask(string description, Guid assignedUserId, int taskStatusId, string taskTitle, Guid taskId)
         {
             if (string.IsNullOrWhiteSpace(taskTitle))
             {
-                throw new Exception("Task title'ı boş veya null olamaz");
+                throw new TaskDomainException("Task title bos veya null olamaz");
             }
             if (string.IsNullOrWhiteSpace(description))
             {
-                throw new Exception("Description boş veya null olamaz");
+                throw new TaskDomainException("Description bos veya null olamaz");
             }
             Description = description;
             AssignedUserId = assignedUserId;
@@ -27,47 +29,53 @@ namespace ProjectManagement.Domain.Entities
             TaskTitle = taskTitle;
             TaskId = taskId;
         }
+
         private List<SubTaskAnswer> Answers { get; set; } = new();
         public IReadOnlyCollection<SubTaskAnswer> subTaskAnswers => Answers;
+
         public void AddAnswer(SubTaskAnswer answer)
         {
             Answers.Add(answer);
         }
+
         public void UpdateTaskStatus(int taskStatus)
         {
-            this.TaskStatusId = taskStatus;
+            TaskStatusId = taskStatus;
         }
+
         public void UpdateTaskTitle(string taskTitle)
         {
-            this.TaskTitle = taskTitle; 
+            TaskTitle = taskTitle;
         }
-        public void UpdateTaskDescription (string taskDescription)
+
+        public void UpdateTaskDescription(string taskDescription)
         {
-            this.Description = taskDescription;
+            Description = taskDescription;
         }
-        public void RemoveSubTaskAnswer (Guid AnswerId)
+
+        public void RemoveSubTaskAnswer(Guid AnswerId)
         {
-            var answer = subTaskAnswers.Where(x=> x.Id == AnswerId).FirstOrDefault();
+            var answer = subTaskAnswers.Where(x => x.Id == AnswerId).FirstOrDefault();
             if (answer is null)
             {
-                throw new Exception("Subtaskın Answeri bulunamadı!");
+                throw new TaskDomainException("Subtaskin answeri bulunamadi");
             }
             Answers.Remove(answer);
         }
-        public void UpdateSubTaskAnswer (string taskAnswer,Guid subTaskAnswerId)
+
+        public void UpdateSubTaskAnswer(string taskAnswer, Guid subTaskAnswerId)
         {
             var subTask = Answers.Where(x => x.Id == subTaskAnswerId).FirstOrDefault();
             if (subTask is null)
             {
-                throw new Exception("subtakanswer bulunamadı!");
+                throw new TaskDomainException("Subtask answer bulunamadi");
             }
             subTask.UpdateAnswerText(taskAnswer);
-
         }
+
         public string GetTaskStatus()
         {
             return TaskStatus.StatusName;
         }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Repositories;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
@@ -14,7 +14,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
 
         public async Task<List<GetAllSubTasksQueriesResponse>> Handle(GetAllSubTasksQueriesRequest request, CancellationToken cancellationToken)
         {
-            var task = await _repository.GetTask(request.TaskId, false);
+            var task = await _repository.GetTask(request.TaskId, false, cancellationToken);
             ArgumentNullException.ThrowIfNull(task);
             var subTask = task.GetAllSubTasks();
             return subTask.Select(x => new GetAllSubTasksQueriesResponse
@@ -27,3 +27,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Queries.GetAll
         }
     }
 }
+

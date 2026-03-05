@@ -1,4 +1,4 @@
-﻿using TaskFlow.BuildingBlocks.Common;
+using TaskFlow.BuildingBlocks.Common;
 
 namespace Chat.Domain.Entities
 {
@@ -10,9 +10,9 @@ namespace Chat.Domain.Entities
         public Guid SenderId { get; private set; }
         public Guid? ReceiverId { get; private set; }
         public Guid? GroupId { get; private set; }
-        public bool isDeleted { get; private set; }
-        public bool isEdited { get; private set; }
-        public bool isDelivered { get; private set; }
+        public bool IsDeleted { get; private set; }
+        public bool IsEdited { get; private set; }
+        public bool IsDelivered { get; private set; }
         public DateTime? DeliveredTime { get; private set; }
 
         public Message(string content, bool isRead, DateTime sendTime, Guid senderId, Guid? receiverId, bool isDeleted, Guid? groupId, bool isEdited)
@@ -22,10 +22,10 @@ namespace Chat.Domain.Entities
             SendTime = sendTime;
             SenderId = senderId;
             ReceiverId = receiverId;
-            this.isDeleted = isDeleted;
+            IsDeleted = isDeleted;
             GroupId = groupId;
-            this.isEdited = isEdited;
-            this.isDelivered = false;
+            IsEdited = isEdited;
+            IsDelivered = false;
         }
 
         public Message()
@@ -50,27 +50,31 @@ namespace Chat.Domain.Entities
         {
             Content = newContent;
         }
+
         public void MarkAsRead(bool isRead)
         {
             IsRead = isRead;
         }
+
         public void MarkAsDeleted()
         {
-            isDeleted = true;
+            IsDeleted = true;
         }
+
         public void MarkAsEdited()
         {
-            this.isEdited = true;
+            IsEdited = true;
         }
+
         public void SetTime()
         {
             SendTime = DateTime.UtcNow;
         }
+
         public void MarkAsDelivered()
         {
-            this.isDelivered = true;
-            this.DeliveredTime = DateTime.UtcNow;
+            IsDelivered = true;
+            DeliveredTime = DateTime.UtcNow;
         }
-
     }
 }

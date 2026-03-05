@@ -1,9 +1,9 @@
-﻿namespace Identity.Application.Repositories
+namespace Identity.Application.Repositories
 {
-    public interface IWriteRepository <T> where T : class 
+    public interface IWriteRepository<T> where T : class
     {
         Task AddAsync(T entity);
-        void UpdateAsync(T entity);
-        void DeleteAsync(T entity);
+        void Update(T entity);
+        void Delete(T entity);
     }
 }

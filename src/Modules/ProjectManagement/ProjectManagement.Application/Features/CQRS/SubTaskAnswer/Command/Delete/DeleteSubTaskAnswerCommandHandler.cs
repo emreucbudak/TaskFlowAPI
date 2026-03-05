@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Domain.Entities;
 using TaskFlow.BuildingBlocks.UnitOfWork;
@@ -18,7 +18,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Dele
 
         public async Task<bool> Handle(DeleteSubTaskAnswerCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await readRepository.GetTask(request.TaskId, true);
+            var task = await readRepository.GetTask(request.TaskId, true, cancellationToken);
             var subTask = task.GetSubtask(request.SubTaskId);
             subTask.RemoveSubTaskAnswer(request.SubTaskAnswerId);
             await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -26,3 +26,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Dele
         }
     }
 }
+

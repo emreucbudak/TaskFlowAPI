@@ -15,7 +15,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
 
         public async Task<PagedResult<GetIndividualTasksByUserIdQueryResponse>> Handle(GetIndividualTasksByUserIdQueryRequest request, CancellationToken cancellationToken)
         {
-            var tasks = await _readRepository.GetAllIndividualTasks(false, request.PageNumber, request.PageSize,request.UserId);
+            var (tasks, totalCount) = await _readRepository.GetAllIndividualTasks(false, request.PageNumber, request.PageSize, request.UserId, cancellationToken);
 
             return new PagedResult<GetIndividualTasksByUserIdQueryResponse>
             {
@@ -25,15 +25,16 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
                     task.TaskTitle,
                     task.Description,
                     task.Deadline,
-                    "Açık",
+                    "Acik",
                     "Bireysel",
                     string.IsNullOrWhiteSpace(task.TaskPriority?.CategoryName)
                         ? "Belirtilmedi"
                         : task.TaskPriority.CategoryName)).ToList(),
-                TotalCount = tasks.Count(),
+                TotalCount = totalCount,
                 Page = request.PageNumber,
                 PageSize = request.PageSize
             };
         }
     }
 }
+

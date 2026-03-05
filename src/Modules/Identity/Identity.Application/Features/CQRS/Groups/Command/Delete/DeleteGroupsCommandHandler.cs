@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Identity.Application.Features.CQRS.Groups.Exceptions;
 using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
@@ -30,8 +30,9 @@ namespace Identity.Application.Features.CQRS.Groups.Command.Delete
             {
                 throw new GroupsNotFoundExceptions();
             }
-            _writeRepository.DeleteAsync(groups);
+            _writeRepository.Delete(groups);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }
+

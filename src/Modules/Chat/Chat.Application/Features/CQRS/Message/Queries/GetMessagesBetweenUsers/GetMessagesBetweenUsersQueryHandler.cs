@@ -35,9 +35,9 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
                 SenderId = m.SenderId,
                 ReceiverId = m.ReceiverId,
                 GroupId = m.GroupId,
-                isDeleted = m.isDeleted,
-                isEdited = m.isEdited,
-                isDelivered = m.isDelivered,
+                IsDeleted = m.IsDeleted,
+                IsEdited = m.IsEdited,
+                IsDelivered = m.IsDelivered,
                 DeliveredTime = m.DeliveredTime
             }).ToList();
             return response;

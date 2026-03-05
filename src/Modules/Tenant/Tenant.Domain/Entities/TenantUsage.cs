@@ -32,6 +32,11 @@ public class TenantUsage : BaseEntity
 
     public void DecrementUserCount()
     {
+        if (CurrentUserCount <= 0)
+        {
+            return;
+        }
+
         CurrentUserCount--;
         TouchVersion();
     }
@@ -44,6 +49,11 @@ public class TenantUsage : BaseEntity
 
     public void DecrementTaskCount()
     {
+        if (CurrentTaskCount <= 0)
+        {
+            return;
+        }
+
         CurrentTaskCount--;
         TouchVersion();
     }
@@ -56,6 +66,11 @@ public class TenantUsage : BaseEntity
 
     public void DecrementGroupCount()
     {
+        if (CurrentGroupCount <= 0)
+        {
+            return;
+        }
+
         CurrentGroupCount--;
         TouchVersion();
     }
@@ -68,6 +83,11 @@ public class TenantUsage : BaseEntity
 
     public void DecrementIndividualTaskCount()
     {
+        if (CurrentIndividualTaskCount <= 0)
+        {
+            return;
+        }
+
         CurrentIndividualTaskCount--;
         TouchVersion();
     }

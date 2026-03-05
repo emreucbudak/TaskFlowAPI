@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -19,9 +19,11 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
 
         public async Task Handle(DeleteTasksCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await readRepository.GetTask(request.Id, false);
-             projectManagementWriteRepository.DeleteTask(task);
+            var task = await readRepository.GetTask(request.Id, false, cancellationToken);
+            await projectManagementWriteRepository.DeleteTask(task);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }
+
+

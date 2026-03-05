@@ -29,7 +29,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 ValidateEntity(entity);
 
                 await context.Tasks.AddAsync(entity);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("Task başarıyla eklendi. Id: {EntityId}", entity.Id);
             }
@@ -76,7 +75,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 }
 
                 context.Tasks.Remove(existingEntity);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("Task başarıyla silindi. Id: {TaskId}", task.Id);
             }
@@ -119,7 +117,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 }
 
                 context.Entry(existingEntity).CurrentValues.SetValues(task);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("Task başarıyla güncellendi. Id: {TaskId}", task.Id);
             }
@@ -186,7 +183,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 }
 
                 await context.IndividualTasks.AddAsync(entity);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("IndividualTask başarıyla eklendi. Id: {EntityId}", entity.Id);
             }
@@ -222,7 +218,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 }
 
                 context.IndividualTasks.Remove(existingEntity);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("IndividualTask başarıyla silindi. Id: {TaskId}", task.Id);
             }
@@ -269,7 +264,6 @@ namespace ProjectManagement.Persistence.Data.Repositories
                 }
 
                 context.Entry(existingEntity).CurrentValues.SetValues(task);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("IndividualTask başarıyla güncellendi. Id: {TaskId}", task.Id);
             }
@@ -291,3 +285,4 @@ namespace ProjectManagement.Persistence.Data.Repositories
         }
     }
 }
+

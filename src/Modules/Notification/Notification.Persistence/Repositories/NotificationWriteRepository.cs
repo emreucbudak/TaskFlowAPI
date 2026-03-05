@@ -1,15 +1,13 @@
-ï»¿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Notification.Application.Repositories;
 using Notification.Domain.Models;
 using Notification.Infrastructure.Data.NotificationDb;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Notification.Persistence.Repositories
 {
     public sealed class NotificationWriteRepository(
         NotificationDbContext context,
-        IUnitOfWork unitOfWork,
         ILogger<NotificationWriteRepository> logger) : INotificationWriteRepository
     {
         private const int MaxNotificationContentLength = 1000;
@@ -22,19 +20,15 @@ namespace Notification.Persistence.Repositories
             ValidateReceiverUserId(notification.ReceiverUserId);
             ValidateContent(notification.Description);
             ValidateTitle(notification.Title);
-
-
-            notification.MarkAsRead(); 
-
             logger.LogInformation(
-                "Bildirim gÃ¶nderiliyor - AlÄ±cÄ±: {UserId}, Ä°Ã§erik UzunluÄŸu: {Length}",
+                "Bildirim gönderiliyor - Alýcý: {UserId}, Ýçerik Uzunluðu: {Length}",
                 notification.ReceiverUserId,
                 notification.Description.Length);
 
             await context.notificationMessages.AddAsync(notification);
 
             logger.LogDebug(
-                "Bildirim context'e eklendi - Id: {NotificationId}, AlÄ±cÄ±: {UserId}",
+                "Bildirim context'e eklendi - Id: {NotificationId}, Alýcý: {UserId}",
                 notification.Id,
                 notification.ReceiverUserId);
         }
@@ -45,7 +39,7 @@ namespace Notification.Persistence.Repositories
             ValidateId(notification.Id);
 
             logger.LogWarning(
-                "Bildirim siliniyor - Id: {NotificationId}, AlÄ±cÄ±: {UserId}",
+                "Bildirim siliniyor - Id: {NotificationId}, Alýcý: {UserId}",
                 notification.Id,
                 notification.ReceiverUserId);
 
@@ -59,7 +53,7 @@ namespace Notification.Persistence.Repositories
             context.notificationMessages.Remove(notification);
 
             logger.LogInformation(
-                "Bildirim silme iÃ§in iÅŸaretlendi - Id: {NotificationId}",
+                "Bildirim silme için iþaretlendi - Id: {NotificationId}",
                 notification.Id);
         }
 
@@ -67,7 +61,7 @@ namespace Notification.Persistence.Repositories
         {
             if (id == Guid.Empty)
             {
-                throw new ArgumentException("Bildirim ID'si boÅŸ olamaz", nameof(id));
+                throw new ArgumentException("Bildirim ID'si boþ olamaz", nameof(id));
             }
         }
 
@@ -75,7 +69,7 @@ namespace Notification.Persistence.Repositories
         {
             if (receiverUserId == Guid.Empty)
             {
-                throw new ArgumentException("AlÄ±cÄ± kullanÄ±cÄ± ID'si boÅŸ olamaz", nameof(receiverUserId));
+                throw new ArgumentException("Alýcý kullanýcý ID'si boþ olamaz", nameof(receiverUserId));
             }
         }
 
@@ -83,13 +77,13 @@ namespace Notification.Persistence.Repositories
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentException("Bildirim iÃ§eriÄŸi boÅŸ olamaz", nameof(content));
+                throw new ArgumentException("Bildirim içeriði boþ olamaz", nameof(content));
             }
 
             if (content.Length > MaxNotificationContentLength)
             {
                 throw new ArgumentException(
-                    $"Bildirim iÃ§eriÄŸi {MaxNotificationContentLength} karakteri geÃ§emez",
+                    $"Bildirim içeriði {MaxNotificationContentLength} karakteri geçemez",
                     nameof(content));
             }
         }
@@ -99,9 +93,10 @@ namespace Notification.Persistence.Repositories
             if (!string.IsNullOrEmpty(title) && title.Length > MaxNotificationTitleLength)
             {
                 throw new ArgumentException(
-                    $"Bildirim baÅŸlÄ±ÄŸÄ± {MaxNotificationTitleLength} karakteri geÃ§emez",
+                    $"Bildirim baþlýðý {MaxNotificationTitleLength} karakteri geçemez",
                     nameof(title));
             }
         }
     }
 }
+

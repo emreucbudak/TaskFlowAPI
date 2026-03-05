@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
@@ -29,7 +29,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
         {
             using var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false);
 
-            var task = await _repository.GetTask(request.TaskId, true);
+            var task = await _repository.GetTask(request.TaskId, true, cancellationToken);
             var wasCompleted = task.TaskStatusId == CompletedStatusId;
 
             task.UpdateTaskStatus(request.TaskStatusId);
@@ -61,3 +61,4 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
         }
     }
 }
+

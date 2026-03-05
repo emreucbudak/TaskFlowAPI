@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -17,10 +17,11 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Upda
 
         public async Task Handle(UpdateSubTaskAnswerCommandRequest request, CancellationToken cancellationToken)
         {
-            var task = await readRepository.GetTask(request.TaskId, true);
+            var task = await readRepository.GetTask(request.TaskId, true, cancellationToken);
             var subTask = task.GetSubtask(request.SubTaskId);
             subTask.UpdateSubTaskAnswer(request.SubTaskAnswer, request.SubTaskAnswerId);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }
+

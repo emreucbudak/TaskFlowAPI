@@ -9,9 +9,9 @@ namespace Chat.Application.Features.CQRS.Message.Queries.SearchMessages
         public Guid SenderId { get; init; }
         public Guid? ReceiverId { get; init; }
         public Guid? GroupId { get; init; }
-        public bool isDeleted { get; init; }
-        public bool isEdited { get; init; }
-        public bool isDelivered { get; init; }
+        public bool IsDeleted { get; init; }
+        public bool IsEdited { get; init; }
+        public bool IsDelivered { get; init; }
         public DateTime? DeliveredTime { get; init; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
@@ -29,12 +29,12 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         {
             using (var transaction = _unitOfWork.BeginTransaction(_capPublisher, autoCommit: false))
             {
-                var task = await _readRepository.GetTask(request.TaskId, true);
+                var task = await _readRepository.GetTask(request.TaskId, true, cancellationToken);
 
                 if (task == null)
                 {
 
-                    throw new Exception("Task bulunamadı.");
+                    throw new Exception("Task bulunamad�.");
                 }
 
                 var subTask = task.AddSubTask(
@@ -59,3 +59,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         }
     }
 }
+

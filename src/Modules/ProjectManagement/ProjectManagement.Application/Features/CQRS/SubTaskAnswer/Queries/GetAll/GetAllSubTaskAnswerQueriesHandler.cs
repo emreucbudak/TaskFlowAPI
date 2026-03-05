@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Exceptions;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Domain.Entities;
@@ -16,7 +16,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetA
 
         public async Task<List<GetAllSubTaskAnswerQueriesResponse>> Handle(GetAllSubTaskAnswerQueriesRequest request, CancellationToken cancellationToken)
         {
-            var task = await _repository.GetTask(request.TaskId, false);
+            var task = await _repository.GetTask(request.TaskId, false, cancellationToken);
             if (task is null)
             {
                 throw new SubTaskAnswerNotFoundExceptions();
@@ -32,3 +32,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetA
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.UnitOfWork;
 
@@ -17,7 +17,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
 
         public async Task Handle(UpdateTaskCommandRequest request, CancellationToken cancellationToken)
         {
-            var getTask = await _repository.GetTask(request.TaskId, true);
+            var getTask = await _repository.GetTask(request.TaskId, true, cancellationToken);
             getTask.UpdateTaskName(request.TaskName);
             getTask.UpdateTaskDescription(request.Description);
             getTask.UpdateDeadlineTime(DateOnly.FromDateTime(DateTime.UtcNow));
@@ -27,3 +27,4 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
         }
     }
 }
+

@@ -15,29 +15,29 @@ namespace ProjectManagement.Persistence.Data.Repositories
         private const int DefaultPageSize = 20;
         private const int MinPageSize = 1;
 
-        public async Task<List<Task>> GetAllTasks(bool trackChanges, int pageNumber, int pageSize)
+        public async Task<(List<Task> Items, int TotalCount)> GetAllTasks(bool trackChanges, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             if (pageNumber < 1)
             {
-                logger.LogWarning("Geçersiz sayfa numarası {PageNumber}. 1 kullanılıyor", pageNumber);
+                logger.LogWarning("Gecersiz sayfa numarasi {PageNumber}. 1 kullaniliyor", pageNumber);
                 pageNumber = 1;
             }
 
             if (pageSize < MinPageSize)
             {
-                logger.LogWarning("Geçersiz sayfa boyutu {PageSize}. Minimum değer kullanılıyor: {MinPageSize}", pageSize, MinPageSize);
+                logger.LogWarning("Gecersiz sayfa boyutu {PageSize}. Minimum deger kullaniliyor: {MinPageSize}", pageSize, MinPageSize);
                 pageSize = MinPageSize;
             }
 
             if (pageSize > MaxPageSize)
             {
-                logger.LogWarning("Sayfa boyutu {PageSize} maksimum değeri aşıyor. Kullanılan: {MaxPageSize}", pageSize, MaxPageSize);
+                logger.LogWarning("Sayfa boyutu {PageSize} maksimum degeri asiyor. Kullanilan: {MaxPageSize}", pageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
 
             try
             {
-                logger.LogInformation("Task kayıtları getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
+                logger.LogInformation("Task kayitlari getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
                      pageNumber, pageSize, trackChanges);
 
                 var query = context.Tasks
@@ -51,14 +51,16 @@ namespace ProjectManagement.Persistence.Data.Repositories
                     query = query.AsNoTracking();
                 }
 
+                var totalCount = await query.CountAsync(cancellationToken);
+
                 var results = await query
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
-                logger.LogInformation("{Count} adet Task kaydı başarıyla getirildi", results.Count);
+                logger.LogInformation("{Count} adet Task kaydi basariyla getirildi", results.Count);
 
-                return results;
+                return (results, totalCount);
             }
             catch (OperationCanceledException)
             {
@@ -67,22 +69,22 @@ namespace ProjectManagement.Persistence.Data.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Task kayıtları getirilirken hata oluştu. Sayfa: {PageNumber}, Boyut: {PageSize}", pageNumber, pageSize);
+                logger.LogError(ex, "Task kayitlari getirilirken hata olustu. Sayfa: {PageNumber}, Boyut: {PageSize}", pageNumber, pageSize);
                 throw;
             }
         }
 
-        public async Task<Task> GetTask(Guid id, bool trackChanges)
+        public async Task<Task> GetTask(Guid id, bool trackChanges, CancellationToken cancellationToken)
         {
             if (id == Guid.Empty)
             {
-                logger.LogWarning("Task için boş ID sağlandı");
-                throw new ArgumentException("ID boş olamaz", nameof(id));
+                logger.LogWarning("Task icin bos ID saglandi");
+                throw new ArgumentException("ID bos olamaz", nameof(id));
             }
 
             try
             {
-                logger.LogInformation("Task kaydı getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
+                logger.LogInformation("Task kaydi getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
 
                 var query = context.Tasks
                     .Include(t => t.subtask)
@@ -95,15 +97,15 @@ namespace ProjectManagement.Persistence.Data.Repositories
                     query = query.AsNoTracking();
                 }
 
-                var entity = await query.FirstOrDefaultAsync(x => x.Id == id);
+                var entity = await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                 if (entity == null)
                 {
-                    logger.LogWarning("Task bulunamadı. ID: {Id}", id);
-                    throw new KeyNotFoundException($"Task bulunamadı. ID: {id}");
+                    logger.LogWarning("Task bulunamadi. ID: {Id}", id);
+                    throw new KeyNotFoundException($"Task bulunamadi. ID: {id}");
                 }
 
-                logger.LogInformation("Task kaydı başarıyla getirildi. ID: {Id}", id);
+                logger.LogInformation("Task kaydi basariyla getirildi. ID: {Id}", id);
 
                 return entity;
             }
@@ -118,38 +120,39 @@ namespace ProjectManagement.Persistence.Data.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Task kaydı getirilirken hata oluştu. ID: {Id}", id);
+                logger.LogError(ex, "Task kaydi getirilirken hata olustu. ID: {Id}", id);
                 throw;
             }
         }
 
-        public async System.Threading.Tasks.Task<List<Domain.Entities.IndividualTasks>> GetAllIndividualTasks(bool trackChanges, int pageNumber, int pageSize,Guid userId)
+        public async Task<(List<Domain.Entities.IndividualTasks> Items, int TotalCount)> GetAllIndividualTasks(bool trackChanges, int pageNumber, int pageSize, Guid userId, CancellationToken cancellationToken)
         {
-             if (pageNumber < 1)
+            if (pageNumber < 1)
             {
-                logger.LogWarning("Geçersiz sayfa numarası {PageNumber}. 1 kullanılıyor", pageNumber);
+                logger.LogWarning("Gecersiz sayfa numarasi {PageNumber}. 1 kullaniliyor", pageNumber);
                 pageNumber = 1;
             }
 
             if (pageSize < MinPageSize)
             {
-                logger.LogWarning("Geçersiz sayfa boyutu {PageSize}. Minimum değer kullanılıyor: {MinPageSize}", pageSize, MinPageSize);
+                logger.LogWarning("Gecersiz sayfa boyutu {PageSize}. Minimum deger kullaniliyor: {MinPageSize}", pageSize, MinPageSize);
                 pageSize = MinPageSize;
             }
 
             if (pageSize > MaxPageSize)
             {
-                logger.LogWarning("Sayfa boyutu {PageSize} maksimum değeri aşıyor. Kullanılan: {MaxPageSize}", pageSize, MaxPageSize);
+                logger.LogWarning("Sayfa boyutu {PageSize} maksimum degeri asiyor. Kullanilan: {MaxPageSize}", pageSize, MaxPageSize);
                 pageSize = MaxPageSize;
             }
 
             try
             {
-                logger.LogInformation("IndividualTask kayıtları getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
+                logger.LogInformation("IndividualTask kayitlari getiriliyor. Sayfa: {PageNumber}, Boyut: {PageSize}, Takip: {TrackChanges}",
                      pageNumber, pageSize, trackChanges);
 
                 var query = context.IndividualTasks
                     .Include(it => it.TaskPriority)
+                    .Where(it => it.AssignedUserId == userId)
                     .AsQueryable();
 
                 if (!trackChanges)
@@ -157,13 +160,16 @@ namespace ProjectManagement.Persistence.Data.Repositories
                     query = query.AsNoTracking();
                 }
 
+                var totalCount = await query.CountAsync(cancellationToken);
+
                 var results = await query
-                    .Where(it => it.AssignedUserId == userId)
-                    .ToListAsync();
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
 
-                logger.LogInformation("{Count} adet IndividualTask kaydı başarıyla getirildi", results.Count);
+                logger.LogInformation("{Count} adet IndividualTask kaydi basariyla getirildi", results.Count);
 
-                return results;
+                return (results, totalCount);
             }
             catch (OperationCanceledException)
             {
@@ -172,22 +178,22 @@ namespace ProjectManagement.Persistence.Data.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "IndividualTask kayıtları getirilirken hata oluştu. Sayfa: {PageNumber}, Boyut: {PageSize}", pageNumber, pageSize);
+                logger.LogError(ex, "IndividualTask kayitlari getirilirken hata olustu. Sayfa: {PageNumber}, Boyut: {PageSize}", pageNumber, pageSize);
                 throw;
             }
         }
 
-        public async System.Threading.Tasks.Task<Domain.Entities.IndividualTasks> GetIndividualTask(Guid id, bool trackChanges)
+        public async Task<Domain.Entities.IndividualTasks> GetIndividualTask(Guid id, bool trackChanges, CancellationToken cancellationToken)
         {
-             if (id == Guid.Empty)
+            if (id == Guid.Empty)
             {
-                logger.LogWarning("IndividualTask için boş ID sağlandı");
-                throw new ArgumentException("ID boş olamaz", nameof(id));
+                logger.LogWarning("IndividualTask icin bos ID saglandi");
+                throw new ArgumentException("ID bos olamaz", nameof(id));
             }
 
             try
             {
-                logger.LogInformation("IndividualTask kaydı getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
+                logger.LogInformation("IndividualTask kaydi getiriliyor. ID: {Id}, Takip: {TrackChanges}", id, trackChanges);
 
                 var query = context.IndividualTasks
                     .Include(it => it.TaskPriority)
@@ -198,15 +204,15 @@ namespace ProjectManagement.Persistence.Data.Repositories
                     query = query.AsNoTracking();
                 }
 
-                var entity = await query.FirstOrDefaultAsync(x => x.Id == id);
+                var entity = await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                 if (entity == null)
                 {
-                    logger.LogWarning("IndividualTask bulunamadı. ID: {Id}", id);
-                    throw new KeyNotFoundException($"IndividualTask bulunamadı. ID: {id}");
+                    logger.LogWarning("IndividualTask bulunamadi. ID: {Id}", id);
+                    throw new KeyNotFoundException($"IndividualTask bulunamadi. ID: {id}");
                 }
 
-                logger.LogInformation("IndividualTask kaydı başarıyla getirildi. ID: {Id}", id);
+                logger.LogInformation("IndividualTask kaydi basariyla getirildi. ID: {Id}", id);
 
                 return entity;
             }
@@ -221,10 +227,9 @@ namespace ProjectManagement.Persistence.Data.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "IndividualTask kaydı getirilirken hata oluştu. ID: {Id}", id);
+                logger.LogError(ex, "IndividualTask kaydi getirilirken hata olustu. ID: {Id}", id);
                 throw;
             }
         }
-
     }
 }

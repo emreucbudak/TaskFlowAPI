@@ -1,4 +1,3 @@
-﻿
 using FlashMediator;
 using Microsoft.Extensions.Logging;
 using ProjectManagement.Application.Features.CQRS.Tasks.Queries.DTOS;
@@ -22,28 +21,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
 
         public async Task<PagedResult<GetAllTasksQueriesResponse>> Handle(GetAllTasksQueriesRequest request, CancellationToken cancellationToken)
         {
-            List<Domain.Entities.Task> tasks;
-            try
-            {
-                tasks = await _repository.GetAllTasks(false, request.PageNumber, request.PageSize);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(
-                    exception,
-                    "Task list could not be loaded. Returning empty page. CompanyId={CompanyId}, PageNumber={PageNumber}, PageSize={PageSize}",
-                    request.CompanyId,
-                    request.PageNumber,
-                    request.PageSize);
-
-                return new PagedResult<GetAllTasksQueriesResponse>
-                {
-                    Items = [],
-                    TotalCount = 0,
-                    Page = request.PageNumber,
-                    PageSize = request.PageSize
-                };
-            }
+            var (tasks, totalCount) = await _repository.GetAllTasks(false, request.PageNumber, request.PageSize, cancellationToken);
 
             return new PagedResult<GetAllTasksQueriesResponse>
             {
@@ -64,12 +42,13 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
                         AssignedUserId = st.AssignedUserId
                     }).ToList()
                 }).ToList(),
-                TotalCount = tasks.Count(),
+                TotalCount = totalCount,
                 Page = request.PageNumber,
                 PageSize = request.PageSize,
-                
             };
 
         }
     }
 }
+
+

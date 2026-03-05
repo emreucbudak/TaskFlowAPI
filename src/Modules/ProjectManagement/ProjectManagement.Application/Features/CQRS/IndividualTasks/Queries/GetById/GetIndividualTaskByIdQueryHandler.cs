@@ -15,7 +15,7 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
 
         public async Task<GetIndividualTaskByIdQueryResponse> Handle(GetIndividualTaskByIdQueryRequest request, CancellationToken cancellationToken)
         {
-            var task = await _readRepository.GetIndividualTask(request.Id, false);
+            var task = await _readRepository.GetIndividualTask(request.Id, false, cancellationToken);
             if (task == null)
             {
                 throw new IndividualTaskNotFoundException();
@@ -25,3 +25,4 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -140,6 +140,14 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("SearchCompanyUsersQueryRequest")]
+    public async Task<IActionResult> SearchCompanyUsersQuery([FromBody] Identity.Application.Features.CQRS.Auth.Queries.SearchCompanyUsers.SearchCompanyUsersQueryRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetAllCompanyDepartmentsQueriesRequest")]
     public async Task<IActionResult> GetAllCompanyDepartmentsQueries([FromBody] Identity.Application.Features.CQRS.Department.Query.GetAll.GetAllCompanyDepartmentsQueriesRequest request)
     {
@@ -206,4 +214,3 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok();
     }
 }
-

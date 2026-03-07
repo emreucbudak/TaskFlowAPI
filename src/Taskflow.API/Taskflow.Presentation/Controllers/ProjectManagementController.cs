@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -99,6 +99,14 @@ public sealed class ProjectManagementController(IMediator mediator) : Controller
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetAllTasksQueriesRequest")]
     public async Task<IActionResult> GetAllTasksQueries([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetAllTasksQueriesRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetGroupTasksByAssignedUsersQueryRequest")]
+    public async Task<IActionResult> GetGroupTasksByAssignedUsersQuery([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUsers.GetGroupTasksByAssignedUsersQueryRequest request)
     {
         var result = await mediator.Send(request);
         return Ok(result);

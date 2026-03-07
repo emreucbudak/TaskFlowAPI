@@ -1,34 +1,44 @@
 using FlashMediator;
-using Microsoft.Extensions.Logging;
 using ProjectManagement.Application.Features.CQRS.Tasks.Queries.DTOS;
 using ProjectManagement.Application.Repositories;
 using TaskFlow.BuildingBlocks.Common;
 
-namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries
+namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUsers
 {
-    public class GetAllTasksQueriesHandler : IRequestHandler<GetAllTasksQueriesRequest, PagedResult<GetAllTasksQueriesResponse>>
+    public sealed class GetGroupTasksByAssignedUsersQueryHandler(
+        IProjectManagementReadRepository repository) : IRequestHandler<GetGroupTasksByAssignedUsersQueryRequest, PagedResult<GetAllTasksQueriesResponse>>
     {
-        private readonly IProjectManagementReadRepository _repository;
-        private readonly ILogger<GetAllTasksQueriesHandler> _logger;
-
-        public GetAllTasksQueriesHandler(
-            IProjectManagementReadRepository repository,
-            ILogger<GetAllTasksQueriesHandler> logger)
+        public async Task<PagedResult<GetAllTasksQueriesResponse>> Handle(GetGroupTasksByAssignedUsersQueryRequest request, CancellationToken cancellationToken)
         {
-            _repository = repository;
-            _logger = logger;
-        }
+            var assignedUserIds = request.AssignedUserIds?
+                .Where(userId => userId != Guid.Empty)
+                .Distinct()
+                .ToArray() ?? [];
 
-        public async Task<PagedResult<GetAllTasksQueriesResponse>> Handle(GetAllTasksQueriesRequest request, CancellationToken cancellationToken)
-        {
-            var (tasks, totalCount) = await _repository.GetAllTasks(false, request.PageNumber, request.PageSize, cancellationToken);
+            if (assignedUserIds.Length == 0)
+            {
+                return new PagedResult<GetAllTasksQueriesResponse>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    Page = request.PageNumber,
+                    PageSize = request.PageSize
+                };
+            }
+
+            var (tasks, totalCount) = await repository.GetTasksByAssignedUserIds(
+                false,
+                request.PageNumber,
+                request.PageSize,
+                assignedUserIds,
+                cancellationToken);
 
             return new PagedResult<GetAllTasksQueriesResponse>
             {
                 Items = tasks.Select(MapTask).ToList(),
                 TotalCount = totalCount,
                 Page = request.PageNumber,
-                PageSize = request.PageSize,
+                PageSize = request.PageSize
             };
         }
 

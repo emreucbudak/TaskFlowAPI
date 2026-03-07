@@ -1,4 +1,4 @@
-ï»¿using Chat.Infrastructure.Extensions;
+using Chat.Infrastructure.Extensions;
 using Chat.Infrastructure.Hubs;
 using Chat.Persistence.Extensions;
 using FlashMediator;
@@ -342,6 +342,7 @@ await ApplyMigrationsWithRetryAsync<ProjectManagementDbContext>(app.Services, st
 await ApplyMigrationsWithRetryAsync<StatsDbContext>(app.Services, startupLogger);
 await EnsureProjectManagementReferenceDataSeededAsync(app.Services);
 await EnsureReportStatusesSeededAsync(app.Services);
+await EnsureTenantPlanLimitsSyncedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
@@ -507,6 +508,59 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
     }
 }
 
+static async Task EnsureTenantPlanLimitsSyncedAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var tenantContext = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
+
+    var requiredPlanLimits = new Dictionary<Guid, (int PeopleAddedLimit, int TeamLimit, int IndividualTaskLimit, bool IsInternalReportingEnabled)>
+    {
+        [Guid.Parse("018da123-4567-7000-8000-000000000001")] = (50, 10, 1000, true),
+        [Guid.Parse("018da123-4567-7000-8000-000000000002")] = (250, 50, 10000, true),
+        [Guid.Parse("018da123-4567-7000-8000-000000000003")] = (10000, 500, 100000, true)
+    };
+
+    var existingPlanProperties = await tenantContext.planProperties
+        .Where(item => requiredPlanLimits.Keys.Contains(item.Id))
+        .ToListAsync();
+
+    var hasChanges = false;
+
+    foreach (var planProperties in existingPlanProperties)
+    {
+        var required = requiredPlanLimits[planProperties.Id];
+        var entry = tenantContext.Entry(planProperties);
+
+        if (planProperties.PeopleAddedLimit != required.PeopleAddedLimit)
+        {
+            entry.Property(x => x.PeopleAddedLimit).CurrentValue = required.PeopleAddedLimit;
+            hasChanges = true;
+        }
+
+        if (planProperties.TeamLimit != required.TeamLimit)
+        {
+            entry.Property(x => x.TeamLimit).CurrentValue = required.TeamLimit;
+            hasChanges = true;
+        }
+
+        if (planProperties.IndividualTaskLimit != required.IndividualTaskLimit)
+        {
+            entry.Property(x => x.IndividualTaskLimit).CurrentValue = required.IndividualTaskLimit;
+            hasChanges = true;
+        }
+
+        if (planProperties.IsInternalReportingEnabled != required.IsInternalReportingEnabled)
+        {
+            entry.Property(x => x.IsInternalReportingEnabled).CurrentValue = required.IsInternalReportingEnabled;
+            hasChanges = true;
+        }
+    }
+
+    if (hasChanges)
+    {
+        await tenantContext.SaveChangesAsync();
+    }
+}
 static async Task EnsureProjectManagementReferenceDataSeededAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();
@@ -514,17 +568,17 @@ static async Task EnsureProjectManagementReferenceDataSeededAsync(IServiceProvid
 
     var requiredStatuses = new[]
     {
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 1, StatusName = "GÃ¶rev AtamasÄ± YapÄ±ldÄ±" },
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 2, StatusName = "YapÄ±m AÅŸamasÄ±nda" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 1, StatusName = "Görev Atamasý Yapýldý" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 2, StatusName = "Yapým Aþamasýnda" },
         new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 3, StatusName = "Onay Bekliyor" },
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 4, StatusName = "TamamlandÄ±" }
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 4, StatusName = "Tamamlandý" }
     };
 
     var requiredPriorities = new[]
     {
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 1, CategoryName = "Ã–ncelikli GÃ¶rev" },
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 2, CategoryName = "SÄ±radan GÃ¶rev" },
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 3, CategoryName = "Acil GÃ¶rev" }
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 1, CategoryName = "Öncelikli Görev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 2, CategoryName = "Sýradan Görev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 3, CategoryName = "Acil Görev" }
     };
 
     var existingStatusIds = await projectManagementContext.TaskStatuses
@@ -578,5 +632,7 @@ static async Task EnsureReportStatusesSeededAsync(IServiceProvider services)
 
     await reportContext.SaveChangesAsync();
 }
+
+
 
 

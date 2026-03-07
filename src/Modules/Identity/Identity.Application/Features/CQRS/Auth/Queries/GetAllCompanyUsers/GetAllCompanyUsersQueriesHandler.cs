@@ -18,14 +18,23 @@ public sealed class GetAllCompanyUsersQueriesHandler
     public async Task<List<GetAllCompanyUsersQueriesResponse>> Handle(GetAllCompanyUsersQueriesRequest request, CancellationToken cancellationToken)
     {
         var usersQuery = _userManager.Users
-            .AsQueryable()
+            .AsNoTracking()
             .Where(user => user.CompanyId == request.CompanyId);
 
         return await usersQuery
             .Select(user => new GetAllCompanyUsersQueriesResponse
             {
                 Id = user.Id,
-                Name = user.Name ?? user.Email ?? string.Empty
+                Name = user.Name ?? user.Email ?? string.Empty,
+                DepartmentMemberships = user.DepartmentMembers
+                    .OrderBy(member => member.DepartmentId)
+                    .Select(member => new UserDepartmentMembershipResponse
+                    {
+                        DepartmentId = member.DepartmentId,
+                        DepartmentName = member.Department.Name,
+                        DepartmentRoleId = member.DepartmentRoleId
+                    })
+                    .ToList()
             })
             .OrderBy(item => item.Name)
             .ToListAsync(cancellationToken);

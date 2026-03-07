@@ -1,19 +1,19 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
 {
     public class CreateTasksCommandHandler : IRequestHandler<CreateTasksCommandRequest>
     {
         private readonly IProjectManagementWriteRepository _writeRepository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public CreateTasksCommandHandler(
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             IProjectManagementWriteRepository writeRepository,
             ICapPublisher capPublisher)
         {
@@ -27,7 +27,7 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
             var deadlineDate = DateOnly.FromDateTime(request.DeadlineTime);
             if (deadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
             {
-                throw new ArgumentException("Bitiş tarihi şuandan önce (geçmiş tarih olamaz)");
+                throw new ArgumentException("BitiÅŸ tarihi ÅŸuandan Ã¶nce (geÃ§miÅŸ tarih olamaz)");
             }
 
             var task = new Domain.Entities.Task(
@@ -70,3 +70,4 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
         }
     }
 }
+

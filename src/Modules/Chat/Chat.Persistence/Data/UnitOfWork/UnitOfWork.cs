@@ -1,9 +1,9 @@
-using Chat.Persistence.Data.ChatDb;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+﻿using Chat.Persistence.Data.ChatDb;
+using Chat.Application.UnitOfWork;
 
 namespace Chat.Persistence.Data.UnitOfWork
 {
-    public class UnitOfWork(ChatDbContext context) : IUnitOfWork
+    public class UnitOfWork(ChatDbContext context) : IChatUnitOfWork
     {
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

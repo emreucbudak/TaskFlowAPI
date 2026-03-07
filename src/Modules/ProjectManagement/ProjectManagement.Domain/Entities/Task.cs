@@ -1,11 +1,11 @@
-using ProjectManagement.Domain.Exceptions;
+﻿using ProjectManagement.Domain.Exceptions;
 using TaskFlow.BuildingBlocks.Common;
 
 namespace ProjectManagement.Domain.Entities
 {
     public class Task : BaseEntity
     {
-        private const int CompletedStatusId = 2;
+        private const int CompletedStatusId = 4;
 
         public Task(string taskName, string description, DateOnly deadlineTime, DateOnly createdDate)
         {
@@ -127,3 +127,4 @@ namespace ProjectManagement.Domain.Entities
         }
     }
 }
+

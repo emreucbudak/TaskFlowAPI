@@ -1,9 +1,9 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Exceptions;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Delete
 {
@@ -11,13 +11,13 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
     {
         private readonly IProjectManagementReadRepository _readRepository;
         private readonly IProjectManagementWriteRepository _writeRepository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public DeleteIndividualTaskCommandHandler(
             IProjectManagementReadRepository readRepository,
             IProjectManagementWriteRepository writeRepository,
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _readRepository = readRepository;
@@ -50,4 +50,5 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.De
         }
     }
 }
+
 

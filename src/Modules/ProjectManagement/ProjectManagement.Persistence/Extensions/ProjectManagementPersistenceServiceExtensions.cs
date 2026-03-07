@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Persistence.Data.ProjectManagementDb;
 using ProjectManagement.Persistence.Data.Repositories;
 using ProjectManagement.Persistence.Data.UnitOfWork;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Persistence.Extensions
 {
@@ -17,8 +17,7 @@ namespace ProjectManagement.Persistence.Extensions
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ProjectManagementDbContext).Assembly.FullName)));
 
-            services.AddScoped<ICapUnitOfWork, UnitOfWork>();
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICapUnitOfWork>());
+            services.AddScoped<IProjectManagementCapUnitOfWork, UnitOfWork>();
 
             services.AddScoped<IProjectManagementReadRepository, ProjectManagementReadRepository>();
             services.AddScoped<IProjectManagementWriteRepository, ProjectManagementWriteRepository>();
@@ -27,3 +26,5 @@ namespace ProjectManagement.Persistence.Extensions
         }
     }
 }
+
+

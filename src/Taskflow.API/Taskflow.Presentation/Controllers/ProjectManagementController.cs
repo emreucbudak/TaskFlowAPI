@@ -1,12 +1,16 @@
-using FlashMediator;
+﻿using FlashMediator;
+using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUsers;
 
 namespace Taskflow.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class ProjectManagementController(IMediator mediator) : ControllerBase
+public sealed class ProjectManagementController(IMediator mediator, UserManager<User> userManager) : ControllerBase
 {
     [Authorize(Policy = "SubscribedCompanyPolicy")]
     [HttpPost("CreateIndividualTaskCommandRequest")]
@@ -100,13 +104,31 @@ public sealed class ProjectManagementController(IMediator mediator) : Controller
     [HttpPost("GetAllTasksQueriesRequest")]
     public async Task<IActionResult> GetAllTasksQueries([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetAllTasksQueriesRequest request)
     {
-        var result = await mediator.Send(request);
+        var currentUser = await userManager.GetUserAsync(User);
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        var assignedUserIds = await userManager.Users
+            .Where(item => item.CompanyId == currentUser.CompanyId)
+            .Select(item => item.Id)
+            .ToListAsync();
+
+        var scopedRequest = new GetGroupTasksByAssignedUsersQueryRequest
+        {
+            AssignedUserIds = assignedUserIds,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+
+        var result = await mediator.Send(scopedRequest);
         return Ok(result);
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetGroupTasksByAssignedUsersQueryRequest")]
-    public async Task<IActionResult> GetGroupTasksByAssignedUsersQuery([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUsers.GetGroupTasksByAssignedUsersQueryRequest request)
+    public async Task<IActionResult> GetGroupTasksByAssignedUsersQuery([FromBody] GetGroupTasksByAssignedUsersQueryRequest request)
     {
         var result = await mediator.Send(request);
         return Ok(result);

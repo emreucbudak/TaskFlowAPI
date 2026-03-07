@@ -1,8 +1,8 @@
-using Chat.Application.ChatNotification;
+﻿using Chat.Application.ChatNotification;
 using Chat.Application.Features.CQRS.Message.Command.Create;
 using Chat.Application.Repositories;
 using Chat.Application.Exceptions;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Chat.Application.UnitOfWork;
 using Identity.Application.Services;
 
 namespace Chat.Application.Services
@@ -10,14 +10,14 @@ namespace Chat.Application.Services
     public class MessageControlService : IMessageControlService
     {
         private readonly IMessageWriteRepository _messageWriteRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IChatUnitOfWork _unitOfWork;
         private readonly IChatNotificationService _chatNotificationService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IGroupValidationService _groupValidationService;
 
         public MessageControlService(
             IMessageWriteRepository messageWriteRepository,
-            IUnitOfWork unitOfWork,
+            IChatUnitOfWork unitOfWork,
             IChatNotificationService chatNotificationService,
             ICurrentUserService currentUserService,
             IGroupValidationService groupValidationService)
@@ -58,12 +58,12 @@ namespace Chat.Application.Services
             var currentUserId = _currentUserService.UserId;
             if (!currentUserId.HasValue)
             {
-                throw new MessageAuthException("Kullanıcı kimliği doğrulanmadı.");
+                throw new MessageAuthException("KullanÄ±cÄ± kimliÄŸi doÄŸrulanmadÄ±.");
             }
 
             if (senderId != currentUserId.Value)
             {
-                throw new MessageAuthException("Gönderen ID, kimliği doğrulanmış kullanıcı ile eşleşmiyor.");
+                throw new MessageAuthException("GÃ¶nderen ID, kimliÄŸi doÄŸrulanmÄ±ÅŸ kullanÄ±cÄ± ile eÅŸleÅŸmiyor.");
             }
         }
 
@@ -71,18 +71,18 @@ namespace Chat.Application.Services
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new MessageControlException("Mesaj içeriği boş olamaz.");
+                throw new MessageControlException("Mesaj iÃ§eriÄŸi boÅŸ olamaz.");
             }
 
             if (content.Length > 1000)
             {
-                throw new MessageControlException("Mesaj içeriği 1000 karakter sınırını aşıyor.");
+                throw new MessageControlException("Mesaj iÃ§eriÄŸi 1000 karakter sÄ±nÄ±rÄ±nÄ± aÅŸÄ±yor.");
             }
 
             if (System.Text.RegularExpressions.Regex.IsMatch(content, @"<[^>]+>") ||
                 content.Contains("javascript:", StringComparison.OrdinalIgnoreCase))
             {
-                throw new MessageControlException("Mesaj içeriği geçersiz karakterler veya potansiyel güvenlik riskleri içeriyor.");
+                throw new MessageControlException("Mesaj iÃ§eriÄŸi geÃ§ersiz karakterler veya potansiyel gÃ¼venlik riskleri iÃ§eriyor.");
             }
         }
 
@@ -90,12 +90,12 @@ namespace Chat.Application.Services
         {
             if (receiverId.HasValue && groupId.HasValue)
             {
-                throw new MessageControlException("Bir mesaj hem alıcıya hem de gruba aynı anda gönderilemez.");
+                throw new MessageControlException("Bir mesaj hem alÄ±cÄ±ya hem de gruba aynÄ± anda gÃ¶nderilemez.");
             }
 
             if (!receiverId.HasValue && !groupId.HasValue)
             {
-                throw new MessageControlException("Bir mesajın ya bir alıcısı ya da bir grubu olmalıdır.");
+                throw new MessageControlException("Bir mesajÄ±n ya bir alÄ±cÄ±sÄ± ya da bir grubu olmalÄ±dÄ±r.");
             }
         }
 
@@ -104,7 +104,7 @@ namespace Chat.Application.Services
             var canSend = await _groupValidationService.ValidateGroupMembershipAsync(userId, groupId);
             if (!canSend)
             {
-                throw new MessageControlException("Grup bulunamadı, pasif veya kullanıcı grubun üyesi değil.");
+                throw new MessageControlException("Grup bulunamadÄ±, pasif veya kullanÄ±cÄ± grubun Ã¼yesi deÄŸil.");
             }
         }
 
@@ -131,3 +131,4 @@ namespace Chat.Application.Services
         }
     }
 }
+

@@ -1,8 +1,8 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
@@ -10,12 +10,12 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
     public class DeleteSubTasksCommandHandler : IRequestHandler<DeleteSubTasksCommandRequest>
     {
         private readonly IProjectManagementReadRepository _readRepository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public DeleteSubTasksCommandHandler(
             IProjectManagementReadRepository readRepository,
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _readRepository = readRepository;
@@ -32,7 +32,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
 
                 if (task == null)
                 {
-                    throw new Exception("Task bulunamad�.");
+                    throw new Exception("Task bulunamadı.");
                 }
 
                 task.RemoveSubTask(request.SubTaskId);
@@ -50,3 +50,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Delete
         }
     }
 }
+

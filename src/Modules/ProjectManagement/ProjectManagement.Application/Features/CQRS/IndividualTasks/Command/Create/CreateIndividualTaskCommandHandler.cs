@@ -1,14 +1,14 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create;
 
 public sealed class CreateIndividualTaskCommandHandler(
     IProjectManagementWriteRepository writeRepository,
-    ICapUnitOfWork unitOfWork,
+    IProjectManagementCapUnitOfWork unitOfWork,
     ICapPublisher capPublisher) : IRequestHandler<CreateIndividualTaskCommandRequest>
 {
     public async Task Handle(CreateIndividualTaskCommandRequest request, CancellationToken cancellationToken)
@@ -57,3 +57,4 @@ public sealed class CreateIndividualTaskCommandHandler(
         }
     }
 }
+

@@ -1,8 +1,8 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.UpdateTaskStatus
 {
@@ -12,12 +12,12 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
         private const string GroupTaskCompletedTopic = "GroupTaskCompleted";
 
         private readonly IProjectManagementReadRepository _repository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public UpdateTaskStatusCommandHandler(
             IProjectManagementReadRepository repository,
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _repository = repository;
@@ -61,4 +61,5 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Update.Updat
         }
     }
 }
+
 

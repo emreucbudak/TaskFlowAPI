@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using Report.Application.Repositories;
@@ -15,9 +15,11 @@ namespace Report.Persistence.Repositories
         private const int DefaultPageSize = 20;
         private DbSet<Domain.Entities.Report> db => context.Reports;
 
-        public async Task<PagedResult<Domain.Entities.Report>> GetAllAsync(int pageSize,
+        public async Task<PagedResult<Domain.Entities.Report>> GetAllAsync(
+            int pageSize,
             int page = 1,
             bool trackChanges = false,
+            IReadOnlyCollection<Guid>? reportingUserIds = null,
             Func<IQueryable<Domain.Entities.Report>, IIncludableQueryable<Domain.Entities.Report, object>>? inc = null)
         {
             ValidatePagination(ref page, ref pageSize);
@@ -27,6 +29,16 @@ namespace Report.Persistence.Repositories
             try
             {
                 var query = BuildQuery(trackChanges, inc);
+                var normalizedReportingUserIds = reportingUserIds?
+                    .Where(id => id != Guid.Empty)
+                    .Distinct()
+                    .ToArray() ?? [];
+
+                if (normalizedReportingUserIds.Length > 0)
+                {
+                    query = query.Where(report => normalizedReportingUserIds.Contains(report.ReportingUserId));
+                }
+
                 return await ToPagedResultAsync(query, page, pageSize);
             }
             catch (Exception ex)

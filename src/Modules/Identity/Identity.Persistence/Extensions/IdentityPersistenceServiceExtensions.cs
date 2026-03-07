@@ -1,4 +1,4 @@
-using Identity.Application.Repositories;
+﻿using Identity.Application.Repositories;
 using Identity.Application.UnitOfWork;
 using Identity.Domain.Entities;
 using Identity.Persistence.Data.IdentityDb;
@@ -7,7 +7,6 @@ using Identity.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Identity.Persistence.Extensions
 {
@@ -20,8 +19,6 @@ namespace Identity.Persistence.Extensions
                     b => b.MigrationsAssembly(typeof(IdentityManagementDbContext).Assembly.FullName)));
 
             services.AddScoped<IIdentityCapUnitOfWork, UnitOfWork>();
-            services.AddScoped<ICapUnitOfWork>(sp => sp.GetRequiredService<IIdentityCapUnitOfWork>());
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IIdentityCapUnitOfWork>());
 
             services.AddScoped(typeof(IReadRepository<,>), typeof(ReadRepository<,>));
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));
@@ -31,3 +28,4 @@ namespace Identity.Persistence.Extensions
         }
     }
 }
+

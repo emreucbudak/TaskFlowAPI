@@ -1,9 +1,8 @@
-using FlashMediator;
-using TaskFlow.BuildingBlocks.Interfaces;
+﻿using FlashMediator;
 
 namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeader
 {
-    public record GetDepartmentLeaderQueryRequest : IRequest<GetDepartmentLeaderQueryResponse>, ICacheableQuery
+    public record GetDepartmentLeaderQueryRequest : IRequest<GetDepartmentLeaderQueryResponse>
     {
         public GetDepartmentLeaderQueryRequest(Guid departmentId)
         {
@@ -16,3 +15,4 @@ namespace Identity.Application.Features.CQRS.Department.Query.GetDepartmentLeade
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(10);
     }
 }
+

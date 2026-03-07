@@ -1,9 +1,8 @@
-using FlashMediator;
-using TaskFlow.BuildingBlocks.Interfaces;
+﻿using FlashMediator;
 
 namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesByGroupId
 {
-    public class GetMessagesByGroupIdQueryRequest : IRequest<List<GetMessagesByGroupIdQueryResponse>>,ICacheableQuery
+    public class GetMessagesByGroupIdQueryRequest : IRequest<List<GetMessagesByGroupIdQueryResponse>>
     {
         public Guid CurrentUserId { get; init; }
         public Guid GroupId { get; init; }
@@ -23,3 +22,4 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesByGroupId
         }
     }
 }
+

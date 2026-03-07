@@ -1,4 +1,4 @@
-using Chat.Infrastructure.Extensions;
+﻿using Chat.Infrastructure.Extensions;
 using Chat.Infrastructure.Hubs;
 using Chat.Persistence.Extensions;
 using FlashMediator;
@@ -340,6 +340,7 @@ await ApplyMigrationsWithRetryAsync<NotificationDbContext>(app.Services, startup
 await ApplyMigrationsWithRetryAsync<ReportDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<ProjectManagementDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<StatsDbContext>(app.Services, startupLogger);
+await EnsureProjectManagementReferenceDataSeededAsync(app.Services);
 await EnsureReportStatusesSeededAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
@@ -379,6 +380,13 @@ static async Task ApplyMigrationsWithRetryAsync<TContext>(
         {
             using var scope = services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
+            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync(cancellationToken);
+            if (!pendingMigrations.Any())
+            {
+                logger.LogInformation("{Context} has no pending migrations. Skipping database migrate step.", typeof(TContext).Name);
+                return;
+            }
+
             await dbContext.Database.MigrateAsync(cancellationToken);
             logger.LogInformation("{Context} migration completed.", typeof(TContext).Name);
             return;
@@ -499,6 +507,59 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
     }
 }
 
+static async Task EnsureProjectManagementReferenceDataSeededAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var projectManagementContext = scope.ServiceProvider.GetRequiredService<ProjectManagementDbContext>();
+
+    var requiredStatuses = new[]
+    {
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 1, StatusName = "Görev Ataması Yapıldı" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 2, StatusName = "Yapım Aşamasında" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 3, StatusName = "Onay Bekliyor" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 4, StatusName = "Tamamlandı" }
+    };
+
+    var requiredPriorities = new[]
+    {
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 1, CategoryName = "Öncelikli Görev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 2, CategoryName = "Sıradan Görev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 3, CategoryName = "Acil Görev" }
+    };
+
+    var existingStatusIds = await projectManagementContext.TaskStatuses
+        .Select(x => x.TaskStatusId)
+        .ToListAsync();
+
+    var existingPriorityIds = await projectManagementContext.TaskPriorityCategories
+        .Select(x => x.TaskPriorityCategoryId)
+        .ToListAsync();
+
+    var missingStatuses = requiredStatuses
+        .Where(x => !existingStatusIds.Contains(x.TaskStatusId))
+        .ToList();
+
+    var missingPriorities = requiredPriorities
+        .Where(x => !existingPriorityIds.Contains(x.TaskPriorityCategoryId))
+        .ToList();
+
+    if (missingStatuses.Count == 0 && missingPriorities.Count == 0)
+    {
+        return;
+    }
+
+    if (missingStatuses.Count > 0)
+    {
+        projectManagementContext.TaskStatuses.AddRange(missingStatuses);
+    }
+
+    if (missingPriorities.Count > 0)
+    {
+        projectManagementContext.TaskPriorityCategories.AddRange(missingPriorities);
+    }
+
+    await projectManagementContext.SaveChangesAsync();
+}
 static async Task EnsureReportStatusesSeededAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();
@@ -517,3 +578,5 @@ static async Task EnsureReportStatusesSeededAsync(IServiceProvider services)
 
     await reportContext.SaveChangesAsync();
 }
+
+

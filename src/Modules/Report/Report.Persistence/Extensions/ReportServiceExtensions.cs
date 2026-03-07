@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Report.Application.Repositories;
 using Report.Application.UnitOfWork;
 using Report.Persistence.Data;
 using Report.Persistence.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Report.Persistence.Extensions
 {
@@ -20,8 +19,6 @@ namespace Report.Persistence.Extensions
             });
 
             services.AddScoped<IReportUnitOfWork, Data.UnitOfWork.UnitOfWork>();
-            services.AddScoped<ICapUnitOfWork>(sp => sp.GetRequiredService<IReportUnitOfWork>());
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IReportUnitOfWork>());
 
             services.AddScoped<IReportReadRepository, ReportReadRepository>();
             services.AddScoped<IReportWriteRepository, ReportWriteRepository>();
@@ -30,3 +27,4 @@ namespace Report.Persistence.Extensions
         }
     }
 }
+

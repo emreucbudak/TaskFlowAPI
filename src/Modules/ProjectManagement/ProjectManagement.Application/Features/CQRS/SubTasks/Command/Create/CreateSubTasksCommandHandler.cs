@@ -1,8 +1,8 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
 {
@@ -10,13 +10,13 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
     {
         private readonly IProjectManagementReadRepository _readRepository;
         private readonly IProjectManagementWriteRepository _writeRepository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public CreateSubTasksCommandHandler(
             IProjectManagementReadRepository readRepository,
             IProjectManagementWriteRepository writeRepository,
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _readRepository = readRepository;
@@ -34,7 +34,7 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
                 if (task == null)
                 {
 
-                    throw new Exception("Task bulunamad�.");
+                    throw new Exception("Task bulunamadı.");
                 }
 
                 var subTask = task.AddSubTask(
@@ -59,4 +59,5 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create
         }
     }
 }
+
 

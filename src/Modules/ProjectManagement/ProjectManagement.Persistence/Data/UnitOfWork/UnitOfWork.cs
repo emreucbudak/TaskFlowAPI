@@ -1,12 +1,12 @@
-using DotNetCore.CAP;
+﻿using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using ProjectManagement.Persistence.Data.ProjectManagementDb;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Persistence.Data.UnitOfWork
 {
-    public class UnitOfWork(ProjectManagementDbContext context) : ICapUnitOfWork
+    public class UnitOfWork(ProjectManagementDbContext context) : IProjectManagementCapUnitOfWork
     {
         private IDbContextTransaction? _currentTransaction;
 

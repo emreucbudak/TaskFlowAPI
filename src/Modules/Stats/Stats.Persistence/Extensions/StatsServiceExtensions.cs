@@ -5,7 +5,6 @@ using Stats.Application.Repositories;
 using Stats.Persistence.Data;
 using Stats.Persistence.Messaging.Consumers;
 using Stats.Persistence.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Stats.Persistence.Extensions
 {
@@ -19,7 +18,6 @@ namespace Stats.Persistence.Extensions
                     npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(StatsDbContext).Assembly.FullName));
             });
 
-            services.AddScoped<IUnitOfWork, Data.UnitOfWork.UnitOfWork>();
 
             services.AddScoped<IWorkerStatsReadRepositories, WorkerStatsReadRepositories>();
             services.AddScoped<IWorkerStatsWriteRepositories, WorkerStatsWriteRepositories>();
@@ -29,3 +27,4 @@ namespace Stats.Persistence.Extensions
         }
     }
 }
+

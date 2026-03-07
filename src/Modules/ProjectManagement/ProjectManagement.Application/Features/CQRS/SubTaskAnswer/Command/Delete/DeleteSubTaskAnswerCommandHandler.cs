@@ -1,16 +1,16 @@
-using FlashMediator;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
 using ProjectManagement.Domain.Entities;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Delete
 {
     public class DeleteSubTaskAnswerCommandHandler : IRequestHandler<DeleteSubTaskAnswerCommandRequest, bool>
     {
         private readonly IProjectManagementReadRepository readRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork unitOfWork;
 
-        public DeleteSubTaskAnswerCommandHandler(IProjectManagementReadRepository readRepository, IUnitOfWork unitOfWork)
+        public DeleteSubTaskAnswerCommandHandler(IProjectManagementReadRepository readRepository, IProjectManagementCapUnitOfWork unitOfWork)
         {
             this.readRepository = readRepository;
             this.unitOfWork = unitOfWork;
@@ -26,4 +26,5 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Dele
         }
     }
 }
+
 

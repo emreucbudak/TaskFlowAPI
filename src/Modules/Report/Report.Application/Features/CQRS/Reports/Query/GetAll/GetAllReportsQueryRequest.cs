@@ -1,4 +1,4 @@
-using FlashMediator;
+﻿using FlashMediator;
 using TaskFlow.BuildingBlocks.Common;
 
 namespace Report.Application.Features.CQRS.Reports.Query.GetAll
@@ -7,5 +7,6 @@ namespace Report.Application.Features.CQRS.Reports.Query.GetAll
     {
         public int Page { get; init; } = 1;
         public int PageSize { get; init; } = 10;
+        public IReadOnlyCollection<Guid> ReportingUserIds { get; init; } = [];
     }
 }

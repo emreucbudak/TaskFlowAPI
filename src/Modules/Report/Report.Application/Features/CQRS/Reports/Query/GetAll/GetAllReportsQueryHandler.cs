@@ -1,4 +1,4 @@
-using FlashMediator;
+﻿using FlashMediator;
 using Report.Application.Repositories;
 using TaskFlow.BuildingBlocks.Common;
 
@@ -15,7 +15,11 @@ namespace Report.Application.Features.CQRS.Reports.Query.GetAll
 
         public async Task<PagedResult<GetAllReportsQueryResponse>> Handle(GetAllReportsQueryRequest request, CancellationToken cancellationToken)
         {
-            var result = await _readRepository.GetAllAsync(request.PageSize, request.Page, false);
+            var result = await _readRepository.GetAllAsync(
+                request.PageSize,
+                request.Page,
+                false,
+                request.ReportingUserIds);
 
             var mappedItems = result.Items.Select(r => new GetAllReportsQueryResponse(
                 r.Id,

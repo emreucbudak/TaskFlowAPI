@@ -1,12 +1,15 @@
-using FlashMediator;
+﻿using FlashMediator;
+using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Taskflow.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class ReportController(IMediator mediator) : ControllerBase
+public sealed class ReportController(IMediator mediator, UserManager<User> userManager) : ControllerBase
 {
     [Authorize(Policy = "SubscribedWorkerPolicy")]
     [HttpPost("CreateReportCommandRequest")]
@@ -28,7 +31,19 @@ public sealed class ReportController(IMediator mediator) : ControllerBase
     [HttpPost("GetAllReportsQueryRequest")]
     public async Task<IActionResult> GetAllReportsQuery([FromBody] Report.Application.Features.CQRS.Reports.Query.GetAll.GetAllReportsQueryRequest request)
     {
-        var result = await mediator.Send(request);
+        var currentUser = await userManager.GetUserAsync(User);
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        var reportingUserIds = await userManager.Users
+            .Where(item => item.CompanyId == currentUser.CompanyId)
+            .Select(item => item.Id)
+            .ToListAsync();
+
+        var scopedRequest = request with { ReportingUserIds = reportingUserIds };
+        var result = await mediator.Send(scopedRequest);
         return Ok(result);
     }
 

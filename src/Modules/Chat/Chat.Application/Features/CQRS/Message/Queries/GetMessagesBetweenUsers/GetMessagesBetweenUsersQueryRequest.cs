@@ -1,9 +1,8 @@
-using FlashMediator;
-using TaskFlow.BuildingBlocks.Interfaces;
+﻿using FlashMediator;
 
 namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
 {
-    public class GetMessagesBetweenUsersQueryRequest : IRequest<List<GetMessagesBetweenUsersQueryResponse>>, ICacheableQuery
+    public class GetMessagesBetweenUsersQueryRequest : IRequest<List<GetMessagesBetweenUsersQueryResponse>>
     {
         public Guid CurrentUserId { get; init; }
         public Guid UserId1 { get; init; }
@@ -25,3 +24,4 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
         }
     }
 }
+

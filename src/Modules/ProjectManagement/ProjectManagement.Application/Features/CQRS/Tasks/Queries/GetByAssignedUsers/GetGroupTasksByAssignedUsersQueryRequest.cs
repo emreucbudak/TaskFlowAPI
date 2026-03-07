@@ -1,11 +1,10 @@
-using FlashMediator;
+﻿using FlashMediator;
 using ProjectManagement.Application.Features.CQRS.Tasks.Queries;
 using TaskFlow.BuildingBlocks.Common;
-using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUsers
 {
-    public sealed record GetGroupTasksByAssignedUsersQueryRequest : IRequest<PagedResult<GetAllTasksQueriesResponse>>, ICacheableQuery
+    public sealed record GetGroupTasksByAssignedUsersQueryRequest : IRequest<PagedResult<GetAllTasksQueriesResponse>>
     {
         public IReadOnlyCollection<Guid> AssignedUserIds { get; init; } = [];
         public int PageNumber { get; init; } = 1;

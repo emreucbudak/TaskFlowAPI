@@ -1,20 +1,20 @@
-using DotNetCore.CAP;
+ï»¿using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.UpdateSubTask
 {
     public class UpdateSubTaskCommandHandler : IRequestHandler<UpdateSubTaskCommandRequest>
     {
         private readonly IProjectManagementReadRepository _repository;
-        private readonly ICapUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
         private readonly ICapPublisher _capPublisher;
 
         public UpdateSubTaskCommandHandler(
             IProjectManagementReadRepository repository,
-            ICapUnitOfWork unitOfWork,
+            IProjectManagementCapUnitOfWork unitOfWork,
             ICapPublisher capPublisher)
         {
             _repository = repository;
@@ -30,14 +30,14 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
 
                 if (parentTask == null)
                 {
-                    throw new Exception("Ana görev bulunamadý.");
+                    throw new Exception("Ana gÃ¶rev bulunamadÄ±.");
                 }
 
                 var subTask = parentTask.GetSubtask(request.SubTasksId);
 
                 if (subTask == null)
                 {
-                    throw new Exception("Alt görev bulunamadý.");
+                    throw new Exception("Alt gÃ¶rev bulunamadÄ±.");
                 }
 
                 subTask.UpdateTaskTitle(request.TaskTitle);
@@ -58,3 +58,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTasks.Command.Update.Up
         }
     }
 }
+

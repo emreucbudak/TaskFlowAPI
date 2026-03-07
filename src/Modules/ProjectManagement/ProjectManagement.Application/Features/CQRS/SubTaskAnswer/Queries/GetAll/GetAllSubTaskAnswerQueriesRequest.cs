@@ -1,9 +1,8 @@
 ﻿using FlashMediator;
-using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetAll
 {
-    public record GetAllSubTaskAnswerQueriesRequest : IRequest<List<GetAllSubTaskAnswerQueriesResponse>> ,ICacheableQuery
+    public record GetAllSubTaskAnswerQueriesRequest : IRequest<List<GetAllSubTaskAnswerQueriesResponse>> 
     {
         public Guid TaskId { get; init; }
         public Guid SubTaskId   { get; init; }
@@ -13,3 +12,4 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Queries.GetA
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(15);
     }
 }
+

@@ -1,17 +1,17 @@
 ﻿using FlashMediator;
 using Notification.Application.Features.CQRS.Notification.Exceptions;
 using Notification.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Notification.Application.UnitOfWork;
 
 namespace Notification.Application.Features.CQRS.Notification.Command.Delete
 {
     public class DeleteNotificationCommandHandler : IRequestHandler<DeleteNotificationCommandRequest>
     {
         private readonly INotificationWriteRepository writeRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly INotificationUnitOfWork unitOfWork;
         private readonly INotificationReadRepository readRepository;
 
-        public DeleteNotificationCommandHandler(INotificationWriteRepository writeRepository, IUnitOfWork unitOfWork, INotificationReadRepository readRepository)
+        public DeleteNotificationCommandHandler(INotificationWriteRepository writeRepository, INotificationUnitOfWork unitOfWork, INotificationReadRepository readRepository)
         {
             this.writeRepository = writeRepository;
             this.unitOfWork = unitOfWork;
@@ -30,3 +30,4 @@ namespace Notification.Application.Features.CQRS.Notification.Command.Delete
         }
     }
 }
+

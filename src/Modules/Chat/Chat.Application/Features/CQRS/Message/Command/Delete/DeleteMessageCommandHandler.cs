@@ -1,16 +1,16 @@
-using Chat.Application.Features.CQRS.Message.Exceptions;
+﻿using Chat.Application.Features.CQRS.Message.Exceptions;
 using Chat.Application.Repositories;
 using FlashMediator;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Chat.Application.UnitOfWork;
 
 namespace Chat.Application.Features.CQRS.Message.Command.Delete
 {
     public class DeleteMessageCommandHandler : IRequestHandler<DeleteMessageCommandRequest>
     {
         private readonly IMessageWriteRepository _messageWriteRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IChatUnitOfWork _unitOfWork;
 
-        public DeleteMessageCommandHandler(IMessageWriteRepository messageWriteRepository, IUnitOfWork unitOfWork)
+        public DeleteMessageCommandHandler(IMessageWriteRepository messageWriteRepository, IChatUnitOfWork unitOfWork)
         {
             _messageWriteRepository = messageWriteRepository;
             _unitOfWork = unitOfWork;
@@ -27,3 +27,4 @@ namespace Chat.Application.Features.CQRS.Message.Command.Delete
         }
     }
 }
+

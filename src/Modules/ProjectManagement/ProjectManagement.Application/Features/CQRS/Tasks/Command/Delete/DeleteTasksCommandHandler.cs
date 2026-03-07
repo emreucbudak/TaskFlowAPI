@@ -1,6 +1,6 @@
-using FlashMediator;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
 {
@@ -8,9 +8,9 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
     {
         private readonly IProjectManagementReadRepository readRepository;
         private readonly IProjectManagementWriteRepository projectManagementWriteRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork _unitOfWork;
 
-        public DeleteTasksCommandHandler(IProjectManagementReadRepository readRepository, IUnitOfWork unitOfWork, IProjectManagementWriteRepository projectManagementWriteRepository)
+        public DeleteTasksCommandHandler(IProjectManagementReadRepository readRepository, IProjectManagementCapUnitOfWork unitOfWork, IProjectManagementWriteRepository projectManagementWriteRepository)
         {
             this.readRepository = readRepository;
             _unitOfWork = unitOfWork;
@@ -25,5 +25,6 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Delete
         }
     }
 }
+
 
 

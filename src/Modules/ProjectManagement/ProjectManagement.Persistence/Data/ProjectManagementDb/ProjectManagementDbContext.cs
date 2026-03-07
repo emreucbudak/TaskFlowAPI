@@ -1,5 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using ProjectManagement.Persistence.Data.DataConfiguration;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ProjectManagement.Persistence.Data.ProjectManagementDb
 {
@@ -22,10 +21,10 @@ namespace ProjectManagement.Persistence.Data.ProjectManagementDb
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("ProjectManagement");
-            modelBuilder.ApplyConfiguration(new TaskConfiguration());
-            modelBuilder.ApplyConfiguration(new SubtaskConfiguration());
-            modelBuilder.ApplyConfiguration(new IndividualTaskConfiguration());
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProjectManagementDbContext).Assembly);
+
             base.OnModelCreating(modelBuilder);
         }
     }
 }
+

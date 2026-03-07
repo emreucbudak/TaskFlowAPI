@@ -1,15 +1,15 @@
 ﻿using FlashMediator;
 using Notification.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Notification.Application.UnitOfWork;
 
 namespace Notification.Application.Features.CQRS.Notification.Command.Create
 {
     public class CreateNotificationCommandHandler : IRequestHandler<CreateNotificationCommandRequest>
     {
         private readonly INotificationWriteRepository writeRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly INotificationUnitOfWork unitOfWork;
 
-        public CreateNotificationCommandHandler(INotificationWriteRepository writeRepository, IUnitOfWork unitOfWork)
+        public CreateNotificationCommandHandler(INotificationWriteRepository writeRepository, INotificationUnitOfWork unitOfWork)
         {
             this.writeRepository = writeRepository;
             this.unitOfWork = unitOfWork;
@@ -23,3 +23,4 @@ namespace Notification.Application.Features.CQRS.Notification.Command.Create
         }
     }
 }
+

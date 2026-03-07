@@ -1,4 +1,4 @@
-using Chat.Domain.Entities;
+﻿using Chat.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,6 +16,15 @@ namespace Chat.Persistence.Data.Configurations
 
             builder.Property(x => x.SenderId)
                 .IsRequired();
+
+            builder.Property(x => x.IsDeleted)
+                .HasColumnName("isDeleted");
+
+            builder.Property(x => x.IsEdited)
+                .HasColumnName("isEdited");
+
+            builder.Property(x => x.IsDelivered)
+                .HasColumnName("isDelivered");
 
             // Index for faster lookups
             builder.HasIndex(x => x.SenderId);

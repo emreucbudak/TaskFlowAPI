@@ -1,15 +1,15 @@
-using FlashMediator;
+﻿using FlashMediator;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 
 namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Update
 {
     public class UpdateSubTaskAnswerCommandHandler : IRequestHandler<UpdateSubTaskAnswerCommandRequest>
     {
         private readonly IProjectManagementReadRepository readRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IProjectManagementCapUnitOfWork unitOfWork;
 
-        public UpdateSubTaskAnswerCommandHandler(IProjectManagementReadRepository readRepository, IUnitOfWork unitOfWork)
+        public UpdateSubTaskAnswerCommandHandler(IProjectManagementReadRepository readRepository, IProjectManagementCapUnitOfWork unitOfWork)
         {
             this.readRepository = readRepository;
             this.unitOfWork = unitOfWork;
@@ -24,4 +24,5 @@ namespace ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Upda
         }
     }
 }
+
 

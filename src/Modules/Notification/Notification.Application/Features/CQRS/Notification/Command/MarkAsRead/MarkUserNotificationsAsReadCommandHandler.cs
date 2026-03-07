@@ -1,12 +1,12 @@
-using FlashMediator;
+﻿using FlashMediator;
 using Notification.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Notification.Application.UnitOfWork;
 
 namespace Notification.Application.Features.CQRS.Notification.Command.MarkAsRead
 {
     public sealed class MarkUserNotificationsAsReadCommandHandler(
         INotificationReadRepository readRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<MarkUserNotificationsAsReadCommandRequest, int>
+        INotificationUnitOfWork unitOfWork) : IRequestHandler<MarkUserNotificationsAsReadCommandRequest, int>
     {
         public async Task<int> Handle(MarkUserNotificationsAsReadCommandRequest request, CancellationToken cancellationToken)
         {
@@ -36,3 +36,4 @@ namespace Notification.Application.Features.CQRS.Notification.Command.MarkAsRead
         }
     }
 }
+

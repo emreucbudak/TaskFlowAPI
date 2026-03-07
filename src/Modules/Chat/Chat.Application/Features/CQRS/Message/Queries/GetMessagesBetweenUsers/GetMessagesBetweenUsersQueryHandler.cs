@@ -1,19 +1,15 @@
-using Chat.Application.Repositories;
+﻿using Chat.Application.Repositories;
 using FlashMediator;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
 
 namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
 {
     public class GetMessagesBetweenUsersQueryHandler : IRequestHandler<GetMessagesBetweenUsersQueryRequest, List<GetMessagesBetweenUsersQueryResponse>>
     {
         private readonly IMessageReadRepository _messageReadRepository;
-        private readonly IDistributedCache _distributedCache;
 
-        public GetMessagesBetweenUsersQueryHandler(IMessageReadRepository messageReadRepository, IDistributedCache distributedCache)
+        public GetMessagesBetweenUsersQueryHandler(IMessageReadRepository messageReadRepository)
         {
             _messageReadRepository = messageReadRepository;
-            _distributedCache = distributedCache;
         }
 
         public async Task<List<GetMessagesBetweenUsersQueryResponse>> Handle(GetMessagesBetweenUsersQueryRequest request, CancellationToken cancellationToken)
@@ -44,3 +40,4 @@ namespace Chat.Application.Features.CQRS.Message.Queries.GetMessagesBetweenUsers
         }
     }
 }
+

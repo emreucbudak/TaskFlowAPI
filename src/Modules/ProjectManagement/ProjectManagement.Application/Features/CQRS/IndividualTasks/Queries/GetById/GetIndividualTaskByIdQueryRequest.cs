@@ -1,9 +1,8 @@
-using FlashMediator;
-using TaskFlow.BuildingBlocks.Interfaces;
+﻿using FlashMediator;
 
 namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.GetById
 {
-    public record GetIndividualTaskByIdQueryRequest : IRequest<GetIndividualTaskByIdQueryResponse> , ICacheableQuery
+    public record GetIndividualTaskByIdQueryRequest : IRequest<GetIndividualTaskByIdQueryResponse> 
     {
         public Guid Id { get; init; }
 
@@ -12,3 +11,4 @@ namespace ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.Ge
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(10);
     }
 }
+

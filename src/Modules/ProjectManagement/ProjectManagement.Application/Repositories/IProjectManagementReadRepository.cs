@@ -6,6 +6,7 @@ namespace ProjectManagement.Application.Repositories
     {
         System.Threading.Tasks.Task<Task> GetTask(Guid id, bool trackChanges, CancellationToken cancellationToken);
         System.Threading.Tasks.Task<(List<Task> Items, int TotalCount)> GetAllTasks(bool trackChanges, int pageNumber, int pageSize, CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<(List<Task> Items, int TotalCount)> GetTasksByAssignedUserIds(bool trackChanges, int pageNumber, int pageSize, IReadOnlyCollection<Guid> assignedUserIds, CancellationToken cancellationToken);
         System.Threading.Tasks.Task<Domain.Entities.IndividualTasks> GetIndividualTask(Guid id, bool trackChanges, CancellationToken cancellationToken);
         System.Threading.Tasks.Task<(List<Domain.Entities.IndividualTasks> Items, int TotalCount)> GetAllIndividualTasks(bool trackChanges, int pageNumber, int pageSize, Guid userId, CancellationToken cancellationToken);
     }

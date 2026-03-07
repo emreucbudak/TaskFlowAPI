@@ -10,5 +10,10 @@ namespace Report.Application.Repositories
             int page = 1,
             bool trackChanges = false,
             Func<IQueryable<Domain.Entities.Report>, IIncludableQueryable<Domain.Entities.Report, object>>? inc = null);
+        Task<PagedResult<Domain.Entities.Report>> GetByDepartmentAsync(Guid departmentId,
+            int pageSize,
+            int page = 1,
+            bool trackChanges = false,
+            Func<IQueryable<Domain.Entities.Report>, IIncludableQueryable<Domain.Entities.Report, object>>? inc = null);
     }
 }

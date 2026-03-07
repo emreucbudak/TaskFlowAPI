@@ -1,4 +1,4 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +33,14 @@ public sealed class ReportController(IMediator mediator) : ControllerBase
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetDepartmentReportsQueryRequest")]
+    public async Task<IActionResult> GetDepartmentReportsQuery([FromBody] Report.Application.Features.CQRS.Reports.Query.GetByDepartment.GetDepartmentReportsQueryRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetReportByIdQueryRequest")]
     public async Task<IActionResult> GetReportByIdQuery([FromBody] Report.Application.Features.CQRS.Reports.Query.GetById.GetReportByIdQueryRequest request)
     {
@@ -48,4 +56,3 @@ public sealed class ReportController(IMediator mediator) : ControllerBase
         return Ok();
     }
 }
-

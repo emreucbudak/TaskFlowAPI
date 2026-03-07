@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.BuildingBlocks.Common;
 using UserResponse = Identity.Application.Features.CQRS.Auth.Queries.GetAllCompanyUsers.GetAllCompanyUsersQueriesResponse;
+using UserDepartmentMembershipResponse = Identity.Application.Features.CQRS.Auth.Queries.GetAllCompanyUsers.UserDepartmentMembershipResponse;
 
 namespace Identity.Application.Features.CQRS.Auth.Queries.SearchCompanyUsers;
 
@@ -39,7 +40,16 @@ public sealed class SearchCompanyUsersQueryHandler(UserManager<User> userManager
             .Select(user => new UserResponse
             {
                 Id = user.Id,
-                Name = user.Name ?? user.Email ?? string.Empty
+                Name = user.Name ?? user.Email ?? string.Empty,
+                DepartmentMemberships = user.DepartmentMembers
+                    .OrderBy(member => member.DepartmentId)
+                    .Select(member => new UserDepartmentMembershipResponse
+                    {
+                        DepartmentId = member.DepartmentId,
+                        DepartmentName = member.Department.Name,
+                        DepartmentRoleId = member.DepartmentRoleId
+                    })
+                    .ToList()
             })
             .ToListAsync(cancellationToken);
 

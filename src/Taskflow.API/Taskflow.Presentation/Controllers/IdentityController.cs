@@ -19,7 +19,7 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok();
     }
 
-    [Authorize(Policy = "SubscribedCompanyPolicy")]
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("AddGroupsCommandRequest")]
     public async Task<IActionResult> AddGroupsCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.Add.AddGroupsCommandRequest request)
     {

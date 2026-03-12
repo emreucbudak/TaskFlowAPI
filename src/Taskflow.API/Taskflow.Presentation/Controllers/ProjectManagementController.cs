@@ -12,11 +12,53 @@ namespace Taskflow.Presentation.Controllers;
 [Route("api/[controller]")]
 public sealed class ProjectManagementController(IMediator mediator, UserManager<User> userManager) : ControllerBase
 {
-    [Authorize(Policy = "SubscribedCompanyPolicy")]
+    private const int DepartmentLeaderRoleId = 1;
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("CreateIndividualTaskCommandRequest")]
-    public async Task<IActionResult> CreateIndividualTaskCommand([FromBody] ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create.CreateIndividualTaskCommandRequest request)
+    public async Task<IActionResult> CreateIndividualTaskCommand([FromBody] ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create.CreateIndividualTaskCommandRequest request, CancellationToken cancellationToken)
     {
-        await mediator.Send(request);
+        var currentUser = await userManager.GetUserAsync(User);
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (currentUser.CompanyId != request.CompanyId)
+        {
+            return Forbid();
+        }
+
+        var actorRoles = await userManager.GetRolesAsync(currentUser);
+        var isCompanyUser = actorRoles.Any(role => string.Equals(role, "Company", StringComparison.OrdinalIgnoreCase));
+
+        if (!isCompanyUser)
+        {
+            var managedDepartmentIds = await userManager.Users
+                .AsNoTracking()
+                .Where(user => user.Id == currentUser.Id && user.CompanyId == request.CompanyId)
+                .SelectMany(user => user.DepartmentMembers
+                    .Where(member => member.DepartmentRoleId == DepartmentLeaderRoleId)
+                    .Select(member => member.DepartmentId))
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            if (managedDepartmentIds.Count == 0)
+            {
+                return Forbid();
+            }
+
+            var canAssignUser = await userManager.Users
+                .AsNoTracking()
+                .Where(user => user.Id == request.AssignedUserId && user.CompanyId == request.CompanyId)
+                .AnyAsync(user => user.DepartmentMembers.Any(member => managedDepartmentIds.Contains(member.DepartmentId)), cancellationToken);
+
+            if (!canAssignUser)
+            {
+                return Forbid();
+            }
+        }
+
+        await mediator.Send(request, cancellationToken);
         return Ok();
     }
 
@@ -42,6 +84,14 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
     {
         await mediator.Send(request);
         return Ok();
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("CreateGroupTaskWithSubTasksCommandRequest")]
+    public async Task<IActionResult> CreateGroupTaskWithSubTasksCommand([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Command.CreateGroupTask.CreateGroupTaskWithSubTasksCommandRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return Ok(result);
     }
 
     [Authorize(Policy = "SubscribedWorkerPolicy")]
@@ -198,3 +248,4 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
         return Ok();
     }
 }
+

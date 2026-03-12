@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
@@ -13,6 +13,11 @@ public sealed class CreateIndividualTaskCommandHandler(
 {
     public async Task Handle(CreateIndividualTaskCommandRequest request, CancellationToken cancellationToken)
     {
+        if (request.TaskPriorityCategoryId <= 0)
+        {
+            throw new ArgumentException("Gorev onceligi zorunludur.");
+        }
+
         var task = new Domain.Entities.IndividualTasks(
             request.AssignedUserId,
             request.TaskTitle,
@@ -57,4 +62,3 @@ public sealed class CreateIndividualTaskCommandHandler(
         }
     }
 }
-

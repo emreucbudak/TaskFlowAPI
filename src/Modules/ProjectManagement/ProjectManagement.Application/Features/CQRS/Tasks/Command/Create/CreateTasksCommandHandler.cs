@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using FlashMediator;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
@@ -27,7 +27,12 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
             var deadlineDate = DateOnly.FromDateTime(request.DeadlineTime);
             if (deadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
             {
-                throw new ArgumentException("BitiÅŸ tarihi ÅŸuandan Ã¶nce (geÃ§miÅŸ tarih olamaz)");
+                throw new ArgumentException("Bitis tarihi suandan once olamaz.");
+            }
+
+            if (request.TaskPriorityCategoryId <= 0)
+            {
+                throw new ArgumentException("Gorev onceligi zorunludur.");
             }
 
             var task = new Domain.Entities.Task(
@@ -35,6 +40,8 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
                 request.Description,
                 deadlineDate,
                 DateOnly.FromDateTime(DateTime.UtcNow));
+            task.UpdateTaskPriority(request.TaskPriorityCategoryId);
+
             var delayTime = deadlineDate
                 .ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
                 .AddDays(-1) - DateTime.UtcNow;
@@ -70,4 +77,3 @@ namespace ProjectManagement.Application.Features.CQRS.Tasks.Command.Create
         }
     }
 }
-

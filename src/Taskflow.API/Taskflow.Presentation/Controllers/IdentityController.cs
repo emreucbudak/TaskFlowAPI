@@ -67,7 +67,7 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         return Ok();
     }
 
-    [Authorize(Policy = "SubscribedCompanyPolicy")]
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("DeleteGroupsCommandRequest")]
     public async Task<IActionResult> DeleteGroupsCommand([FromBody] Identity.Application.Features.CQRS.Groups.Command.Delete.DeleteGroupsCommandRequest request)
     {

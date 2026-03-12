@@ -12,3 +12,4 @@ namespace Identity.Application.Features.CQRS.Auth.Queries.GetAllCompanyUsers
         public TimeSpan? ExpirationTime => TimeSpan.FromMinutes(10);
     }
 }
+

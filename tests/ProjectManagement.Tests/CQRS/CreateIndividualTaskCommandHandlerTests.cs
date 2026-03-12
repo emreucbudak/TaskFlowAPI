@@ -14,7 +14,6 @@ public class CreateIndividualTaskCommandHandlerTests
     [Fact]
     public async Task Handle_WithValidRequest_ShouldCallAddAndPublishAndCommit()
     {
-        // Arrange
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
         var unitOfWorkMock = new Mock<ICapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
@@ -58,11 +57,11 @@ public class CreateIndividualTaskCommandHandlerTests
             Guid.NewGuid(),
             1);
 
-        // Act
         await handler.Handle(request, CancellationToken.None);
 
-        // Assert
-        writeRepositoryMock.Verify(x => x.AddIndividualTask(It.IsAny<IndividualTask>()), Times.Once);
+        writeRepositoryMock.Verify(
+            x => x.AddIndividualTask(It.Is<IndividualTask>(task => task.TaskPriorityCategoryId == 1)),
+            Times.Once);
         capPublisherMock.Verify(x => x.PublishDelayAsync(
             It.IsAny<TimeSpan>(),
             "IndividualTaskCreated",
@@ -74,9 +73,34 @@ public class CreateIndividualTaskCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WithoutPriority_ShouldThrowArgumentException()
+    {
+        var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
+        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var capPublisherMock = new Mock<ICapPublisher>();
+
+        var handler = new CreateIndividualTaskCommandHandler(
+            writeRepositoryMock.Object,
+            unitOfWorkMock.Object,
+            capPublisherMock.Object);
+
+        var request = new CreateIndividualTaskCommandRequest(
+            Guid.NewGuid(),
+            "Title",
+            "Description",
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)),
+            Guid.NewGuid(),
+            0);
+
+        Func<Task> act = () => handler.Handle(request, CancellationToken.None);
+
+        await Assert.ThrowsAsync<ArgumentException>(act);
+        writeRepositoryMock.Verify(x => x.AddIndividualTask(It.IsAny<IndividualTask>()), Times.Never);
+    }
+
+    [Fact]
     public async Task Handle_WhenException_ShouldRollback()
     {
-        // Arrange
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
         var unitOfWorkMock = new Mock<ICapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
@@ -107,10 +131,8 @@ public class CreateIndividualTaskCommandHandlerTests
             Guid.NewGuid(),
             1);
 
-        // Act
         Func<Task> act = () => handler.Handle(request, CancellationToken.None);
 
-        // Assert
         await Assert.ThrowsAsync<InvalidOperationException>(act);
         transactionMock.Verify(x => x.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
         transactionMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);

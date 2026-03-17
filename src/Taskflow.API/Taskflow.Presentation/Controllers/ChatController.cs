@@ -1,6 +1,7 @@
-﻿using FlashMediator;
+using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Taskflow.Presentation.Controllers;
 
@@ -57,6 +58,20 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("MarkConversationAsReadCommandRequest")]
+    public async Task<IActionResult> MarkConversationAsReadCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.MarkConversationAsRead.MarkConversationAsReadCommandRequest request)
+    {
+        var currentUserIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await mediator.Send(request with { CurrentUserId = currentUserId });
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("MarkAsDeliveredCommandRequest")]
     public async Task<IActionResult> MarkAsDeliveredCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.MarkAsDelivered.MarkAsDeliveredCommandRequest request)
     {
@@ -80,4 +95,3 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
         return Ok();
     }
 }
-

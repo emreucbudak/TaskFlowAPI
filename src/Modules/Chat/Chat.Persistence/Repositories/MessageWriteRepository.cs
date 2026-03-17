@@ -117,6 +117,38 @@ namespace Chat.Persistence.Repositories
             }
         }
 
+        public async Task<int> MarkConversationAsReadAsync(Guid currentUserId, Guid otherUserId)
+        {
+            try
+            {
+                var unreadMessages = await context.Messages
+                    .Where(message =>
+                        !message.IsDeleted &&
+                        message.GroupId == null &&
+                        message.ReceiverId == currentUserId &&
+                        message.SenderId == otherUserId &&
+                        !message.IsRead)
+                    .ToListAsync();
+
+                if (unreadMessages.Count == 0)
+                {
+                    return 0;
+                }
+
+                foreach (var message in unreadMessages)
+                {
+                    message.MarkAsRead(true);
+                }
+
+                return unreadMessages.Count;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Sohbet mesajlari okundu olarak isaretlenirken hata olustu. UserId: {CurrentUserId}, OtherUserId: {OtherUserId}", currentUserId, otherUserId);
+                throw new Exception("Sohbet okundu olarak isaretlenemedi.", ex);
+            }
+        }
+
         public async Task<bool> DeleteConversationAsync(Guid userId1, Guid userId2)
         {
             try

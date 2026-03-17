@@ -7,5 +7,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
         public Guid UserId { get; init; }
         public Guid CompanyId { get; init; }
         public string Role { get; init; } = string.Empty;
+        public bool IsDepartmentLeader { get; init; }
+        public Guid? DepartmentId { get; init; }
     }
 }

@@ -63,6 +63,11 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
                     .Cast<string>()
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .DefaultIfEmpty("Departman atamasi yapilmamis")
+                    .ToList(),
+                LeaderUserIds = group.Users
+                    .Where(member => member.GroupRolesId == 1)
+                    .Select(member => member.UserId)
+                    .Distinct()
                     .ToList()
             }).ToList();
         }

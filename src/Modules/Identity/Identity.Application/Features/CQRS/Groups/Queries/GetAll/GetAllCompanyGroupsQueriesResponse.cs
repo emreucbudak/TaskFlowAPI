@@ -7,5 +7,6 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
         public List<Guid> WorkerUserIds { get; init; } = [];
         public List<string> WorkerName { get; init; } = [];
         public List<string> DepartmenName { get; init; } = [];
+        public List<Guid> LeaderUserIds { get; init; } = [];
     }
 }

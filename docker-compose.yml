@@ -23,6 +23,7 @@ services:
       - rabbitmq_password
       - redis_password
       - stripe_secret_key
+      - google_api_key
       - jwt_secret_key
       - chat_message_encryption_key
     depends_on:
@@ -104,7 +105,9 @@ secrets:
   redis_password:
     file: ./secrets/redis_password
   stripe_secret_key:
-    environment: TF_STRIPE_SECRET_KEY
+    file: ./secrets/stripe_secret_key
+  google_api_key:
+    file: ./secrets/google_api_key
   jwt_secret_key:
     file: ./secrets/jwt_secret_key
   chat_message_encryption_key:

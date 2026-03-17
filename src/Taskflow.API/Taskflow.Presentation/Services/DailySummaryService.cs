@@ -28,14 +28,14 @@ public sealed partial class DailySummaryService(
     {
         try
         {
-            var individualTasksTask = mediator.Send(new GetIndividualTasksByUserIdQueryRequest
+            var individualTasks = await mediator.Send(new GetIndividualTasksByUserIdQueryRequest
             {
                 UserId = userId,
                 PageNumber = 1,
                 PageSize = MaxPageSize
             }, cancellationToken);
 
-            var groupTasksTask = mediator.Send(new GetGroupTasksByAssignedUsersQueryRequest
+            var groupTasks = await mediator.Send(new GetGroupTasksByAssignedUsersQueryRequest
             {
                 AssignedUserIds = [userId],
                 PageNumber = 1,
@@ -43,6 +43,7 @@ public sealed partial class DailySummaryService(
             }, cancellationToken);
 
             Task<TaskFlow.BuildingBlocks.Common.PagedResult<Report.Application.Features.CQRS.Reports.Query.GetAll.GetAllReportsQueryResponse>>? reportsTask = null;
+            TaskFlow.BuildingBlocks.Common.PagedResult<Report.Application.Features.CQRS.Reports.Query.GetAll.GetAllReportsQueryResponse>? reports = null;
             if (isDepartmentLeader && departmentId.HasValue)
             {
                 reportsTask = mediator.Send(new GetDepartmentReportsQueryRequest
@@ -52,14 +53,6 @@ public sealed partial class DailySummaryService(
                     PageSize = MaxPageSize
                 }, cancellationToken);
             }
-
-            await Task.WhenAll(
-                reportsTask is not null
-                    ? new Task[] { individualTasksTask, groupTasksTask, reportsTask }
-                    : new Task[] { individualTasksTask, groupTasksTask });
-
-            var individualTasks = await individualTasksTask;
-            var groupTasks = await groupTasksTask;
 
             var today = DateOnly.FromDateTime(timeProvider.GetUtcNow().DateTime);
             var promptBuilder = new StringBuilder();
@@ -113,7 +106,7 @@ public sealed partial class DailySummaryService(
             // Department reports (if leader)
             if (reportsTask is not null)
             {
-                var reports = await reportsTask;
+                reports = await reportsTask;
 
                 promptBuilder.AppendLine();
                 promptBuilder.AppendLine("--- Departman Raporlari ---");
@@ -139,9 +132,23 @@ public sealed partial class DailySummaryService(
             promptBuilder.AppendLine("Lutfen yukaridaki verileri kullanarak 3-5 cumlelik bir gunluk ozet olustur. Emoji kullanma.");
 
             var prompt = promptBuilder.ToString();
-            var result = await kernel.InvokePromptAsync(prompt, cancellationToken: cancellationToken);
+            try
+            {
+                var result = await kernel.InvokePromptAsync(prompt, cancellationToken: cancellationToken);
+                var summary = result.GetValue<string>();
+                if (!string.IsNullOrWhiteSpace(summary))
+                {
+                    return summary;
+                }
 
-            return result.GetValue<string>() ?? "Ozet olusturulamadi.";
+                logger.LogWarning("Gemini gunluk ozet icin bos yanit dondu. UserId: {UserId}, CompanyId: {CompanyId}", userId, companyId);
+                return string.Empty;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogWarning(ex, "Gemini gunluk ozeti uretilemedi. UserId: {UserId}, CompanyId: {CompanyId}", userId, companyId);
+                return string.Empty;
+            }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

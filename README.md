@@ -59,7 +59,44 @@ Create the following files under `secrets/` before running Docker Compose:
 - `secrets/rabbitmq_password`
 - `secrets/redis_password`
 - `secrets/stripe_secret_key`
+- `secrets/google_api_key`
 - `secrets/jwt_secret_key`
+
+Each file should contain only the raw secret value, for example:
+
+```text
+sk_test_your_stripe_secret_key
+```
+
+PowerShell example:
+
+```powershell
+New-Item -ItemType Directory -Path .\secrets -Force | Out-Null
+Set-Content -Path .\secrets\stripe_secret_key -Value 'sk_test_your_stripe_secret_key' -NoNewline
+```
+
+Docker Compose mounts these files into the container as `/run/secrets/<secret_name>`.
+For example, `./secrets/stripe_secret_key` becomes `/run/secrets/stripe_secret_key`.
+
+To add a new file-based secret:
+
+1. Create a file under `secrets/` with the secret name.
+2. Add the secret under the top-level `secrets:` section in `docker-compose.yml`.
+3. Attach that secret to the service under `services.<service>.secrets`.
+4. Read it in the app from `/run/secrets/<secret_name>` or via `AddKeyPerFile("/run/secrets", optional: true)`.
+
+Example:
+
+```yaml
+services:
+  taskflow.presentation:
+    secrets:
+      - my_custom_secret
+
+secrets:
+  my_custom_secret:
+    file: ./secrets/my_custom_secret
+```
 
 Then start services:
 

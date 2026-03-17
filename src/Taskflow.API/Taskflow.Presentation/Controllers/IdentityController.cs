@@ -213,4 +213,36 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
         await mediator.Send(request);
         return Ok();
     }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("SubmitGroupActivityCommandRequest")]
+    public async Task<IActionResult> SubmitGroupActivityCommand([FromBody] Identity.Application.Features.CQRS.GroupActivities.Command.Submit.SubmitGroupActivityCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("ApproveGroupActivityCommandRequest")]
+    public async Task<IActionResult> ApproveGroupActivityCommand([FromBody] Identity.Application.Features.CQRS.GroupActivities.Command.Approve.ApproveGroupActivityCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("RejectGroupActivityCommandRequest")]
+    public async Task<IActionResult> RejectGroupActivityCommand([FromBody] Identity.Application.Features.CQRS.GroupActivities.Command.Reject.RejectGroupActivityCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetGroupActivitiesQueryRequest")]
+    public async Task<IActionResult> GetGroupActivitiesQuery([FromBody] Identity.Application.Features.CQRS.GroupActivities.Queries.GetByGroup.GetGroupActivitiesQueryRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
 }

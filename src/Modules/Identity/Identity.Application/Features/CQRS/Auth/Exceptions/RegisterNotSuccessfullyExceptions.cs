@@ -1,10 +1,10 @@
-﻿using TaskFlow.BuildingBlocks.Exceptions;
+using TaskFlow.BuildingBlocks.Exceptions;
 
 namespace Identity.Application.Features.CQRS.Auth.Exceptions
 {
-    public class RegisterNotSuccessfullyExceptions : AuthExceptions
+    public class RegisterNotSuccessfullyExceptions : BadRequestExceptions
     {
-        public RegisterNotSuccessfullyExceptions() : base($"Kayıt işlemi başarısız oldu!")
+        public RegisterNotSuccessfullyExceptions() : base("Kayıt işlemi başarısız oldu!")
         {
         }
     }

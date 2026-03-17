@@ -26,7 +26,7 @@ namespace Identity.Infrastructure.TokenService
             return Convert.ToBase64String(bytes);
         }
 
-        public JwtSecurityToken CreateToken(User user, IList<string> roles)
+        public JwtSecurityToken CreateToken(User user, IList<string> roles, bool isDepartmentLeader = false, Guid? departmentId = null)
         {
             IList<Claim> claims = new List<Claim>()
             {
@@ -37,7 +37,12 @@ namespace Identity.Infrastructure.TokenService
                 new Claim("companyId", user.CompanyId.ToString()),
                 new Claim("tenantId", user.CompanyId.ToString()),
                 new Claim(ClaimTypes.Sid, user.CompanyId.ToString()),
+                new Claim("isDepartmentLeader", isDepartmentLeader.ToString().ToLowerInvariant()),
             };
+            if (departmentId.HasValue)
+            {
+                claims.Add(new Claim("departmentId", departmentId.Value.ToString()));
+            }
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));

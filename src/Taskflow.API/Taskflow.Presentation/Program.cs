@@ -42,6 +42,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Taskflow.Presentation.Authorization;
 using Taskflow.Presentation.ExceptionHandlers;
+using Taskflow.Presentation.Services;
+using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
@@ -62,6 +64,29 @@ static string? FirstNonEmpty(params string?[] values)
 
 static string GetSecret(string secretName, params string[] envVarAliases)
 {
+    var secretValue = ReadSecretValue(secretName);
+    if (!string.IsNullOrWhiteSpace(secretValue))
+    {
+        return secretValue;
+    }
+
+    foreach (var envVarAlias in envVarAliases)
+    {
+        var envAliasValue = Environment.GetEnvironmentVariable(envVarAlias);
+        if (!string.IsNullOrWhiteSpace(envAliasValue))
+        {
+            return envAliasValue.Trim();
+        }
+    }
+
+    var dockerSecretPath = $"/run/secrets/{secretName}";
+    var localSecretPath = Path.GetFullPath(Path.Combine("..", "..", "secrets", secretName));
+    Console.WriteLine($"[UYARI] Secret '{secretName}' bulunamadi! (Docker: {dockerSecretPath}, Local: {localSecretPath})");
+    return string.Empty;
+}
+
+static string? ReadSecretValue(string secretName)
+{
     var dockerSecretPath = $"/run/secrets/{secretName}";
     if (File.Exists(dockerSecretPath))
     {
@@ -80,17 +105,7 @@ static string GetSecret(string secretName, params string[] envVarAliases)
         return secretFromEnv.Trim();
     }
 
-    foreach (var envVarAlias in envVarAliases)
-    {
-        var envAliasValue = Environment.GetEnvironmentVariable(envVarAlias);
-        if (!string.IsNullOrWhiteSpace(envAliasValue))
-        {
-            return envAliasValue.Trim();
-        }
-    }
-
-    Console.WriteLine($"[UYARI] Secret '{secretName}' bulunamadi! (Docker: {dockerSecretPath}, Local: {localSecretPath})");
-    return string.Empty;
+    return null;
 }
 
 var postgresHost = FirstNonEmpty(
@@ -235,6 +250,8 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true
             }));
 });
+builder.Services.AddExceptionHandler<ConflictExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<AuthExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<SubscriptionLimitExceededExceptionHandler>();
@@ -288,6 +305,37 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, SubscriptionHandler>();
+
+// Semantic Kernel + Gemini
+var geminiApiKey = FirstNonEmpty(
+    ReadSecretValue("google_api_key"),
+    ReadSecretValue("gemini_api_key"),
+    Environment.GetEnvironmentVariable("TF_GOOGLE_API_KEY"),
+    Environment.GetEnvironmentVariable("GOOGLE_API_KEY"),
+    Environment.GetEnvironmentVariable("TF_GEMINI_API_KEY"),
+    Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
+if (string.IsNullOrWhiteSpace(geminiApiKey))
+{
+    var configApiKey = builder.Configuration["Gemini:ApiKey"]?.Trim();
+    if (!string.IsNullOrWhiteSpace(configApiKey) && configApiKey != "__FROM_SECRET__")
+    {
+        geminiApiKey = configApiKey;
+    }
+}
+if (!string.IsNullOrWhiteSpace(geminiApiKey))
+{
+    builder.Configuration["Gemini:ApiKey"] = geminiApiKey;
+}
+var geminiModelId = builder.Configuration["Gemini:ModelId"]?.Trim() ?? "gemini-2.0-flash";
+
+var kernelBuilder = Kernel.CreateBuilder();
+#pragma warning disable SKEXP0070
+kernelBuilder.AddGoogleAIGeminiChatCompletion(geminiModelId, geminiApiKey ?? string.Empty);
+#pragma warning restore SKEXP0070
+var kernel = kernelBuilder.Build();
+builder.Services.AddSingleton(kernel);
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IDailySummaryService, DailySummaryService>();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -568,17 +616,17 @@ static async Task EnsureProjectManagementReferenceDataSeededAsync(IServiceProvid
 
     var requiredStatuses = new[]
     {
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 1, StatusName = "Görev Atamasý Yapýldý" },
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 2, StatusName = "Yapým Aþamasýnda" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 1, StatusName = "Gï¿½rev Atamasï¿½ Yapï¿½ldï¿½" },
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 2, StatusName = "Yapï¿½m Aï¿½amasï¿½nda" },
         new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 3, StatusName = "Onay Bekliyor" },
-        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 4, StatusName = "Tamamlandý" }
+        new ProjectManagement.Domain.Entities.TaskStatus { TaskStatusId = 4, StatusName = "Tamamlandï¿½" }
     };
 
     var requiredPriorities = new[]
     {
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 1, CategoryName = "Öncelikli Görev" },
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 2, CategoryName = "Sýradan Görev" },
-        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 3, CategoryName = "Acil Görev" }
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 1, CategoryName = "ï¿½ncelikli Gï¿½rev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 2, CategoryName = "Sï¿½radan Gï¿½rev" },
+        new ProjectManagement.Domain.Entities.TaskPriorityCategory { TaskPriorityCategoryId = 3, CategoryName = "Acil Gï¿½rev" }
     };
 
     var existingStatusIds = await projectManagementContext.TaskStatuses

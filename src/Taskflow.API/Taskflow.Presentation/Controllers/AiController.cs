@@ -10,6 +10,7 @@ namespace Taskflow.Presentation.Controllers;
 public sealed class AiController(IDailySummaryService dailySummaryService) : ControllerBase
 {
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetDailySummaryRequest")]
     [HttpPost("daily-summary")]
     public async Task<IActionResult> GenerateDailySummary(CancellationToken cancellationToken)
     {

@@ -17,7 +17,7 @@ namespace TaskFlow.BuildingBlocks.Contracts.Redis
             this.logger = logger;
         }
 
-        public async Task<T> GetAsync<T>(string key)
+        public async Task<T?> GetAsync<T>(string key)
         {
             try
             {

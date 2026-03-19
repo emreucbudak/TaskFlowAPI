@@ -131,7 +131,7 @@ public sealed class CompanyDataResetService : ICompanyDataResetService
                 .Where(stat => allCompanyUserIds.Contains(stat.UserId))
                 .ExecuteDeleteAsync(cancellationToken);
 
-            await _notificationContext.notificationMessages
+            await _notificationContext.NotificationMessages
                 .Where(notification => allCompanyUserIds.Contains(notification.ReceiverUserId))
                 .ExecuteDeleteAsync(cancellationToken);
         }

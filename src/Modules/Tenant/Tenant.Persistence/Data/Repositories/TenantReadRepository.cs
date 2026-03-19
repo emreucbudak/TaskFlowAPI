@@ -24,7 +24,7 @@ namespace Tenant.Persistence.Data.Repositories
             _logger.LogInformation("Loading all company plans. TrackChanges={TrackChanges}", trackChanges);
             try
             {
-                IQueryable<CompanyPlan> query = _context.companyPlans.Include(p => p.PlanProperties);
+                IQueryable<CompanyPlan> query = _context.CompanyPlans.Include(p => p.PlanProperties);
 
                 if (!trackChanges)
                 {
@@ -47,9 +47,10 @@ namespace Tenant.Persistence.Data.Repositories
 
         public async Task<CompanyPlan?> GetActivePlanByKey(string? planSlug, string? planName, CancellationToken cancellationToken)
         {
-            var plans = await _context.companyPlans
+            var plans = await _context.CompanyPlans
                 .AsNoTracking()
                 .Where(x => x.isActive)
+                .Take(100)
                 .ToListAsync(cancellationToken);
 
             return plans.FirstOrDefault(plan => MatchesPlan(plan.PlanName, planSlug, planName));
@@ -62,7 +63,7 @@ namespace Tenant.Persistence.Data.Repositories
 
             try
             {
-                IQueryable<CompanyPlan> query = _context.companyPlans;
+                IQueryable<CompanyPlan> query = _context.CompanyPlans;
 
                 if (!trackChanges)
                 {
@@ -90,7 +91,7 @@ namespace Tenant.Persistence.Data.Repositories
 
             try
             {
-                return await _context.tenantSubscriptions
+                return await _context.TenantSubscriptions
                     .AsNoTracking()
                     .Where(item => item.TenantId == tenantId)
                     .Include(item => item.TenantUsage)

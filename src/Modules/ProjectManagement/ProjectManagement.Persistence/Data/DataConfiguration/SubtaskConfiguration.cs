@@ -18,7 +18,7 @@ namespace ProjectManagement.Persistence.Data.DataConfiguration
             builder.HasIndex(x => x.TaskStatusId);
 
             builder.HasOne(x => x.Task)
-                .WithMany(x => x.subtask)
+                .WithMany(x => x.Subtasks)
                 .HasForeignKey(x => x.TaskId);
 
             builder.HasOne(x => x.TaskStatus)

@@ -12,6 +12,7 @@ namespace Identity.Application.Repositories
             int page = 1,
             bool trackChanges = false,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null,
-            Expression<Func<T, bool>>? predicate = null);
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null);
     }
 }

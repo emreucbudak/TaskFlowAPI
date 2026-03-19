@@ -24,8 +24,13 @@ namespace Notification.Infrastructure.Hubs
         }
         public async override  Task OnConnectedAsync()
         {
-            var userId = Context.UserIdentifier;
-            List<string> groups = await mediator.Send(new GetUserAllGroupsNameQueriesRequest(Guid.Parse(userId)));
+            if (!Guid.TryParse(Context.UserIdentifier, out var userId))
+            {
+                Context.Abort();
+                return;
+            }
+
+            List<string> groups = await mediator.Send(new GetUserAllGroupsNameQueriesRequest(userId));
             foreach(var group in groups)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, group);

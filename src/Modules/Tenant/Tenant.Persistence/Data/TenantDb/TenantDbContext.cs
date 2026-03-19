@@ -12,11 +12,11 @@ namespace Tenant.Persistence.Data.TenantDb
         protected TenantDbContext()
         {
         }
-        public DbSet<CompanyPlan> companyPlans { get; set; }
-        public DbSet<PlanProperties> planProperties { get; set; }
-        public DbSet<TenantSubscription> tenantSubscriptions { get; set; }
-        public DbSet<TenantUsage> tenantUsages { get; set; }
-        public DbSet<PaymentTransaction> paymentTransactions { get; set; }
+        public DbSet<CompanyPlan> CompanyPlans { get; set; }
+        public DbSet<PlanProperties> PlanProperties { get; set; }
+        public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
+        public DbSet<TenantUsage> TenantUsages { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
        
 
 
@@ -39,6 +39,30 @@ namespace Tenant.Persistence.Data.TenantDb
                 .WithOne()
                 .HasForeignKey<TenantSubscription>(ts => ts.TenantUsageId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CompanyPlan>(entity =>
+            {
+                entity.Property(cp => cp.PlanName)
+                    .IsRequired()
+                    .HasMaxLength(200);
+                entity.HasOne(cp => cp.PlanProperties)
+                    .WithOne()
+                    .HasForeignKey<CompanyPlan>(cp => cp.PlanPropertiesId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<PaymentTransaction>(entity =>
+            {
+                entity.HasOne<TenantSubscription>()
+                    .WithMany()
+                    .HasForeignKey(pt => pt.TenantSubscriptionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(pt => pt.RowVersion)
+                    .IsConcurrencyToken()
+                    .ValueGeneratedNever();
+            });
+            modelBuilder.Entity<CompanyPlan>()
+                .Property(cp => cp.RowVersion)
+                .IsConcurrencyToken()
+                .ValueGeneratedNever();
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
 
             base.OnModelCreating(modelBuilder);

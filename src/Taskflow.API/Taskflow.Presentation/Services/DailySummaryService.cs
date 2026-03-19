@@ -323,6 +323,8 @@ public sealed partial class DailySummaryService(
             || normalizedStatus.Contains("closed");
     }
 
+    private const int MaxFieldLength = 200;
+
     private static string Sanitize(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -330,11 +332,26 @@ public sealed partial class DailySummaryService(
             return "-";
         }
 
-        return SanitizeRegex().Replace(input, " ").Trim();
+        var sanitized = HtmlTagRegex().Replace(input, string.Empty);
+        sanitized = PromptInjectionRegex().Replace(sanitized, string.Empty);
+        sanitized = SanitizeRegex().Replace(sanitized, " ").Trim();
+
+        if (sanitized.Length > MaxFieldLength)
+        {
+            sanitized = sanitized[..MaxFieldLength];
+        }
+
+        return string.IsNullOrWhiteSpace(sanitized) ? "-" : sanitized;
     }
 
     [GeneratedRegex(@"[\r\n\t]+")]
     private static partial Regex SanitizeRegex();
+
+    [GeneratedRegex(@"<[^>]+>")]
+    private static partial Regex HtmlTagRegex();
+
+    [GeneratedRegex(@"(SYSTEM|ASSISTANT|USER|<\|im_start\|>|<\|im_end\|>|</GOREV_VERILERI>|<GOREV_VERILERI>)", RegexOptions.IgnoreCase)]
+    private static partial Regex PromptInjectionRegex();
 }
 
 internal sealed record UrgentTaskCandidate(

@@ -81,7 +81,7 @@ namespace ProjectManagement.Persistence.Data.Repositories
                     trackChanges);
 
                 var query = BuildTaskQuery(trackChanges)
-                    .Where(task => task.subtask.Any(subTask => normalizedAssignedUserIds.Contains(subTask.AssignedUserId)));
+                    .Where(task => task.Subtasks.Any(subTask => normalizedAssignedUserIds.Contains(subTask.AssignedUserId)));
 
                 var totalCount = await query.CountAsync(cancellationToken);
 
@@ -246,7 +246,7 @@ namespace ProjectManagement.Persistence.Data.Repositories
         private IQueryable<Task> BuildTaskQuery(bool trackChanges)
         {
             var query = context.Tasks
-                .Include(task => task.subtask)
+                .Include(task => task.Subtasks)
                 .ThenInclude(subTask => subTask.TaskStatus)
                 .Include(task => task.TaskStatus)
                 .Include(task => task.TaskPriority)

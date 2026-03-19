@@ -28,8 +28,8 @@ namespace ProjectManagement.Domain.Entities
         public string Description { get; private set; }
         public int TaskStatusId { get; private set; }
         public TaskStatus TaskStatus { get; private set; }
-        private readonly List<Subtask> _subtask = new();
-        public IReadOnlyCollection<Subtask> subtask => _subtask;
+        private readonly List<Subtask> _subtasks = new();
+        public IReadOnlyCollection<Subtask> Subtasks => _subtasks;
         public DateOnly DeadlineTime { get; private set; }
         public int? TaskPriorityCategoryId { get; private set; }
         public TaskPriorityCategory? TaskPriority { get; private set; }
@@ -52,15 +52,15 @@ namespace ProjectManagement.Domain.Entities
                 throw new InvalidOperationException("TAMAMLANMIS GOREVE SUBTASK EKLENEMEZ");
             }
             var subtask = new Subtask(description, AssignedUserId, 1, Title, taskId);
-            _subtask.Add(subtask);
+            _subtasks.Add(subtask);
             return subtask;
         }
 
         public void RemoveSubTask(Guid taskId)
         {
-            var subtask = _subtask.Where(x => x.Id == taskId).FirstOrDefault();
+            var subtask = _subtasks.Where(x => x.Id == taskId).FirstOrDefault();
             ArgumentNullException.ThrowIfNull(subtask);
-            _subtask.Remove(subtask);
+            _subtasks.Remove(subtask);
         }
 
         public void UpdateTaskName(string? name)
@@ -98,14 +98,14 @@ namespace ProjectManagement.Domain.Entities
 
         public Subtask GetSubtask(Guid taskId)
         {
-            var subTask = _subtask.Where(x => x.Id == taskId).FirstOrDefault();
+            var subTask = _subtasks.Where(x => x.Id == taskId).FirstOrDefault();
             ArgumentNullException.ThrowIfNull(subTask);
             return subTask;
         }
 
         public List<SubTaskAnswer> GetAllSubTaskAnswer(Guid taskId)
         {
-            var subTask = _subtask.Where(x => x.Id == taskId).FirstOrDefault();
+            var subTask = _subtasks.Where(x => x.Id == taskId).FirstOrDefault();
             ArgumentNullException.ThrowIfNull(subTask);
             var subTaskAnswer = subTask.subTaskAnswers;
             return subTaskAnswer.ToList();
@@ -113,7 +113,7 @@ namespace ProjectManagement.Domain.Entities
 
         public List<Subtask> GetAllSubTasks()
         {
-            return subtask.ToList();
+            return Subtasks.ToList();
         }
 
         public string GetTaskStatus()

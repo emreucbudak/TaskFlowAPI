@@ -32,7 +32,7 @@ namespace Chat.Persistence.Data.Configurations
             builder.HasIndex(x => x.GroupId);
             builder.HasIndex(x => x.SendTime);
 
-            // Configure properties mapping if needed, but standard convention should work
+            builder.HasQueryFilter(m => !m.IsDeleted);
         }
     }
 }

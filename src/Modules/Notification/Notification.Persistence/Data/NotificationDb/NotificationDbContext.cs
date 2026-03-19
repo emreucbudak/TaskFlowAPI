@@ -13,7 +13,7 @@ namespace Notification.Infrastructure.Data.NotificationDb
         protected NotificationDbContext()
         {
         }
-        public DbSet<NotificationMessage> notificationMessages { get; set; }
+        public DbSet<NotificationMessage> NotificationMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

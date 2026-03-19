@@ -7,6 +7,8 @@
         public PlanProperties PlanProperties { get; private set; }
         public int PlanPrice { get; private set; }
         public bool isActive { get; private set; }
+        public byte[] RowVersion { get; private set; }
+
         protected CompanyPlan() { }
 
         public CompanyPlan(string planName, PlanProperties planProperties, int planPrice)

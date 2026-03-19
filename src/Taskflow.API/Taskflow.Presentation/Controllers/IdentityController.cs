@@ -1,5 +1,6 @@
 using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Identity.Domain.Entities;
@@ -48,7 +49,7 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
     public async Task<IActionResult> CreateCompanyCommand([FromBody] Identity.Application.Features.CQRS.Company.Command.Create.CreateCompanyCommandRequest request)
     {
         var companyId = await mediator.Send(request);
-        return Ok(new { companyId, request.CompanyName });
+        return StatusCode(StatusCodes.Status201Created, new { companyId, request.CompanyName });
     }
 
     [Authorize(Policy = "AdminOrCompanyPolicy")]
@@ -241,6 +242,30 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetGroupActivitiesQueryRequest")]
     public async Task<IActionResult> GetGroupActivitiesQuery([FromBody] Identity.Application.Features.CQRS.GroupActivities.Queries.GetByGroup.GetGroupActivitiesQueryRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("CreateGroupEventCommandRequest")]
+    public async Task<IActionResult> CreateGroupEventCommand([FromBody] Identity.Application.Features.CQRS.GroupEvents.Command.Create.CreateGroupEventCommandRequest request)
+    {
+        var eventId = await mediator.Send(request);
+        return StatusCode(StatusCodes.Status201Created, eventId);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("DeleteGroupEventCommandRequest")]
+    public async Task<IActionResult> DeleteGroupEventCommand([FromBody] Identity.Application.Features.CQRS.GroupEvents.Command.Delete.DeleteGroupEventCommandRequest request)
+    {
+        await mediator.Send(request);
+        return Ok();
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("GetGroupEventsQueryRequest")]
+    public async Task<IActionResult> GetGroupEventsQuery([FromBody] Identity.Application.Features.CQRS.GroupEvents.Queries.GetByGroup.GetGroupEventsQueryRequest request)
     {
         var result = await mediator.Send(request);
         return Ok(result);

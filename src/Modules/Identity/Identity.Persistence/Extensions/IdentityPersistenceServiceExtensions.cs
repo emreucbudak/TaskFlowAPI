@@ -5,6 +5,7 @@ using Identity.Persistence.Data.IdentityDb;
 using Identity.Persistence.Data.UnitOfWork;
 using Identity.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,8 +16,11 @@ namespace Identity.Persistence.Extensions
         public static IServiceCollection AddIdentityPersistence(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<IdentityManagementDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(IdentityManagementDbContext).Assembly.FullName)));
+                options
+                    .UseNpgsql(
+                        configuration.GetConnectionString("DefaultConnection"),
+                        b => b.MigrationsAssembly(typeof(IdentityManagementDbContext).Assembly.FullName))
+                    .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
             services.AddScoped<IIdentityCapUnitOfWork, UnitOfWork>();
 

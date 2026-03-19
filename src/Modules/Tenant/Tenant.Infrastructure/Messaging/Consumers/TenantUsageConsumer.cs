@@ -44,11 +44,11 @@ public sealed class TenantUsageConsumer(
         {
             try
             {
-                var usage = await dbContext.tenantUsages.SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
+                var usage = await dbContext.TenantUsages.SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
                 if (usage is null)
                 {
                     usage = new TenantUsage(tenantId);
-                    dbContext.tenantUsages.Add(usage);
+                    dbContext.TenantUsages.Add(usage);
                 }
 
                 incrementAction(usage);

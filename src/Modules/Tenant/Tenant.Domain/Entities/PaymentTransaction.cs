@@ -4,6 +4,7 @@ namespace Tenant.Domain.Entities
 {
     public class PaymentTransaction : BaseEntity
     {
+        public byte[] RowVersion { get; private set; }
         public Guid TenantId { get; private set; }
 
         public Guid TenantSubscriptionId { get; private set; }

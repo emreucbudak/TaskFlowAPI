@@ -17,6 +17,7 @@ namespace Identity.Persistence.Repositories
         private const int MaxPageSize = 100;
         private const int DefaultPageSize = 20;
         private const int MaxTotalRecords = 10000;
+        private const int DepartmentLeaderRoleId = 1;
 
         private DbSet<T> db => context.Set<T>();
 
@@ -25,7 +26,8 @@ namespace Identity.Persistence.Repositories
             int page = 1,
             bool trackChanges = false,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? inc = null,
-            Expression<Func<T, bool>>? predicate = null)
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
         {
             ValidatePagination(ref page, ref pageSize);
 
@@ -49,6 +51,11 @@ namespace Identity.Persistence.Repositories
 
                 var totalCount = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                if (orderBy != null)
+                {
+                    query = orderBy(query);
+                }
 
                 if (totalCount > MaxTotalRecords)
                 {
@@ -108,7 +115,7 @@ namespace Identity.Persistence.Repositories
         {
             var leader = await context.Set<DepartmentMember>()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.DepartmentId == departmentId && x.DepartmentRoleId == 1);
+                .FirstOrDefaultAsync(x => x.DepartmentId == departmentId && x.DepartmentRoleId == DepartmentLeaderRoleId);
 
             if (leader == null)
             {

@@ -1,6 +1,7 @@
 ﻿using FlashMediator;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ public sealed class ReportController(IMediator mediator, UserManager<User> userM
     public async Task<IActionResult> CreateReportCommand([FromBody] Report.Application.Features.CQRS.Reports.Command.Create.CreateReportCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyPolicy")]

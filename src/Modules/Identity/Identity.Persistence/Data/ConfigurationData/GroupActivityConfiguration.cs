@@ -21,6 +21,8 @@ namespace Identity.Persistence.Data.ConfigurationData
                    .HasMaxLength(500);
 
             builder.Property(a => a.Status)
+                   .HasConversion<string>()
+                   .HasMaxLength(20)
                    .IsRequired();
 
             builder.HasOne(a => a.Group)

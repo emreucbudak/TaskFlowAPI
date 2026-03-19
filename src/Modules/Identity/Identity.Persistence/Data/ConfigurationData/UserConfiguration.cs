@@ -8,6 +8,7 @@ namespace Identity.Persistence.Data.ConfigurationData
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
+            builder.HasIndex(u => u.CompanyId);
 
             builder.HasMany(u => u.DepartmentMembers)
                    .WithOne(dm => dm.User)

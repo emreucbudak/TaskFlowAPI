@@ -1,5 +1,6 @@
 using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Taskflow.Presentation.Controllers;
@@ -13,7 +14,7 @@ public sealed class NotificationController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateNotificationCommand([FromBody] Notification.Application.Features.CQRS.Notification.Command.Create.CreateNotificationCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]

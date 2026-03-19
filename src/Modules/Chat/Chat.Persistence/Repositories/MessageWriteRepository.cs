@@ -23,7 +23,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Mesaj eklenirken hata olustu. Gonderen: {SenderId}", message.SenderId);
-                throw new Exception("Mesaj gonderilemedi.", ex);
+                throw;
             }
         }
 
@@ -44,7 +44,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Mesaj silinirken hata olustu. ID: {MessageId}", id);
-                throw new Exception("Mesaj silinemedi.", ex);
+                throw;
             }
         }
 
@@ -72,7 +72,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Coklu mesaj silme islemi sirasinda hata olustu.");
-                throw new Exception("Mesajlar silinemedi.", ex);
+                throw;
             }
         }
 
@@ -93,7 +93,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Mesaj icerigi guncellenirken hata olustu. ID: {MessageId}", id);
-                throw new Exception("Mesaj guncellenemedi.", ex);
+                throw;
             }
         }
 
@@ -113,7 +113,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Mesaj iletildi olarak isaretlenirken hata olustu. ID: {MessageId}", messageId);
-                throw new Exception("Islem basarisiz oldu.", ex);
+                throw;
             }
         }
 
@@ -145,7 +145,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Sohbet mesajlari okundu olarak isaretlenirken hata olustu. UserId: {CurrentUserId}, OtherUserId: {OtherUserId}", currentUserId, otherUserId);
-                throw new Exception("Sohbet okundu olarak isaretlenemedi.", ex);
+                throw;
             }
         }
 
@@ -174,7 +174,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "{UserId1} ve {UserId2} arasindaki sohbet silinirken hata olustu.", userId1, userId2);
-                throw new Exception("Sohbet silinemedi.", ex);
+                throw;
             }
         }
     }

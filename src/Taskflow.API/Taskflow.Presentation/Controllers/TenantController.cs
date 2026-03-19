@@ -1,5 +1,6 @@
 ﻿using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Taskflow.Presentation.Controllers;
@@ -21,7 +22,7 @@ public sealed class TenantController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateCompanyPlanCommand([FromBody] Tenant.Application.Features.CQRS.CompanyPlan.Command.Create.CreateCompanyPlanCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "AdminPolicy")]
@@ -48,7 +49,7 @@ public sealed class TenantController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
-    [AllowAnonymous]
+    [Authorize(Policy = "CompanyPolicy")]
     [HttpPost("CreateStripeCheckoutSession")]
     [HttpPost("CreateStripeCheckoutSessionRequest")]
     public async Task<IActionResult> CreateStripeCheckoutSession(
@@ -59,7 +60,7 @@ public sealed class TenantController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
-    [AllowAnonymous]
+    [Authorize(Policy = "CompanyPolicy")]
     [HttpPost("ActivateCompanySubscription")]
     [HttpPost("ActivateCompanySubscriptionRequest")]
     public async Task<IActionResult> ActivateCompanySubscription(
@@ -70,7 +71,7 @@ public sealed class TenantController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
-    [AllowAnonymous]
+    [Authorize(Policy = "CompanyPolicy")]
     [HttpPost("ConfirmStripePaymentAndActivate")]
     [HttpPost("ConfirmStripePaymentAndActivateRequest")]
     public async Task<IActionResult> ConfirmStripePaymentAndActivate(

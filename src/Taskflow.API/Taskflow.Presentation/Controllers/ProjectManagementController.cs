@@ -1,6 +1,7 @@
 ﻿using FlashMediator;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -59,7 +60,7 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
         }
 
         await mediator.Send(request, cancellationToken);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedWorkerPolicy")]
@@ -67,7 +68,7 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
     public async Task<IActionResult> CreateSubTaskAnswerCommand([FromBody] ProjectManagement.Application.Features.CQRS.SubTaskAnswer.Command.Create.CreateSubTaskAnswerCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyPolicy")]
@@ -75,7 +76,7 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
     public async Task<IActionResult> CreateSubTasksCommand([FromBody] ProjectManagement.Application.Features.CQRS.SubTasks.Command.Create.CreateSubTasksCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyPolicy")]
@@ -83,7 +84,7 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
     public async Task<IActionResult> CreateTasksCommand([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Command.Create.CreateTasksCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
@@ -91,7 +92,7 @@ public sealed class ProjectManagementController(IMediator mediator, UserManager<
     public async Task<IActionResult> CreateGroupTaskWithSubTasksCommand([FromBody] ProjectManagement.Application.Features.CQRS.Tasks.Command.CreateGroupTask.CreateGroupTaskWithSubTasksCommandRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
-        return Ok(result);
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 
     [Authorize(Policy = "SubscribedWorkerPolicy")]

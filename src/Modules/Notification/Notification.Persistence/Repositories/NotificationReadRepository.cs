@@ -28,7 +28,7 @@ namespace Notification.Persistence.Repositories
                 userId,
                 notificationId);
 
-            IQueryable<NotificationMessage> query = context.notificationMessages
+            IQueryable<NotificationMessage> query = context.NotificationMessages
                 .Where(x => x.Id == notificationId && x.ReceiverUserId == userId);
 
             if (!trackChanges)
@@ -71,7 +71,7 @@ namespace Notification.Persistence.Repositories
                 page,
                 pageSize);
 
-            IQueryable<NotificationMessage> query = context.notificationMessages
+            IQueryable<NotificationMessage> query = context.NotificationMessages
                 .Where(x => x.ReceiverUserId == userId)
                 .OrderByDescending(x => x.SendTime)
                 .Take(MaxNotificationWindowSize);
@@ -119,7 +119,7 @@ namespace Notification.Persistence.Repositories
                 userId,
                 normalizedCount);
 
-            IQueryable<NotificationMessage> query = context.notificationMessages
+            IQueryable<NotificationMessage> query = context.NotificationMessages
                 .Where(x => x.ReceiverUserId == userId && !x.IsRead)
                 .OrderByDescending(x => x.SendTime)
                 .Take(normalizedCount);
@@ -146,7 +146,7 @@ namespace Notification.Persistence.Repositories
 
             logger.LogInformation("Kullanici {UserId} icin okunmamis bildirim sayisi hesaplaniyor", userId);
 
-            var count = await context.notificationMessages
+            var count = await context.NotificationMessages
                 .AsNoTracking()
                 .CountAsync(x => x.ReceiverUserId == userId && !x.IsRead);
 

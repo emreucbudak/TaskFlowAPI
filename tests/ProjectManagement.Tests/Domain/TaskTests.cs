@@ -124,8 +124,8 @@ public class TaskTests
         var subTask = task.AddSubTask("Sub Desc", Guid.NewGuid(), "Sub Title", Guid.NewGuid());
 
         // Assert
-        Assert.Single(task.subtask);
-        Assert.Equal(subTask.Id, task.subtask.Single().Id);
+        Assert.Single(task.Subtasks);
+        Assert.Equal(subTask.Id, task.Subtasks.Single().Id);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class TaskTests
         task.RemoveSubTask(subTask.Id);
 
         // Assert
-        Assert.Empty(task.subtask);
+        Assert.Empty(task.Subtasks);
     }
 
     [Fact]

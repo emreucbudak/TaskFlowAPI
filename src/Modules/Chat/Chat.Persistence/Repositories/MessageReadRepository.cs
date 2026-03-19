@@ -43,7 +43,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to get message by id. ID: {MessageId}", id);
-                throw new Exception($"Failed to get message by id: {id}", ex);
+                throw;
             }
         }
 
@@ -66,7 +66,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to get messages by user. UserId: {UserId}", userId);
-                throw new Exception($"Failed to get messages by user: {userId}", ex);
+                throw;
             }
         }
 
@@ -96,7 +96,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to get messages between users. UserId1: {UserId1}, UserId2: {UserId2}", userId1, userId2);
-                throw new Exception("Failed to get conversation messages.", ex);
+                throw;
             }
         }
 
@@ -119,7 +119,7 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to get messages by group. GroupId: {GroupId}", groupId);
-                throw new Exception("Failed to get group messages.", ex);
+                throw;
             }
         }
 
@@ -134,14 +134,13 @@ namespace Chat.Persistence.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to get unread message count. UserId: {UserId}", userId);
-                throw new Exception("Failed to get unread message count.", ex);
+                throw;
             }
         }
 
-        public async Task<IEnumerable<Message>> SearchMessagesAsync(Guid currentUserId, string searchTerm, int pageSize, int page = 1)
+        public Task<IEnumerable<Message>> SearchMessagesAsync(Guid currentUserId, string searchTerm, int pageSize, int page = 1)
         {
-            await Task.CompletedTask;
-            return [];
+            throw new NotImplementedException("Message search is not yet available for encrypted messages.");
         }
 
         private static void ValidatePagination(ref int page, ref int pageSize)

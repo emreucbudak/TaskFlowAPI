@@ -21,14 +21,14 @@ namespace Notification.Persistence.Repositories
             ValidateContent(notification.Description);
             ValidateTitle(notification.Title);
             logger.LogInformation(
-                "Bildirim gönderiliyor - Alýcý: {UserId}, Ýçerik Uzunluðu: {Length}",
+                "Bildirim gï¿½nderiliyor - Alï¿½cï¿½: {UserId}, ï¿½ï¿½erik Uzunluï¿½u: {Length}",
                 notification.ReceiverUserId,
                 notification.Description.Length);
 
-            await context.notificationMessages.AddAsync(notification);
+            await context.NotificationMessages.AddAsync(notification);
 
             logger.LogDebug(
-                "Bildirim context'e eklendi - Id: {NotificationId}, Alýcý: {UserId}",
+                "Bildirim context'e eklendi - Id: {NotificationId}, Alï¿½cï¿½: {UserId}",
                 notification.Id,
                 notification.ReceiverUserId);
         }
@@ -39,7 +39,7 @@ namespace Notification.Persistence.Repositories
             ValidateId(notification.Id);
 
             logger.LogWarning(
-                "Bildirim siliniyor - Id: {NotificationId}, Alýcý: {UserId}",
+                "Bildirim siliniyor - Id: {NotificationId}, Alï¿½cï¿½: {UserId}",
                 notification.Id,
                 notification.ReceiverUserId);
 
@@ -47,13 +47,13 @@ namespace Notification.Persistence.Repositories
 
             if (entry.State == EntityState.Detached)
             {
-                context.notificationMessages.Attach(notification);
+                context.NotificationMessages.Attach(notification);
             }
 
-            context.notificationMessages.Remove(notification);
+            context.NotificationMessages.Remove(notification);
 
             logger.LogInformation(
-                "Bildirim silme için iþaretlendi - Id: {NotificationId}",
+                "Bildirim silme iï¿½in iï¿½aretlendi - Id: {NotificationId}",
                 notification.Id);
         }
 
@@ -61,7 +61,7 @@ namespace Notification.Persistence.Repositories
         {
             if (id == Guid.Empty)
             {
-                throw new ArgumentException("Bildirim ID'si boþ olamaz", nameof(id));
+                throw new ArgumentException("Bildirim ID'si boï¿½ olamaz", nameof(id));
             }
         }
 
@@ -69,7 +69,7 @@ namespace Notification.Persistence.Repositories
         {
             if (receiverUserId == Guid.Empty)
             {
-                throw new ArgumentException("Alýcý kullanýcý ID'si boþ olamaz", nameof(receiverUserId));
+                throw new ArgumentException("Alï¿½cï¿½ kullanï¿½cï¿½ ID'si boï¿½ olamaz", nameof(receiverUserId));
             }
         }
 
@@ -77,13 +77,13 @@ namespace Notification.Persistence.Repositories
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentException("Bildirim içeriði boþ olamaz", nameof(content));
+                throw new ArgumentException("Bildirim iï¿½eriï¿½i boï¿½ olamaz", nameof(content));
             }
 
             if (content.Length > MaxNotificationContentLength)
             {
                 throw new ArgumentException(
-                    $"Bildirim içeriði {MaxNotificationContentLength} karakteri geçemez",
+                    $"Bildirim iï¿½eriï¿½i {MaxNotificationContentLength} karakteri geï¿½emez",
                     nameof(content));
             }
         }
@@ -93,7 +93,7 @@ namespace Notification.Persistence.Repositories
             if (!string.IsNullOrEmpty(title) && title.Length > MaxNotificationTitleLength)
             {
                 throw new ArgumentException(
-                    $"Bildirim baþlýðý {MaxNotificationTitleLength} karakteri geçemez",
+                    $"Bildirim baï¿½lï¿½ï¿½ï¿½ {MaxNotificationTitleLength} karakteri geï¿½emez",
                     nameof(title));
             }
         }

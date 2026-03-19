@@ -1,5 +1,8 @@
+using Chat.Application.Features.CQRS.Message.Command.Delete;
+using Chat.Application.Features.CQRS.Message.Command.Update;
 using FlashMediator;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -14,14 +17,20 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Create.CreateMessageCommandRequest request)
     {
         await mediator.Send(request);
-        return Ok();
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("DeleteMessageCommandRequest")]
-    public async Task<IActionResult> DeleteMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Delete.DeleteMessageCommandRequest request)
+    public async Task<IActionResult> DeleteMessageCommand([FromBody] DeleteMessageCommandRequest request)
     {
-        await mediator.Send(request);
+        var currentUserIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        await mediator.Send(request with { CurrentUserId = currentUserId });
         return Ok();
     }
 
@@ -89,9 +98,15 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("UpdateMessageCommandRequest")]
-    public async Task<IActionResult> UpdateMessageCommand([FromBody] Chat.Application.Features.CQRS.Message.Command.Update.UpdateMessageCommandRequest request)
+    public async Task<IActionResult> UpdateMessageCommand([FromBody] UpdateMessageCommandRequest request)
     {
-        await mediator.Send(request);
+        var currentUserIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        await mediator.Send(request with { CurrentUserId = currentUserId });
         return Ok();
     }
 }

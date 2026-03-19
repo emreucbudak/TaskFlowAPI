@@ -17,6 +17,7 @@ namespace Report.Persistence.Data.DataConfiguration
      
             builder.HasIndex(e => e.ReportingUserId);
             builder.HasIndex(e => e.ReportTopicId);
+            builder.HasIndex(e => e.ReportStatusId);
             builder.HasIndex(e => e.CreatedAt);
         }
     }

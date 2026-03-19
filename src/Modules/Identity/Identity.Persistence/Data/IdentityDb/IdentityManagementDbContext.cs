@@ -23,6 +23,7 @@ namespace Identity.Persistence.Data.IdentityDb
         public DbSet<DepartmentRole> DepartmentRoles { get; set; }
         public DbSet<DepartmentMember> DepartmentMembers { get; set; }
         public DbSet<GroupActivity> GroupActivities { get; set; }
+        public DbSet<GroupEvent> GroupEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

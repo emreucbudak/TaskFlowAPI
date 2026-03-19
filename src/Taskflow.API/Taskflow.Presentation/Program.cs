@@ -306,14 +306,19 @@ builder.Host.UseSerilog(logger);
 builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
 builder.Services.AddScoped<IGroupValidationService, GroupValidationService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 builder.Services.AddProblemDetails();
@@ -573,7 +578,7 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
 {
     const string defaultCompanyName = "TaskFlow Demo Company";
     const string defaultEmail = "demo@taskflow.dev";
-    const string defaultPassword = "TaskFlow!23";
+    var defaultPassword = Environment.GetEnvironmentVariable("TF_DEMO_PASSWORD") ?? "TaskFlow!23";
     const string defaultRole = "Company";
 
     using var scope = services.CreateScope();
@@ -635,9 +640,9 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
     logger.LogInformation("Demo kullanici {Email} olusturuldu.", defaultEmail);
 
     var defaultPlanId = Guid.Parse("018da123-abcd-7000-9000-000000000001");
-    if (!await tenantContext.tenantSubscriptions.AnyAsync(sub => sub.TenantId == company.Id))
+    if (!await tenantContext.TenantSubscriptions.AnyAsync(sub => sub.TenantId == company.Id))
     {
-        var plan = await tenantContext.companyPlans.FindAsync(defaultPlanId);
+        var plan = await tenantContext.CompanyPlans.FindAsync(defaultPlanId);
         if (plan is null)
         {
             logger.LogWarning("Demo abonelik olusturulamadi: varsayilan plan bulunamadi ({PlanId}).", defaultPlanId);
@@ -652,8 +657,8 @@ static async Task EnsureSeedDemoAccountAsync(IServiceProvider services)
             "demo-subscription",
             DateTime.UtcNow);
 
-        tenantContext.tenantUsages.Add(usage);
-        tenantContext.tenantSubscriptions.Add(subscription);
+        tenantContext.TenantUsages.Add(usage);
+        tenantContext.TenantSubscriptions.Add(subscription);
         await tenantContext.SaveChangesAsync();
         logger.LogInformation("Demo abonelik kaydi olusturuldu.");
     }
@@ -671,7 +676,7 @@ static async Task EnsureTenantPlanLimitsSyncedAsync(IServiceProvider services)
         [Guid.Parse("018da123-4567-7000-8000-000000000003")] = (10000, 500, 100000, true)
     };
 
-    var existingPlanProperties = await tenantContext.planProperties
+    var existingPlanProperties = await tenantContext.PlanProperties
         .Where(item => requiredPlanLimits.Keys.Contains(item.Id))
         .ToListAsync();
 

@@ -20,17 +20,15 @@ public sealed class AiController(
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var companyIdClaim = User.FindFirstValue("companyId");
 
-        if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(companyIdClaim))
+        if (!Guid.TryParse(userIdClaim, out var userId) || !Guid.TryParse(companyIdClaim, out var companyId))
             return Unauthorized();
 
-        var userId = Guid.Parse(userIdClaim);
-        var companyId = Guid.Parse(companyIdClaim);
         var isDepartmentLeader = User.FindFirstValue("isDepartmentLeader") == "true";
 
         Guid? departmentId = null;
         var departmentIdClaim = User.FindFirstValue("departmentId");
-        if (!string.IsNullOrEmpty(departmentIdClaim))
-            departmentId = Guid.Parse(departmentIdClaim);
+        if (Guid.TryParse(departmentIdClaim, out var parsedDepartmentId))
+            departmentId = parsedDepartmentId;
 
         var summary = await dailySummaryService.GenerateDailySummaryAsync(
             userId,

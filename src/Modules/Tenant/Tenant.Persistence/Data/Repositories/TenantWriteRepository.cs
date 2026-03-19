@@ -15,13 +15,13 @@ namespace Tenant.Persistence.Data.Repositories
         public void AddPlan(CompanyPlan plan)
         {
             ArgumentNullException.ThrowIfNull(plan);
-            _context.companyPlans.Add(plan);
+            _context.CompanyPlans.Add(plan);
         }
 
         public async Task DeletePlan(CompanyPlan plan)
         {
             ArgumentNullException.ThrowIfNull(plan);
-            var rowsAffected = await _context.companyPlans
+            var rowsAffected = await _context.CompanyPlans
                 .Where(p => p.Id == plan.Id)
                 .ExecuteDeleteAsync();
 
@@ -38,7 +38,7 @@ namespace Tenant.Persistence.Data.Repositories
 
             if (entry.State == EntityState.Detached)
             {
-                _context.companyPlans.Attach(plan);
+                _context.CompanyPlans.Attach(plan);
                 entry.State = EntityState.Modified;
             }
 
@@ -57,13 +57,13 @@ namespace Tenant.Persistence.Data.Repositories
 
         public async Task<TenantUsage> GetOrCreateTenantUsage(Guid tenantId, CancellationToken cancellationToken)
         {
-            var tenantUsage = await _context.tenantUsages
+            var tenantUsage = await _context.TenantUsages
                 .SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
 
             if (tenantUsage is null)
             {
                 tenantUsage = new TenantUsage(tenantId);
-                _context.tenantUsages.Add(tenantUsage);
+                _context.TenantUsages.Add(tenantUsage);
 
                 try
                 {
@@ -73,7 +73,7 @@ namespace Tenant.Persistence.Data.Repositories
                 {
                     _context.Entry(tenantUsage).State = EntityState.Detached;
 
-                    var existingTenantUsage = await _context.tenantUsages
+                    var existingTenantUsage = await _context.TenantUsages
                         .SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
 
                     if (existingTenantUsage is not null)
@@ -136,7 +136,7 @@ namespace Tenant.Persistence.Data.Repositories
 
             for (var attempt = 1; attempt <= MaxConcurrencyRetryCount; attempt++)
             {
-                var tenantUsage = await _context.tenantUsages
+                var tenantUsage = await _context.TenantUsages
                     .SingleOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
 
                 if (tenantUsage is null)
@@ -167,13 +167,13 @@ namespace Tenant.Persistence.Data.Repositories
         }
 
         public Task<TenantSubscription?> GetTenantSubscription(Guid tenantId, CancellationToken cancellationToken)
-            => _context.tenantSubscriptions
+            => _context.TenantSubscriptions
                 .FirstOrDefaultAsync(x => x.TenantId == tenantId, cancellationToken);
 
         public void AddTenantSubscription(TenantSubscription tenantSubscription)
         {
             ArgumentNullException.ThrowIfNull(tenantSubscription);
-            _context.tenantSubscriptions.Add(tenantSubscription);
+            _context.TenantSubscriptions.Add(tenantSubscription);
         }
 
         public async Task UpdateTenantSubscription(
@@ -183,7 +183,7 @@ namespace Tenant.Persistence.Data.Repositories
             DateTime utcNow,
             CancellationToken cancellationToken)
         {
-            var affectedRows = await _context.tenantSubscriptions
+            var affectedRows = await _context.TenantSubscriptions
                 .Where(x => x.TenantId == tenantId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(x => x.CompanyPlanId, companyPlanId)
@@ -208,7 +208,7 @@ namespace Tenant.Persistence.Data.Repositories
                 throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
             }
 
-            var affectedRows = await _context.tenantUsages
+            var affectedRows = await _context.TenantUsages
                 .Where(x => x.TenantId == tenantId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(x => x.CurrentUserCount, 0)
@@ -223,7 +223,7 @@ namespace Tenant.Persistence.Data.Repositories
                 return;
             }
 
-            _context.tenantUsages.Add(new TenantUsage(tenantId));
+            _context.TenantUsages.Add(new TenantUsage(tenantId));
             await _context.SaveChangesAsync(cancellationToken);
         }
 

@@ -4,6 +4,12 @@
     <Project Path="src/BuildingBlocks/TaskFlow.BuildingBlocks/TaskFlow.BuildingBlocks.csproj" Id="57040aae-081e-427f-a79d-04c60bc58cf9" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Assistant/">
+    <Project Path="src/Modules/Assistant/Assistant.Application/Assistant.Application.csproj" Id="d6b1a77b-a566-4314-ab5d-f9e43479b1f0" />
+    <Project Path="src/Modules/Assistant/Assistant.Domain/Assistant.Domain.csproj" Id="fd93bd0f-57d2-4f73-b0b6-f58baedb6b39" />
+    <Project Path="src/Modules/Assistant/Assistant.Infrastructure/Assistant.Infrastructure.csproj" Id="7c389eb8-af1f-4383-8551-4b3f8cf3404c" />
+    <Project Path="src/Modules/Assistant/Assistant.Persistence/Assistant.Persistence.csproj" Id="81dde476-7f62-4ef0-987f-1df1ac1f2f53" />
+  </Folder>
   <Folder Name="/src/Modules/Chat/">
     <Project Path="src/Modules/Chat/Chat.Application/Chat.Application.csproj" Id="ccacf866-86d0-402d-bec0-2cd428e00af8" />
     <Project Path="src/Modules/Chat/Chat.Domain/Chat.Domain.csproj" Id="efa9d582-167e-4482-b4fc-0b9f4626fd6e" />

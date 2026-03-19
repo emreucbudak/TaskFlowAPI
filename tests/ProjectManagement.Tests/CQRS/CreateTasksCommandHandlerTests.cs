@@ -4,7 +4,7 @@ using Moq;
 using ProjectManagement.Application.Features.CQRS.Tasks.Command.Create;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 using DomainTask = ProjectManagement.Domain.Entities.Task;
 
 namespace ProjectManagement.Tests.CQRS;
@@ -15,7 +15,7 @@ public class CreateTasksCommandHandlerTests
     public async Task Handle_WithPastDeadline_ShouldThrowArgumentException()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
 
         var handler = new CreateTasksCommandHandler(
@@ -39,7 +39,7 @@ public class CreateTasksCommandHandlerTests
     public async Task Handle_WithoutPriority_ShouldThrowArgumentException()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
 
         var handler = new CreateTasksCommandHandler(
@@ -63,7 +63,7 @@ public class CreateTasksCommandHandlerTests
     public async Task Handle_WithValidRequest_ShouldCallAddTaskAndPublishAndCommit()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 
@@ -123,7 +123,7 @@ public class CreateTasksCommandHandlerTests
     public async Task Handle_WhenWriteRepoThrows_ShouldRollbackTransaction()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 

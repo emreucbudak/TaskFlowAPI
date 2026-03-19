@@ -26,6 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Assistant\Assistant.Persistence\Assistant.Persistence.csproj" />
+    <ProjectReference Include="..\..\Modules\Assistant\Assistant.Infrastructure\Assistant.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Chat\Chat.Persistence\Chat.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Notification\Notification.Infrastructure\Notification.Infrastructure.csproj" />
@@ -36,6 +38,13 @@
     <ProjectReference Include="..\..\Modules\Stats\Stats.Persistence\Stats.Persistence.csproj" />
     <ProjectReference Include="..\..\Modules\Tenant\Tenant.Infrastructure\Tenant.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Chat\Chat.Infrastructure\Chat.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="KnowledgeBase\**\*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

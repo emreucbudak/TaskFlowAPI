@@ -103,3 +103,12 @@ Then start services:
 ```bash
 docker compose up --build
 ```
+
+## pgvector Hazirligi
+
+- Ana uygulama veritabani `postgres` servisi olarak ayni kalir.
+- `pgvector` ayri bir servis olarak `pgvector/pgvector:pg18` imaji ile calisir.
+- API, vector baglantisini `PgVector__Host`, `PgVector__Port`, `PgVector__Database` veya tam baglanti icin `TF_PGVECTOR_CONNECTION` uzerinden okur.
+- Ek bir kullanici/sifre verilmezse pgvector servisi icin mevcut `postgres_user` ve `postgres_password` secret degerleri kullanilir.
+- API startup sirasinda pgvector veritabaninda `CREATE EXTENSION IF NOT EXISTS vector;` komutunu calistirir.
+- RAG servisleri icin `IPgVectorConnectionFactory` DI uzerinden kullanilabilir.

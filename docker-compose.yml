@@ -10,6 +10,9 @@ services:
       - Postgres__Host=postgres
       - Postgres__Port=5432
       - Postgres__Database=TaskFlowDb
+      - PgVector__Host=pgvector
+      - PgVector__Port=5432
+      - PgVector__Database=TaskFlowVectorDb
       - Redis__Host=redis
       - Redis__Port=6379
       - RabbitMQ__HostName=rabbitmq
@@ -28,6 +31,8 @@ services:
       - chat_message_encryption_key
     depends_on:
       postgres:
+        condition: service_healthy
+      pgvector:
         condition: service_healthy
       redis:
         condition: service_started
@@ -50,6 +55,26 @@ services:
       - taskflow-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/postgres_user) -d TaskFlowDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgvector:
+    image: pgvector/pgvector:pg18
+    environment:
+      - POSTGRES_DB=TaskFlowVectorDb
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_user
+      - postgres_password
+    volumes:
+      - taskflow-pgvector-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/postgres_user) -d TaskFlowVectorDb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -90,6 +115,7 @@ services:
 
 volumes:
   taskflow-postgres-data:
+  taskflow-pgvector-data:
   taskflow-redis-data:
   taskflow-rabbitmq-data:
 

@@ -4,7 +4,7 @@ using Moq;
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Create;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 using IndividualTask = ProjectManagement.Domain.Entities.IndividualTasks;
 
 namespace ProjectManagement.Tests.CQRS;
@@ -15,7 +15,7 @@ public class CreateIndividualTaskCommandHandlerTests
     public async Task Handle_WithValidRequest_ShouldCallAddAndPublishAndCommit()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 
@@ -76,7 +76,7 @@ public class CreateIndividualTaskCommandHandlerTests
     public async Task Handle_WithoutPriority_ShouldThrowArgumentException()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
 
         var handler = new CreateIndividualTaskCommandHandler(
@@ -102,7 +102,7 @@ public class CreateIndividualTaskCommandHandlerTests
     public async Task Handle_WhenException_ShouldRollback()
     {
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 

@@ -52,7 +52,10 @@ public sealed class KnowledgeBaseIndexer(
             var chunks = new List<KnowledgeChunk>(chunkTexts.Count);
             for (var index = 0; index < chunkTexts.Count; index++)
             {
-                var embedding = await embeddingService.CreateEmbeddingAsync(chunkTexts[index], cancellationToken);
+                var embedding = await embeddingService.CreateDocumentEmbeddingAsync(
+                    chunkTexts[index],
+                    document.Title,
+                    cancellationToken);
                 ValidateEmbeddingDimensions(embedding, assistantOptions.Value.EmbeddingDimensions);
 
                 chunks.Add(new KnowledgeChunk(

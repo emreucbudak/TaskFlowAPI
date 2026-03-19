@@ -1,6 +1,7 @@
 using Chat.Infrastructure.Extensions;
 using Chat.Infrastructure.Hubs;
 using Chat.Persistence.Extensions;
+using Assistant.Application.Services;
 using Assistant.Infrastructure.Extensions;
 using Assistant.Persistence.Data.AssistantDb;
 using FlashMediator;
@@ -444,6 +445,7 @@ await ApplyMigrationsWithRetryAsync<StatsDbContext>(app.Services, startupLogger)
 await EnsureProjectManagementReferenceDataSeededAsync(app.Services);
 await EnsureReportStatusesSeededAsync(app.Services);
 await EnsureTenantPlanLimitsSyncedAsync(app.Services);
+await EnsureAssistantKnowledgeBaseInitializedAsync(app.Services, startupLogger);
 
 if (app.Environment.IsDevelopment())
 {
@@ -732,6 +734,23 @@ static async Task EnsureReportStatusesSeededAsync(IServiceProvider services)
         new Report.Domain.Entities.ReportStatus { Id = 4, Name = "Reddedildi" });
 
     await reportContext.SaveChangesAsync();
+}
+
+static async Task EnsureAssistantKnowledgeBaseInitializedAsync(
+    IServiceProvider services,
+    Microsoft.Extensions.Logging.ILogger logger,
+    CancellationToken cancellationToken = default)
+{
+    try
+    {
+        using var scope = services.CreateScope();
+        var initializer = scope.ServiceProvider.GetRequiredService<IAssistantInitializationService>();
+        await initializer.InitializeAsync(cancellationToken);
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        logger.LogError(ex, "Assistant knowledge base bootstrap islemi tamamlanamadi.");
+    }
 }
 
 

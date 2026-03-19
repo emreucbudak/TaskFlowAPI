@@ -7,7 +7,7 @@ TaskFlow içinde raporlama ve bildirim mekanizmaları ekiplerin süreçleri daha
 Kullanıcılar veya yetkili kişiler sistem içinde rapor oluşturabilir.
 Raporlar belirli bir konu, durum veya süreç hakkında bilgi toplamak için kullanılır.
 
-Departman yapısı olan şirketlerde, departman liderleri kendi alanlarıyla ilgili raporlara daha kolay erişebilir.
+Departman yapısı olan şirketlerde departman liderleri kendi alanlarıyla ilgili raporlara daha kolay erişebilir.
 Raporlar durum bilgisiyle birlikte takip edilebilir.
 
 ## Bildirimler

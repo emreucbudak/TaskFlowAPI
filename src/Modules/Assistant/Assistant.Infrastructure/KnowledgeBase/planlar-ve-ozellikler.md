@@ -6,7 +6,7 @@ Planlar, ekiplerin ihtiyacına göre farklı özellikler ve limitler sunar.
 ## Free Plan
 
 Free plan temel görev yönetimi ihtiyaçları için uygundur.
-Bu planda temel görev takibi, sohbet, kullanıcı ve takım limitleri ve departman yönetimi gibi ana yetenekler bulunur.
+Bu planda temel görev takibi, sohbet, kullanıcı ve takım limitleri ile departman yönetimi gibi ana yetenekler bulunur.
 
 ## Standard Plan
 

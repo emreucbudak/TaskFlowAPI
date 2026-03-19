@@ -27,6 +27,7 @@ services:
       - redis_password
       - stripe_secret_key
       - google_api_key
+      - openrouter_api_key
       - jwt_secret_key
       - chat_message_encryption_key
     depends_on:
@@ -70,7 +71,7 @@ services:
       - postgres_user
       - postgres_password
     volumes:
-      - taskflow-pgvector-data:/var/lib/postgresql/data
+      - taskflow-pgvector-data:/var/lib/postgresql
     ports:
       - "5433:5432"
     healthcheck:
@@ -134,6 +135,8 @@ secrets:
     file: ./secrets/stripe_secret_key
   google_api_key:
     file: ./secrets/google_api_key
+  openrouter_api_key:
+    file: ./secrets/openrouter_api_key
   jwt_secret_key:
     file: ./secrets/jwt_secret_key
   chat_message_encryption_key:

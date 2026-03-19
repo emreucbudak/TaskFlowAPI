@@ -13,7 +13,7 @@ public sealed class KnowledgeSearchService(
 {
     public async Task<IReadOnlyCollection<KnowledgeSearchResult>> SearchAsync(string query, int? topK = null, CancellationToken cancellationToken = default)
     {
-        var queryEmbedding = await embeddingService.CreateEmbeddingAsync(query, cancellationToken);
+        var queryEmbedding = await embeddingService.CreateQueryEmbeddingAsync(query, cancellationToken);
         ValidateEmbeddingDimensions(queryEmbedding, assistantOptions.Value.EmbeddingDimensions);
         var take = topK.GetValueOrDefault(assistantOptions.Value.SearchTopK);
         return await knowledgeRepository.SearchSimilarChunksAsync(queryEmbedding, take, cancellationToken);

@@ -8,5 +8,6 @@ public sealed class AssistantOptions
     public int ChunkSize { get; set; } = 900;
     public int ChunkOverlap { get; set; } = 150;
     public int SearchTopK { get; set; } = 5;
+    public double MinimumSourceScore { get; set; } = 0.55d;
     public int EmbeddingDimensions { get; set; } = DefaultEmbeddingDimensions;
 }

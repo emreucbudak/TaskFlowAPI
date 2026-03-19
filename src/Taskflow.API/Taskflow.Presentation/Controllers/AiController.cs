@@ -1,3 +1,4 @@
+using Assistant.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -7,7 +8,9 @@ namespace Taskflow.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class AiController(IDailySummaryService dailySummaryService) : ControllerBase
+public sealed class AiController(
+    IDailySummaryService dailySummaryService,
+    IAssistantChatService assistantChatService) : ControllerBase
 {
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetDailySummaryRequest")]
@@ -38,4 +41,38 @@ public sealed class AiController(IDailySummaryService dailySummaryService) : Con
 
         return Ok(new { Summary = summary });
     }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("chatbot")]
+    public async Task<IActionResult> AskChatbot([FromBody] AssistantChatRequest request, CancellationToken cancellationToken)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.Question))
+        {
+            return BadRequest(new { Message = "Question alani zorunludur." });
+        }
+
+        var response = await assistantChatService.AskAsync(request.Question, cancellationToken);
+
+        return Ok(new AssistantChatResponseDto(
+            response.Answer,
+            response.Sources
+                .Select(source => new AssistantChatSourceDto(
+                    source.SourceKey,
+                    source.Title,
+                    source.ChunkIndex,
+                    source.Score))
+                .ToArray()));
+    }
 }
+
+public sealed record AssistantChatRequest(string Question);
+
+public sealed record AssistantChatResponseDto(
+    string Answer,
+    IReadOnlyCollection<AssistantChatSourceDto> Sources);
+
+public sealed record AssistantChatSourceDto(
+    string SourceKey,
+    string Title,
+    int ChunkIndex,
+    double Score);

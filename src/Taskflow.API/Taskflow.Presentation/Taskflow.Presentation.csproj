@@ -40,11 +40,4 @@
     <ProjectReference Include="..\..\Modules\Chat\Chat.Infrastructure\Chat.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="KnowledgeBase\**\*.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

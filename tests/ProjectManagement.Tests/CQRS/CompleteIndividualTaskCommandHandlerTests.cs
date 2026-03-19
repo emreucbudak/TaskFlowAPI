@@ -5,7 +5,7 @@ using ProjectManagement.Application.Features.CQRS.IndividualTasks.Command.Comple
 using ProjectManagement.Application.Features.CQRS.IndividualTasks.Exceptions;
 using ProjectManagement.Application.IntegrationEvents;
 using ProjectManagement.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using ProjectManagement.Application.UnitOfWork;
 using IndividualTask = ProjectManagement.Domain.Entities.IndividualTasks;
 
 namespace ProjectManagement.Tests.CQRS;
@@ -18,7 +18,7 @@ public class CompleteIndividualTaskCommandHandlerTests
         // Arrange
         var readRepositoryMock = new Mock<IProjectManagementReadRepository>();
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 
@@ -57,7 +57,7 @@ public class CompleteIndividualTaskCommandHandlerTests
         // Arrange
         var readRepositoryMock = new Mock<IProjectManagementReadRepository>();
         var writeRepositoryMock = new Mock<IProjectManagementWriteRepository>();
-        var unitOfWorkMock = new Mock<ICapUnitOfWork>();
+        var unitOfWorkMock = new Mock<IProjectManagementCapUnitOfWork>();
         var capPublisherMock = new Mock<ICapPublisher>();
         var transactionMock = new Mock<IDbContextTransaction>();
 

@@ -1,6 +1,8 @@
 using Chat.Infrastructure.Extensions;
 using Chat.Infrastructure.Hubs;
 using Chat.Persistence.Extensions;
+using Assistant.Infrastructure.Extensions;
+using Assistant.Persistence.Data.AssistantDb;
 using FlashMediator;
 using FluentValidation;
 using Identity.Application.Services;
@@ -140,7 +142,56 @@ var defaultConnectionBuilder = new NpgsqlConnectionStringBuilder
     Username = postgresUser,
     Password = postgresPassword
 };
-builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionBuilder.ConnectionString;
+var defaultConnectionString = defaultConnectionBuilder.ConnectionString;
+builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionString;
+
+var configuredPgVectorConnectionString = FirstNonEmpty(
+    builder.Configuration.GetConnectionString("PgVectorConnection"),
+    builder.Configuration["ConnectionStrings:PgVectorConnection"],
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_CONNECTION"));
+
+var pgVectorHost = FirstNonEmpty(
+    builder.Configuration["PgVector:Host"],
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_HOST"))
+    ?? "localhost";
+
+var pgVectorPortText = FirstNonEmpty(
+    builder.Configuration["PgVector:Port"],
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_PORT"))
+    ?? "5433";
+
+var pgVectorDatabase = FirstNonEmpty(
+    builder.Configuration["PgVector:Database"],
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_DATABASE"))
+    ?? "TaskFlowVectorDb";
+
+var pgVectorUser = FirstNonEmpty(
+    ReadSecretValue("pgvector_user"),
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_USER"),
+    Environment.GetEnvironmentVariable("PGVECTOR_USER"),
+    postgresUser)
+    ?? throw new InvalidOperationException("PgVector kullanicisi tanimlanamadi.");
+
+var pgVectorPassword = FirstNonEmpty(
+    ReadSecretValue("pgvector_password"),
+    Environment.GetEnvironmentVariable("TF_PGVECTOR_PASSWORD"),
+    Environment.GetEnvironmentVariable("PGVECTOR_PASSWORD"),
+    postgresPassword)
+    ?? throw new InvalidOperationException("PgVector sifresi tanimlanamadi.");
+
+var pgVectorPort = int.TryParse(pgVectorPortText, out var parsedPgVectorPort) ? parsedPgVectorPort : 5433;
+var pgVectorConnectionBuilder = new NpgsqlConnectionStringBuilder
+{
+    Host = pgVectorHost,
+    Port = pgVectorPort,
+    Database = pgVectorDatabase,
+    Username = pgVectorUser,
+    Password = pgVectorPassword
+};
+
+var pgVectorConnectionString = configuredPgVectorConnectionString ?? pgVectorConnectionBuilder.ConnectionString;
+
+builder.Configuration["ConnectionStrings:PgVectorConnection"] = pgVectorConnectionString;
 
 var redisHost = builder.Configuration["Redis:Host"] ?? "localhost";
 var redisPort = builder.Configuration["Redis:Port"] ?? "6379";
@@ -258,6 +309,7 @@ builder.Services.AddExceptionHandler<SubscriptionLimitExceededExceptionHandler>(
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
+builder.Services.AddAssistantInfrastructure(builder.Configuration);
 builder.Services.AddConfigureTenant(builder.Configuration);
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddChatPersistence(builder.Configuration);
@@ -381,6 +433,7 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("StartupMigrations");
+await ApplyMigrationsWithRetryAsync<AssistantDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<IdentityManagementDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<TenantDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<ChatDbContext>(app.Services, startupLogger);

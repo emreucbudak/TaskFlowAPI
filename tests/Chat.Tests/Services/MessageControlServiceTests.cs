@@ -3,9 +3,9 @@ using Chat.Application.Exceptions;
 using Chat.Application.Features.CQRS.Message.Command.Create;
 using Chat.Application.Repositories;
 using Chat.Application.Services;
+using Chat.Application.UnitOfWork;
 using Identity.Application.Services;
 using Moq;
-using TaskFlow.BuildingBlocks.UnitOfWork;
 
 namespace Chat.Tests.Services;
 
@@ -232,13 +232,13 @@ public class MessageControlServiceTests
 
     private static MessageControlService CreateService(
         out Mock<IMessageWriteRepository> messageWriteRepositoryMock,
-        out Mock<IUnitOfWork> unitOfWorkMock,
+        out Mock<IChatUnitOfWork> unitOfWorkMock,
         out Mock<IChatNotificationService> chatNotificationServiceMock,
         out Mock<ICurrentUserService> currentUserServiceMock,
         out Mock<IGroupValidationService> groupValidationServiceMock)
     {
         messageWriteRepositoryMock = new Mock<IMessageWriteRepository>();
-        unitOfWorkMock = new Mock<IUnitOfWork>();
+        unitOfWorkMock = new Mock<IChatUnitOfWork>();
         chatNotificationServiceMock = new Mock<IChatNotificationService>();
         currentUserServiceMock = new Mock<ICurrentUserService>();
         groupValidationServiceMock = new Mock<IGroupValidationService>();

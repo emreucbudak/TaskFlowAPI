@@ -1,7 +1,7 @@
 using Moq;
 using Notification.Application.Features.CQRS.Notification.Command.Create;
 using Notification.Application.Repositories;
-using TaskFlow.BuildingBlocks.UnitOfWork;
+using Notification.Application.UnitOfWork;
 
 namespace Notification.Tests.CQRS;
 
@@ -12,7 +12,7 @@ public class CreateNotificationCommandHandlerTests
     {
         // Arrange
         var writeRepositoryMock = new Mock<INotificationWriteRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var unitOfWorkMock = new Mock<INotificationUnitOfWork>();
 
         writeRepositoryMock
             .Setup(x => x.SendNotification(It.IsAny<Notification.Domain.Models.NotificationMessage>()))

@@ -82,24 +82,19 @@ static string GetSecret(string secretName, params string[] envVarAliases)
         }
     }
 
-    var dockerSecretPath = $"/run/secrets/{secretName}";
-    var localSecretPath = Path.GetFullPath(Path.Combine("..", "..", "secrets", secretName));
-    Console.WriteLine($"[UYARI] Secret '{secretName}' bulunamadi! (Docker: {dockerSecretPath}, Local: {localSecretPath})");
+    var candidatePaths = EnumerateSecretCandidatePaths(secretName).ToArray();
+    Console.WriteLine($"[UYARI] Secret '{secretName}' bulunamadi! Denenen yollar: {string.Join(", ", candidatePaths)}");
     return string.Empty;
 }
 
 static string? ReadSecretValue(string secretName)
 {
-    var dockerSecretPath = $"/run/secrets/{secretName}";
-    if (File.Exists(dockerSecretPath))
+    foreach (var candidatePath in EnumerateSecretCandidatePaths(secretName))
     {
-        return File.ReadAllText(dockerSecretPath).Trim();
-    }
-
-    var localSecretPath = Path.GetFullPath(Path.Combine("..", "..", "secrets", secretName));
-    if (File.Exists(localSecretPath))
-    {
-        return File.ReadAllText(localSecretPath).Trim();
+        if (File.Exists(candidatePath))
+        {
+            return File.ReadAllText(candidatePath).Trim();
+        }
     }
 
     var secretFromEnv = Environment.GetEnvironmentVariable(secretName);
@@ -109,6 +104,41 @@ static string? ReadSecretValue(string secretName)
     }
 
     return null;
+}
+
+static IEnumerable<string> EnumerateSecretCandidatePaths(string secretName)
+{
+    var yieldedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    static IEnumerable<string> EnumerateAncestorDirectories(string startingPath)
+    {
+        var currentDirectory = new DirectoryInfo(Path.GetFullPath(startingPath));
+        while (currentDirectory is not null)
+        {
+            yield return currentDirectory.FullName;
+            currentDirectory = currentDirectory.Parent;
+        }
+    }
+
+    foreach (var fixedPath in new[] { $"/run/secrets/{secretName}" })
+    {
+        if (yieldedPaths.Add(fixedPath))
+        {
+            yield return fixedPath;
+        }
+    }
+
+    foreach (var rootPath in new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+    {
+        foreach (var ancestorDirectory in EnumerateAncestorDirectories(rootPath))
+        {
+            var candidatePath = Path.Combine(ancestorDirectory, "secrets", secretName);
+            if (yieldedPaths.Add(candidatePath))
+            {
+                yield return candidatePath;
+            }
+        }
+    }
 }
 
 var postgresHost = FirstNonEmpty(
@@ -379,7 +409,24 @@ if (!string.IsNullOrWhiteSpace(geminiApiKey))
 {
     builder.Configuration["Gemini:ApiKey"] = geminiApiKey;
 }
-var geminiModelId = builder.Configuration["Gemini:ModelId"]?.Trim() ?? "gemini-2.0-flash";
+
+var openRouterApiKey = FirstNonEmpty(
+    ReadSecretValue("openrouter_api_key"),
+    Environment.GetEnvironmentVariable("TF_OPENROUTER_API_KEY"),
+    Environment.GetEnvironmentVariable("OPENROUTER_API_KEY"));
+if (string.IsNullOrWhiteSpace(openRouterApiKey))
+{
+    var configApiKey = builder.Configuration["OpenRouter:ApiKey"]?.Trim();
+    if (!string.IsNullOrWhiteSpace(configApiKey) && configApiKey != "__FROM_SECRET__")
+    {
+        openRouterApiKey = configApiKey;
+    }
+}
+if (!string.IsNullOrWhiteSpace(openRouterApiKey))
+{
+    builder.Configuration["OpenRouter:ApiKey"] = openRouterApiKey;
+}
+var geminiModelId = builder.Configuration["Gemini:ModelId"]?.Trim() ?? "gemini-3-flash-preview";
 
 var kernelBuilder = Kernel.CreateBuilder();
 #pragma warning disable SKEXP0070
@@ -435,6 +482,7 @@ var app = builder.Build();
 
 var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("StartupMigrations");
 await ApplyMigrationsWithRetryAsync<AssistantDbContext>(app.Services, startupLogger);
+await ReloadAssistantVectorTypesAsync(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<IdentityManagementDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<TenantDbContext>(app.Services, startupLogger);
 await ApplyMigrationsWithRetryAsync<ChatDbContext>(app.Services, startupLogger);
@@ -750,6 +798,41 @@ static async Task EnsureAssistantKnowledgeBaseInitializedAsync(
     catch (Exception ex) when (ex is not OperationCanceledException)
     {
         logger.LogError(ex, "Assistant knowledge base bootstrap islemi tamamlanamadi.");
+    }
+}
+
+static async Task ReloadAssistantVectorTypesAsync(
+    IServiceProvider services,
+    Microsoft.Extensions.Logging.ILogger logger,
+    CancellationToken cancellationToken = default)
+{
+    using var scope = services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AssistantDbContext>();
+    var connection = dbContext.Database.GetDbConnection();
+
+    if (connection is not NpgsqlConnection npgsqlConnection)
+    {
+        logger.LogWarning("AssistantDbContext baglantisi NpgsqlConnection degil. Vector type reload atlandi.");
+        return;
+    }
+
+    var shouldCloseConnection = npgsqlConnection.State != System.Data.ConnectionState.Open;
+    if (shouldCloseConnection)
+    {
+        await npgsqlConnection.OpenAsync(cancellationToken);
+    }
+
+    try
+    {
+        await npgsqlConnection.ReloadTypesAsync(cancellationToken);
+        logger.LogInformation("Assistant vector type metadata yeniden yuklendi.");
+    }
+    finally
+    {
+        if (shouldCloseConnection)
+        {
+            await npgsqlConnection.CloseAsync();
+        }
     }
 }
 

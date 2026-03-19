@@ -12,6 +12,9 @@ public sealed class GeminiEmbeddingService(
     IOptions<AssistantOptions> assistantOptions,
     IOptions<GeminiOptions> geminiOptions) : IEmbeddingService
 {
+    public Task<float[]> CreateEmbeddingAsync(string text, CancellationToken cancellationToken = default) =>
+        CreateQueryEmbeddingAsync(text, cancellationToken);
+
     public Task<float[]> CreateDocumentEmbeddingAsync(string text, string? title = null, CancellationToken cancellationToken = default) =>
         CreateEmbeddingCoreAsync(text, "RETRIEVAL_DOCUMENT", title, cancellationToken);
 

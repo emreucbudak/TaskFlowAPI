@@ -42,7 +42,6 @@ public sealed class AiController(
         return Ok(new { Summary = summary });
     }
 
-    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("chatbot")]
     public async Task<IActionResult> AskChatbot([FromBody] AssistantChatRequest request, CancellationToken cancellationToken)
     {

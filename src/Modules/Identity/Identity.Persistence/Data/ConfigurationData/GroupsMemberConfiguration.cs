@@ -14,12 +14,12 @@ namespace Identity.Persistence.Data.ConfigurationData
                    .HasColumnName("GroupsMemberId");
 
             builder.HasOne(gm => gm.Group)
-                   .WithMany()
+                   .WithMany(g => g.Users)
                    .HasForeignKey(gm => gm.GroupId)
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(gm => gm.User)
-                   .WithMany()
+                   .WithMany(u => u.GroupsMembers)
                    .HasForeignKey(gm => gm.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
 

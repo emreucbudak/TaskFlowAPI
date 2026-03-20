@@ -4,5 +4,5 @@ namespace Assistant.Application.Services;
 
 public interface IAssistantChatService
 {
-    Task<AssistantChatResponse> AskAsync(string question, CancellationToken cancellationToken = default);
+    Task<AssistantChatResponseDto> AskAsync(string question, CancellationToken cancellationToken = default);
 }

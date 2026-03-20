@@ -6,7 +6,7 @@ namespace Identity.Application.TokenService
 {
     public interface ITokenService
     {
-        JwtSecurityToken CreateToken(User user, IList<string> roles, bool isDepartmentLeader = false, Guid? departmentId = null);
+        JwtSecurityToken CreateToken(User user, IList<string> roles);
         ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
         string CreateRefreshToken();
 

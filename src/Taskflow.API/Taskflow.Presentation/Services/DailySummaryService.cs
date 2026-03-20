@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FlashMediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -6,6 +7,7 @@ using ProjectManagement.Application.Features.CQRS.Tasks.Queries.GetByAssignedUse
 using Report.Application.Features.CQRS.Reports.Query.GetByDepartment;
 using System.Text;
 using System.Text.RegularExpressions;
+using TaskFlow.BuildingBlocks.Exceptions;
 using TaskFlow.BuildingBlocks.Interfaces;
 
 namespace Taskflow.Presentation.Services;
@@ -22,12 +24,22 @@ public sealed partial class DailySummaryService(
     private static readonly TimeSpan SummaryCacheDuration = TimeSpan.FromMinutes(15);
 
     public async Task<string> GenerateDailySummaryAsync(
-        Guid userId,
-        Guid companyId,
-        bool isDepartmentLeader,
-        Guid? departmentId,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken = default)
     {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        var companyIdClaim = user.FindFirstValue("companyId");
+
+        if (!Guid.TryParse(userIdClaim, out var userId) || !Guid.TryParse(companyIdClaim, out var companyId))
+            throw new AuthExceptions("Invalid user or company claims.");
+
+        var isDepartmentLeader = user.FindFirstValue("isDepartmentLeader") == "true";
+
+        Guid? departmentId = null;
+        var departmentIdClaim = user.FindFirstValue("departmentId");
+        if (Guid.TryParse(departmentIdClaim, out var parsedDepartmentId))
+            departmentId = parsedDepartmentId;
+
         try
         {
             var today = DateOnly.FromDateTime(timeProvider.GetUtcNow().DateTime);

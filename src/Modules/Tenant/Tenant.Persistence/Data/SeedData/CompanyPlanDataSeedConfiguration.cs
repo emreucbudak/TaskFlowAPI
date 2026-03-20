@@ -15,7 +15,8 @@ namespace Tenant.Persistence.Data.SeedData
                     PlanName = "Start-up",
                     PlanPrice = 500,
                     isActive = true,
-                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000001")
+                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000001"),
+                    RowVersion = Array.Empty<byte>()
                 },
                 new
                 {
@@ -23,7 +24,8 @@ namespace Tenant.Persistence.Data.SeedData
                     PlanName = "Business",
                     PlanPrice = 1000,
                     isActive = true,
-                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000002")
+                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000002"),
+                    RowVersion = Array.Empty<byte>()
                 },
                 new
                 {
@@ -31,7 +33,8 @@ namespace Tenant.Persistence.Data.SeedData
                     PlanName = "Enterprise",
                     PlanPrice = 1500,
                     isActive = true,
-                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000003")
+                    PlanPropertiesId = Guid.Parse("018da123-4567-7000-8000-000000000003"),
+                    RowVersion = Array.Empty<byte>()
                 }
             );
         }

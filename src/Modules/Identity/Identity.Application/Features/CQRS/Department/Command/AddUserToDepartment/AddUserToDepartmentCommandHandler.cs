@@ -79,7 +79,18 @@ namespace Identity.Application.Features.CQRS.Department.Command.AddUserToDepartm
                         new UserRemovedFromDepartmentIntegrationEvent(user.Id, currentDepartment.Id));
                 }
 
-                if (!targetDepartment.DepartmentMembers.Any(member => member.UserId == user.Id))
+                var existingMembership = targetDepartment.DepartmentMembers
+                    .FirstOrDefault(member => member.UserId == user.Id);
+
+                if (existingMembership is not null)
+                {
+                    if (existingMembership.DepartmentRoleId != request.RoleId)
+                    {
+                        targetDepartment.RemoveUser(user.Id);
+                        targetDepartment.AddUser(user.Id, request.RoleId);
+                    }
+                }
+                else
                 {
                     targetDepartment.AddUser(user.Id, request.RoleId);
 

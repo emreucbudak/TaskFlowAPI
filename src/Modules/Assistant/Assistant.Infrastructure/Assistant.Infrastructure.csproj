@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Assistant.Application\Assistant.Application.csproj" />
     <ProjectReference Include="..\Assistant.Persistence\Assistant.Persistence.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TaskFlow.BuildingBlocks\TaskFlow.BuildingBlocks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

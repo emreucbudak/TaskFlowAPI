@@ -133,6 +133,14 @@ public sealed class IdentityController(IMediator mediator, UserManager<User> use
     }
 
     [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
+    [HttpPost("CheckDepartmentLeadershipQueryRequest")]
+    public async Task<IActionResult> CheckDepartmentLeadershipQuery([FromBody] Identity.Application.Features.CQRS.Department.Query.CheckDepartmentLeadership.CheckDepartmentLeadershipQueryRequest request)
+    {
+        var result = await mediator.Send(request);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = "SubscribedCompanyOrWorkerPolicy")]
     [HttpPost("GetAllCompanyUsersQueriesRequest")]
     public async Task<IActionResult> GetAllCompanyUsersQueries([FromBody] Identity.Application.Features.CQRS.Auth.Queries.GetAllCompanyUsers.GetAllCompanyUsersQueriesRequest request)
     {

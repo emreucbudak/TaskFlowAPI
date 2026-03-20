@@ -4,6 +4,7 @@ using Assistant.Application.Models;
 using Assistant.Application.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TaskFlow.BuildingBlocks.Exceptions;
 
 namespace Assistant.Infrastructure.Services;
 
@@ -44,11 +45,11 @@ public sealed class AssistantChatService(
         "limit"
     ];
 
-    public async Task<AssistantChatResponse> AskAsync(string question, CancellationToken cancellationToken = default)
+    public async Task<AssistantChatResponseDto> AskAsync(string question, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(question))
         {
-            throw new ArgumentException("Soru bos olamaz.", nameof(question));
+            throw new BadRequestExceptions("Soru bos olamaz.");
         }
 
         var trimmedQuestion = question.Trim();
@@ -60,7 +61,7 @@ public sealed class AssistantChatService(
 
         if (IsOutOfScope(trimmedQuestion, filteredSources))
         {
-            return new AssistantChatResponse(OutOfScopeFallback, []);
+            return new AssistantChatResponseDto(OutOfScopeFallback, []);
         }
 
         var prompt = BuildPrompt(trimmedQuestion, filteredSources);
@@ -83,24 +84,29 @@ public sealed class AssistantChatService(
             if (string.IsNullOrWhiteSpace(answer))
             {
                 logger.LogWarning("Assistant chat icin OpenRouter bos yanit dondu. Question: {Question}", trimmedQuestion);
-                return new AssistantChatResponse(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
+                return MapToDto(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
             }
 
             if (string.Equals(answer, NoKnowledgeFallback, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(answer, OutOfScopeFallback, StringComparison.OrdinalIgnoreCase))
             {
                 logger.LogWarning("Assistant chat icin model fallback yaniti dondu. Question: {Question}", trimmedQuestion);
-                return new AssistantChatResponse(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
+                return MapToDto(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
             }
 
-            return new AssistantChatResponse(answer, filteredSources);
+            return MapToDto(answer, filteredSources);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             logger.LogWarning(exception, "Assistant chat cevabi OpenRouter uzerinden olusturulamadi. Question: {Question}", trimmedQuestion);
-            return new AssistantChatResponse(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
+            return MapToDto(BuildGroundedFallbackAnswer(filteredSources), filteredSources);
         }
     }
+
+    private static AssistantChatResponseDto MapToDto(string answer, IReadOnlyCollection<KnowledgeSearchResult> sources) =>
+        new(answer, sources
+            .Select(s => new AssistantChatSourceDto(s.SourceKey, s.Title, s.ChunkIndex, s.Score))
+            .ToArray());
 
     private static string BuildPrompt(string question, IReadOnlyCollection<KnowledgeSearchResult> sources)
     {

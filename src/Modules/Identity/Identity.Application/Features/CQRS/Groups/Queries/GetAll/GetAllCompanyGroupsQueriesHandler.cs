@@ -42,34 +42,47 @@ namespace Identity.Application.Features.CQRS.Groups.Queries.GetAll
                 page++;
             }
 
-            return companyGroups.Select(group => new GetAllCompanyGroupsQueriesResponse
-            {
-                GroupId = group.Id,
-                GroupName = group.Name,
-                WorkerUserIds = group.Users
-                    .Select(member => member.UserId)
-                    .Distinct()
-                    .ToList(),
-                WorkerName = group.Users
-                    .Select(member => member.User?.Name)
-                    .Where(name => !string.IsNullOrWhiteSpace(name))
-                    .Cast<string>()
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList(),
-                DepartmenName = group.Users
-                    .SelectMany(member => member.User?.DepartmentMembers ?? [])
-                    .Select(departmentMember => departmentMember.Department?.Name)
-                    .Where(name => !string.IsNullOrWhiteSpace(name))
-                    .Cast<string>()
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .DefaultIfEmpty("Departman atamasi yapilmamis")
-                    .ToList(),
-                LeaderUserIds = group.Users
-                    .Where(member => member.GroupRolesId == 1)
-                    .Select(member => member.UserId)
-                    .Distinct()
-                    .ToList()
-            }).ToList();
+            return companyGroups
+                .Where(group => !string.IsNullOrWhiteSpace(group.Name))
+                .GroupBy(group => group.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(grouped => new GetAllCompanyGroupsQueriesResponse
+                {
+                    GroupId = grouped
+                        .Select(group => group.Id)
+                        .FirstOrDefault(id => id != Guid.Empty),
+                    GroupName = grouped.First().Name.Trim(),
+                    WorkerUserIds = grouped
+                        .SelectMany(group => group.Users)
+                        .Select(member => member.UserId)
+                        .Where(id => id != Guid.Empty)
+                        .Distinct()
+                        .ToList(),
+                    WorkerName = grouped
+                        .SelectMany(group => group.Users)
+                        .Select(member => member.User?.Name?.Trim())
+                        .Where(name => !string.IsNullOrWhiteSpace(name))
+                        .Cast<string>()
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList(),
+                    DepartmenName = grouped
+                        .SelectMany(group => group.Users)
+                        .SelectMany(member => member.User?.DepartmentMembers ?? [])
+                        .Select(dm => dm.Department?.Name?.Trim())
+                        .Where(name => !string.IsNullOrWhiteSpace(name))
+                        .Cast<string>()
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .DefaultIfEmpty("Departman atamasi yapilmamis")
+                        .ToList(),
+                    LeaderUserIds = grouped
+                        .SelectMany(group => group.Users)
+                        .Where(member => member.GroupRolesId == 1)
+                        .Select(member => member.UserId)
+                        .Where(id => id != Guid.Empty)
+                        .Distinct()
+                        .ToList()
+                })
+                .OrderBy(dto => dto.GroupName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
     }
 }

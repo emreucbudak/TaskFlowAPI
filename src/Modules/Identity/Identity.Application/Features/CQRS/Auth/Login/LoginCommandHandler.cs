@@ -1,19 +1,15 @@
 ﻿using FlashMediator;
 using Identity.Application.Features.CQRS.Auth.Exceptions;
-using Identity.Application.Repositories;
 using Identity.Application.TokenService;
 using Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
-using TaskFlow.BuildingBlocks.Exceptions;
 
 namespace Identity.Application.Features.CQRS.Auth.Login
 {
     public class LoginCommandHandler(
         UserManager<User> userManager,
-        ITokenService tokenService,
-        IDepartmentMemberRepository departmentMemberRepository) : IRequestHandler<LoginCommandRequest, LoginCommandResponse>
+        ITokenService tokenService) : IRequestHandler<LoginCommandRequest, LoginCommandResponse>
     {
         public async Task<LoginCommandResponse> Handle(LoginCommandRequest request, CancellationToken cancellationToken)
         {
@@ -30,13 +26,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
 
             IList<string> roles = await userManager.GetRolesAsync(user);
 
-            var leaderMembership = await departmentMemberRepository
-                .GetLeaderMembershipAsync(user.Id, cancellationToken);
-
-            bool isDepartmentLeader = leaderMembership is not null;
-            Guid? departmentId = leaderMembership?.DepartmentId;
-
-            JwtSecurityToken accessToken = tokenService.CreateToken(user, roles, isDepartmentLeader, departmentId);
+            JwtSecurityToken accessToken = tokenService.CreateToken(user, roles);
             string token = new JwtSecurityTokenHandler().WriteToken(accessToken);
             string refreshToken = tokenService.CreateRefreshToken();
 
@@ -46,9 +36,7 @@ namespace Identity.Application.Features.CQRS.Auth.Login
                 RefreshToken = refreshToken,
                 UserId = user.Id,
                 CompanyId = user.CompanyId,
-                Role = roles.FirstOrDefault() ?? string.Empty,
-                IsDepartmentLeader = isDepartmentLeader,
-                DepartmentId = departmentId
+                Role = roles.FirstOrDefault() ?? string.Empty
             };
         }
     }

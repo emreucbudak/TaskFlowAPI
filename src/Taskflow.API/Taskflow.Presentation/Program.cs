@@ -14,7 +14,6 @@ using Identity.Persistence.Data.IdentityDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.RateLimiting;
 using Notification.Infrastructure.Extensions;
 using Notification.Infrastructure.Hubs;
 using Notification.Infrastructure.Data.NotificationDb;
@@ -29,7 +28,6 @@ using Serilog;
 using Stats.Persistence.Data;
 using Stats.Persistence.Extensions;
 using System.Net.Sockets;
-using System.Linq;
 using System.Threading.RateLimiting;
 using TaskFlow.BuildingBlocks.Extensions;
 using TaskFlow.BuildingBlocks.Contracts.Redis;
@@ -41,8 +39,6 @@ using Tenant.Persistence.Data.TenantDb;
 using Tenant.Infrastructure.Extensions;
 using Chat.Persistence.Data.ChatDb;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Taskflow.Presentation.Authorization;
 using Taskflow.Presentation.ExceptionHandlers;
 using Taskflow.Presentation.Services;
@@ -366,7 +362,8 @@ builder.Services.AddFlashMediator(
     typeof(Notification.Application.Features.CQRS.Notification.Queries.GetAllNotifications.GetUserAllNotificationsQueriesHandler).Assembly,
     typeof(ProjectManagement.Application.Features.CQRS.IndividualTasks.Queries.GetByUserId.GetIndividualTasksByUserIdQueryHandler).Assembly,
     typeof(Report.Application.Features.CQRS.Reports.Query.GetAll.GetAllReportsQueryHandler).Assembly,
-    typeof(Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod.GetWorkerStatsByUserAndPeriodQueryHandler).Assembly);
+    typeof(Stats.Application.Features.CQRS.WorkerStats.Queries.GetByUserAndPeriod.GetWorkerStatsByUserAndPeriodQueryHandler).Assembly,
+    typeof(Assistant.Application.Features.CQRS.Chat.Queries.Ask.AskChatbotQueryHandler).Assembly);
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
